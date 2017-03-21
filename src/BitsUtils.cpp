@@ -9,16 +9,16 @@ BitsUtils::BitsUtils(){
 
 BitsUtils::~BitsUtils(){}
 
-void BitsUtils::setGolombBase(unsigned int potencia_base){
-	if(potencia_base < 1 || potencia_base > 32){
-		cerr<<"setGolombBase - Base no soportada (base "<<GOLOMB_BASE<<" conservada)\n";
+void BitsUtils::setGolombBase(unsigned int base_power){
+	if(base_power < 1 || base_power > 32){
+		cerr<<"setGolombBase - Base not supported (Preserving "<<GOLOMB_BASE<<")\n";
 		return;
 	}
 	else{
-		cout<<"Ajustando golomb para base 2 ^ "<<potencia_base<<" ("<<(1 << potencia_base)<<")\n";
-		GOLOMB_BASE = (1 << potencia_base);
-		GOLOMB_BITS_BASE = potencia_base;
-		GOLOMB_MASK_BASE = (1 << potencia_base) - 1;
+		cout<<"setGolombBase - Adjusting Golomb base to 2 ^ "<<base_power<<" ("<<(1 << base_power)<<")\n";
+		GOLOMB_BASE = (1 << base_power);
+		GOLOMB_BITS_BASE = base_power;
+		GOLOMB_MASK_BASE = (1 << base_power) - 1;
 	}
 }
 
@@ -30,50 +30,48 @@ unsigned int BitsUtils::n_bits(unsigned int num){
 	return ret;
 }
 
-//Escribe los "largo_num" bits de "num" en la "salida", desde su posicion "pos_salida" (en bits)
-//Notar que luego de cada escritura, el llamador debe sumar los "largo_num" bits escritos a su "pos_salida" local
-// - "salida" es el puntero a la salida para escribir
-// - "pos_salida" es la posicion en bits en la salida para escribir
-// - "largo_num" es el largo de la escritura en bits
+//Escribe los "len_num" bits de "num" en la "out", desde su posicion "pos_out" (en bits)
+//Notar que luego de cada escritura, el llamador debe sumar los "len_num" bits escritos a su "pos_out" local
+// - "out" es el puntero a la salida para escribir
+// - "pos_out" es la posicion en bits en la salida para escribir
+// - "len_num" es el largo de la escritura en bits
 // - "num" es el numero que se desea escribir
-void BitsUtils::bitput(unsigned int *salida, unsigned int pos_salida, unsigned int largo_num, unsigned int num){
-//	cout<<" -> bitput - "<<largo_num<<" bits de "<<num<<" en posicion "<<pos_salida<<"\n";
-	//salida = salida + pos_salida/32, moverse al int donde empezar la escritura
-	salida += pos_salida >> BITS_WORD;
-	//con esto pos_salida marca el bit dentro del int donde empieza la escritura
-//	pos_salida &= (1<<BITS_WORD) - 1;
-	pos_salida &= MASK_WORD;
-	if (largo_num == WORD_SIZE) {
-		*salida |= (*salida & ((1<<pos_salida) - 1)) | (num << pos_salida);
-		if (!pos_salida){
+void BitsUtils::bitput(unsigned int *out, unsigned int pos_out, unsigned int len_num, unsigned int num){
+//	cout<<" -> bitput - "<<len_num<<" bits de "<<num<<" en posicion "<<pos_out<<"\n";
+	out += pos_out >> BITS_WORD;
+	// Con esto pos_out marca el bit dentro del int donde empieza la escritura
+	pos_out &= MASK_WORD;
+	if (len_num == WORD_SIZE) {
+		*out |= (*out & ((1<<pos_out) - 1)) | (num << pos_out);
+		if (!pos_out){
 			return;
 		}
-		salida++;
-		*salida = (*salida & ~((1<<pos_salida) - 1)) | (num >> (WORD_SIZE - pos_salida));
+		out++;
+		*out = (*out & ~((1<<pos_out) - 1)) | (num >> (WORD_SIZE - pos_out));
 	}
 	else {
-		if (pos_salida + largo_num <= WORD_SIZE) {
-			*salida = (*salida & ~( ((1<<largo_num) - 1) << pos_salida) ) | (num << pos_salida);
+		if (pos_out + len_num <= WORD_SIZE) {
+			*out = (*out & ~( ((1<<len_num) - 1) << pos_out) ) | (num << pos_out);
 			return;
 		}
-		*salida = (*salida & ((1<<pos_salida) - 1)) | (num << pos_salida);
-		salida++;
-		largo_num -= WORD_SIZE - pos_salida;
-		*salida = (*salida & ~((1<<largo_num)-1)) | (num >> (WORD_SIZE - pos_salida));
+		*out = (*out & ((1<<pos_out) - 1)) | (num << pos_out);
+		out++;
+		len_num -= WORD_SIZE - pos_out;
+		*out = (*out & ~((1<<len_num)-1)) | (num >> (WORD_SIZE - pos_out));
 	}
 }
 
-//Retorna el numero de "largo_num" bits desde "pos" de la "entrada"
-unsigned int BitsUtils::bitget(unsigned int *entrada, unsigned int pos, unsigned int largo_num){
+//Retorna el numero de "len_num" bits desde "pos" de la "in"
+unsigned int BitsUtils::bitget(unsigned int *in, unsigned int pos, unsigned int len_num){
 	unsigned int i = (pos >> 5);
 	unsigned int j = pos & 0x1f;
 	unsigned int answ;
-	if( j + largo_num <= WORD_SIZE ){
-		answ = (entrada[i] << (WORD_SIZE-j-largo_num)) >> (WORD_SIZE - largo_num);
+	if( j + len_num <= WORD_SIZE ){
+		answ = (in[i] << (WORD_SIZE-j-len_num)) >> (WORD_SIZE - len_num);
 	}
 	else {
-		answ = entrada[i] >> j;
-		answ = answ | ( (entrada[i+1] << (WORD_SIZE-j-largo_num)) >> (WORD_SIZE-largo_num) );
+		answ = in[i] >> j;
+		answ = answ | ( (in[i+1] << (WORD_SIZE-j-len_num)) >> (WORD_SIZE-len_num) );
 	}
 	return answ;
 }
@@ -82,11 +80,11 @@ unsigned int BitsUtils::bits_golomb(unsigned int num){
 	return ( 1 + (num >> GOLOMB_BITS_BASE) + GOLOMB_BITS_BASE );
 }
 
-//Escribe el numero "num" en la posicion "pos_escritura" (en bits) de la "salida"
-//Retorna el numero de bits usados (para ajustar pos_escritura)
-unsigned int BitsUtils::write_golomb(unsigned int *salida, unsigned int pos_escritura, unsigned int num){
+//Escribe el numero "num" en la posicion "pos_write" (en bits) de la "out"
+//Retorna el numero de bits usados (para ajustar pos_write)
+unsigned int BitsUtils::write_golomb(unsigned int *out, unsigned int pos_write, unsigned int num){
 	
-	unsigned int pos_salida = pos_escritura;
+	unsigned int pos_out = pos_write;
 	//unsigned int q = num / GOLOMB_BASE;
 	//unsigned int resto = num % GOLOMB_BASE;
 	unsigned int q = (num >> GOLOMB_BITS_BASE);
@@ -97,35 +95,35 @@ unsigned int BitsUtils::write_golomb(unsigned int *salida, unsigned int pos_escr
 	//Creo que no se puede con una mascara, hay que escribir los 1's en un tipo de ciclo
 	while( q > 31){
 		//escribir 32 1's
-		bitput(salida, pos_salida, 32, 0xffffffff);
-		pos_salida += 32;
+		bitput(out, pos_out, 32, 0xffffffff);
+		pos_out += 32;
 		q -= 32;
-//		cout<<"write_golomb - pos_salida: "<<pos_salida<<"\n";
+//		cout<<"write_golomb - pos_out: "<<pos_out<<"\n";
 	}
 	
 	//Notar que esta mascara debe ser construida de derecha a izquiera
 	unsigned int mascara_q = ((1<<q) - 1) ;
 	//escribir la mascara (se escriben q+1 bits en total)
-	bitput(salida, pos_salida, q+1, mascara_q);
-	pos_salida += (q+1);
-//	cout<<"write_golomb - pos_salida: "<<pos_salida<<"\n";
+	bitput(out, pos_out, q+1, mascara_q);
+	pos_out += (q+1);
+//	cout<<"write_golomb - pos_out: "<<pos_out<<"\n";
 	
 	//escribir el resto
-	bitput(salida, pos_salida, GOLOMB_BITS_BASE, resto);
-	pos_salida += GOLOMB_BITS_BASE;
-//	cout<<"write_golomb - pos_salida: "<<pos_salida<<"\n";
+	bitput(out, pos_out, GOLOMB_BITS_BASE, resto);
+	pos_out += GOLOMB_BITS_BASE;
+//	cout<<"write_golomb - pos_out: "<<pos_out<<"\n";
 	
-	return (pos_salida - pos_escritura);
+	return (pos_out - pos_write);
 }
 
 
-//Lee el proximo numero a partir de la posicion "pos_lectura" de la "entrada"
+//Lee el proximo numero a partir de la posicion "pos_read" de la "in"
 //Guarda el numero leido en "num" y retorna el numero de bits leidos
-unsigned int BitsUtils::read_golomb(unsigned int *entrada, unsigned int pos_lectura, unsigned int &num){
+unsigned int BitsUtils::read_golomb(unsigned int *in, unsigned int pos_read, unsigned int &num){
 	
-//	cout<<"read_golomb - desde pos: "<<pos_lectura<<"\n";
+//	cout<<"read_golomb - desde pos: "<<pos_read<<"\n";
 		
-	unsigned int pos_salida = pos_lectura;
+	unsigned int pos_out = pos_read;
 	unsigned int q = 0;
 	unsigned int resto = 0;
 	
@@ -136,23 +134,23 @@ unsigned int BitsUtils::read_golomb(unsigned int *entrada, unsigned int pos_lect
 	//Luego un ciclo para leer ints entreos (runs de 32 1's)
 	//Luego (cuando un entero rompa ese ciclo) leer el resto uno a uno
 	
-	unsigned int *entrada_local = ( entrada + (pos_salida >> 5) );
+	unsigned int *in_local = ( in + (pos_out >> 5) );
 	
 	//si el resto del entero actual es de 1's, entonces tiene sentido hacer procesos especiales
 	//Si no, entonces basta con tomar el primer 0 del entero actual
 	//Notar que ese segundo caso es equivalente a pasar las dos verificaciones previas
-	unsigned int mask = (0xffffffff << (pos_salida & 0x1f));
-	if( (*entrada_local & mask) == mask ){
+	unsigned int mask = (0xffffffff << (pos_out & 0x1f));
+	if( (*in_local & mask) == mask ){
 //		cout<<"read_golomb - resto de entero de 1s\n";
 		//1's en el entero actual
-		q = 32 - (pos_salida & 0x1f);
-		pos_salida += q;
-		++entrada_local;
+		q = 32 - (pos_out & 0x1f);
+		pos_out += q;
+		++in_local;
 //		cout<<"read_golomb - q1: "<<q<<"\n";
-		while( (*entrada_local == 0xffffffff) ){
+		while( (*in_local == 0xffffffff) ){
 			q += 32;
-			pos_salida += 32;
-			++entrada_local;
+			pos_out += 32;
+			++in_local;
 		}
 //		cout<<"read_golomb - q2: "<<q<<"\n";
 		//Prepara mascara para revisar el entero actual desde el principio
@@ -160,87 +158,86 @@ unsigned int BitsUtils::read_golomb(unsigned int *entrada, unsigned int pos_lect
 	}
 	else{
 		//Prepara mascara para revisar el resto del entero actual
-		mask = 0x1 << (pos_salida & 0x1f);
+		mask = 0x1 << (pos_out & 0x1f);
 	}
 	//Ahora TIENE que haber un 0 en el entero actual
 	//Notar que esto SE PUEDE hacer en 5 pasos con una busqueda binaria de cada mitad
 	//Lo dejo asi por simpleza (pues en este caso se aplica a entero completo o parcial)
 	for(; mask != 0 ; mask <<= 1){
-//		cout<<"Probando mascara "<<mask<<" ("<<((*entrada_local & mask) != mask)<<")\n";
-		++pos_salida;
-		if( (*entrada_local & mask) != mask ){
+//		cout<<"Probando mascara "<<mask<<" ("<<((*in_local & mask) != mask)<<")\n";
+		++pos_out;
+		if( (*in_local & mask) != mask ){
 			break;
 		}
 		++q;
 	}
 //	cout<<"read_golomb - q3: "<<q<<"\n";
 	
-	
 //	cout<<"read_golomb - leyendo resto\n";
-	resto = bitget(entrada, pos_salida, GOLOMB_BITS_BASE);
-	pos_salida += GOLOMB_BITS_BASE;
+	resto = bitget(in, pos_out, GOLOMB_BITS_BASE);
+	pos_out += GOLOMB_BITS_BASE;
 //	cout<<"read_golomb - r: "<<resto<<"\n";
 	
 	//num = resto + (q * GOLOMB_BASE);
 	num = resto | (q << GOLOMB_BITS_BASE);
 	
-//	cout<<"read_golomb - fin (num: "<<num<<", bits: "<<(pos_salida - pos_lectura)<<")\n";
-	return (pos_salida - pos_lectura);
+//	cout<<"read_golomb - fin (num: "<<num<<", bits: "<<(pos_out - pos_read)<<")\n";
+	return (pos_out - pos_read);
 }
 
-unsigned int BitsUtils::BitsUtils::write_gamma(unsigned int *salida, unsigned int pos_escritura, unsigned int num){
+unsigned int BitsUtils::BitsUtils::write_gamma(unsigned int *out, unsigned int pos_write, unsigned int num){
 	
 	unsigned int n = n_bits(num) - 1;
-	unsigned int pos_salida = pos_escritura;
+	unsigned int pos_out = pos_write;
 	
-//	cout<<"write_gamma - numero "<<num<<", n: "<<n<<" (pos_salida: "<<pos_salida<<")\n";
+//	cout<<"write_gamma - numero "<<num<<", n: "<<n<<" (pos_out: "<<pos_out<<")\n";
 	
 	//Notar que n NO PUEDE ser mayor que 32
 	
 //	while( n > 31){
 //		//escribir 32 1's
-//		bitput(salida, pos_salida, 32, 0x00000000);
-//		pos_salida += 32;
+//		bitput(out, pos_out, 32, 0x00000000);
+//		pos_out += 32;
 //		n -= 32;
-//		cout<<"write_gamma - pos_salida: "<<pos_salida<<"\n";
+//		cout<<"write_gamma - pos_out: "<<pos_out<<"\n";
 //	}
 	
-	bitput(salida, pos_salida, n, 0x0);
-	pos_salida += n;
+	bitput(out, pos_out, n, 0x0);
+	pos_out += n;
 	
-	bitput(salida, pos_salida, 1, 0x1);
-	++pos_salida;
+	bitput(out, pos_out, 1, 0x1);
+	++pos_out;
 	
 	//escribir el resto
-	bitput(salida, pos_salida, n, (num & ((1<<n)-1)) );
-	pos_salida += n;
-//	cout<<"write_gamma - pos_salida: "<<pos_salida<<"\n";
+	bitput(out, pos_out, n, (num & ((1<<n)-1)) );
+	pos_out += n;
+//	cout<<"write_gamma - pos_out: "<<pos_out<<"\n";
 	
-	return (pos_salida - pos_escritura);
+	return (pos_out - pos_write);
 }
 
-unsigned int BitsUtils::read_gamma(unsigned int *entrada, unsigned int pos_lectura, unsigned int &num){
+unsigned int BitsUtils::read_gamma(unsigned int *in, unsigned int pos_read, unsigned int &num){
 	
-	unsigned int pos_salida = pos_lectura;
+	unsigned int pos_out = pos_read;
 	unsigned int n = 0;
 	unsigned int resto = 0;
 	
 	//Leer los 0's hasta el primer 1
-	unsigned int *entrada_local = ( entrada + (pos_salida >> BITS_WORD) );
+	unsigned int *in_local = ( in + (pos_out >> BITS_WORD) );
 	
 	//Notar que n puede ser, a lo mas, 32
 //	cout<<"read_gamma - leyendo n\n";
-	unsigned int mask_bit = (1 << (pos_salida & 0x1f) );
+	unsigned int mask_bit = (1 << (pos_out & 0x1f) );
 	for(n = 0; n < 32; ++n){
-//		cout<<"Probando mascara "<<mask_bit<<" ("<<((*entrada_local & mask_bit) == mask_bit)<<")\n";
-		++pos_salida;
-		if( (*entrada_local & mask_bit) == mask_bit ){
+//		cout<<"Probando mascara "<<mask_bit<<" ("<<((*in_local & mask_bit) == mask_bit)<<")\n";
+		++pos_out;
+		if( (*in_local & mask_bit) == mask_bit ){
 			break;
 		}
 		mask_bit <<= 1;
 		if(mask_bit == 0){
 			mask_bit = 1;
-			++entrada_local;
+			++in_local;
 		}
 	}
 //	cout<<"read_gamma - n: "<<n<<"\n";
@@ -253,141 +250,141 @@ unsigned int BitsUtils::read_gamma(unsigned int *entrada, unsigned int pos_lectu
 	}
 	else{
 //		cout<<"read_gamma - leyendo resto\n";
-		resto = bitget(entrada, pos_salida, n);
-		pos_salida += n;
+		resto = bitget(in, pos_out, n);
+		pos_out += n;
 //		cout<<"read_gamma - r: "<<resto<<"\n";
 		num = resto | (1 << n);
 	}
 	
-//	cout<<"read_gamma - fin (num: "<<num<<", bits: "<<(pos_salida - pos_lectura)<<")\n";
-	return (pos_salida - pos_lectura);
+//	cout<<"read_gamma - fin (num: "<<num<<", bits: "<<(pos_out - pos_read)<<")\n";
+	return (pos_out - pos_read);
 	
 }
 
 unsigned int BitsUtils::write_varbyte(unsigned char *buff, unsigned long long num){
 	
-	unsigned char *salida = buff;
+	unsigned char *out = buff;
 	
 	//Si usa menos de 8, 15, 22, o 29 bits (porque se permiten 7 de cada byte)
 	if(num < 0x80){
 		//1 byte
-		*salida = (num & 0x7f);
-		++salida;
+		*out = (num & 0x7f);
+		++out;
 	}
 	else if(num < 0x4000){
 		//2 byte
-		*salida = ((num >> 7) & 0x7f) | 0x80;
-		++salida;
-		*salida = (num & 0x7f);
-		++salida;
+		*out = ((num >> 7) & 0x7f) | 0x80;
+		++out;
+		*out = (num & 0x7f);
+		++out;
 	}
 	else if(num < 0x200000){
 		//3 byte
-		*salida = ((num >> 14) & 0x7f) | 0x80;
-		++salida;
-		*salida = ((num >> 7) & 0x7f) | 0x80;
-		++salida;
-		*salida = (num & 0x7f);
-		++salida;
+		*out = ((num >> 14) & 0x7f) | 0x80;
+		++out;
+		*out = ((num >> 7) & 0x7f) | 0x80;
+		++out;
+		*out = (num & 0x7f);
+		++out;
 	}
 	else if(num < 0x10000000){
 		//4 byte
-		*salida = ((num >> 21) & 0x7f) | 0x80;
-		++salida;
-		*salida = ((num >> 14) & 0x7f) | 0x80;
-		++salida;
-		*salida = ((num >> 7) & 0x7f) | 0x80;
-		++salida;
-		*salida = (num & 0x7f);
-		++salida;
+		*out = ((num >> 21) & 0x7f) | 0x80;
+		++out;
+		*out = ((num >> 14) & 0x7f) | 0x80;
+		++out;
+		*out = ((num >> 7) & 0x7f) | 0x80;
+		++out;
+		*out = (num & 0x7f);
+		++out;
 	}
 	else if(num < 0x800000000ULL){
 		//5 byte
-		*salida = ((num >> 28) & 0x7f) | 0x80;
-		++salida;
-		*salida = ((num >> 21) & 0x7f) | 0x80;
-		++salida;
-		*salida = ((num >> 14) & 0x7f) | 0x80;
-		++salida;
-		*salida = ((num >> 7) & 0x7f) | 0x80;
-		++salida;
-		*salida = (num & 0x7f);
-		++salida;
+		*out = ((num >> 28) & 0x7f) | 0x80;
+		++out;
+		*out = ((num >> 21) & 0x7f) | 0x80;
+		++out;
+		*out = ((num >> 14) & 0x7f) | 0x80;
+		++out;
+		*out = ((num >> 7) & 0x7f) | 0x80;
+		++out;
+		*out = (num & 0x7f);
+		++out;
 	}
 	else if(num < 0x40000000000ULL){
 		//6 byte
-		*salida = ((num >> 35) & 0x7f) | 0x80;
-		++salida;
-		*salida = ((num >> 28) & 0x7f) | 0x80;
-		++salida;
-		*salida = ((num >> 21) & 0x7f) | 0x80;
-		++salida;
-		*salida = ((num >> 14) & 0x7f) | 0x80;
-		++salida;
-		*salida = ((num >> 7) & 0x7f) | 0x80;
-		++salida;
-		*salida = (num & 0x7f);
-		++salida;
+		*out = ((num >> 35) & 0x7f) | 0x80;
+		++out;
+		*out = ((num >> 28) & 0x7f) | 0x80;
+		++out;
+		*out = ((num >> 21) & 0x7f) | 0x80;
+		++out;
+		*out = ((num >> 14) & 0x7f) | 0x80;
+		++out;
+		*out = ((num >> 7) & 0x7f) | 0x80;
+		++out;
+		*out = (num & 0x7f);
+		++out;
 	}
 	else if(num < 0x2000000000000ULL){
 		//7 byte
-		*salida = ((num >> 42) & 0x7f) | 0x80;
-		++salida;
-		*salida = ((num >> 35) & 0x7f) | 0x80;
-		++salida;
-		*salida = ((num >> 28) & 0x7f) | 0x80;
-		++salida;
-		*salida = ((num >> 21) & 0x7f) | 0x80;
-		++salida;
-		*salida = ((num >> 14) & 0x7f) | 0x80;
-		++salida;
-		*salida = ((num >> 7) & 0x7f) | 0x80;
-		++salida;
-		*salida = (num & 0x7f);
-		++salida;
+		*out = ((num >> 42) & 0x7f) | 0x80;
+		++out;
+		*out = ((num >> 35) & 0x7f) | 0x80;
+		++out;
+		*out = ((num >> 28) & 0x7f) | 0x80;
+		++out;
+		*out = ((num >> 21) & 0x7f) | 0x80;
+		++out;
+		*out = ((num >> 14) & 0x7f) | 0x80;
+		++out;
+		*out = ((num >> 7) & 0x7f) | 0x80;
+		++out;
+		*out = (num & 0x7f);
+		++out;
 	}
 	else if(num < 0x100000000000000ULL){
 		//8 byte
-		*salida = ((num >> 49) & 0x7f) | 0x80;
-		++salida;
-		*salida = ((num >> 42) & 0x7f) | 0x80;
-		++salida;
-		*salida = ((num >> 35) & 0x7f) | 0x80;
-		++salida;
-		*salida = ((num >> 28) & 0x7f) | 0x80;
-		++salida;
-		*salida = ((num >> 21) & 0x7f) | 0x80;
-		++salida;
-		*salida = ((num >> 14) & 0x7f) | 0x80;
-		++salida;
-		*salida = ((num >> 7) & 0x7f) | 0x80;
-		++salida;
-		*salida = (num & 0x7f);
-		++salida;
+		*out = ((num >> 49) & 0x7f) | 0x80;
+		++out;
+		*out = ((num >> 42) & 0x7f) | 0x80;
+		++out;
+		*out = ((num >> 35) & 0x7f) | 0x80;
+		++out;
+		*out = ((num >> 28) & 0x7f) | 0x80;
+		++out;
+		*out = ((num >> 21) & 0x7f) | 0x80;
+		++out;
+		*out = ((num >> 14) & 0x7f) | 0x80;
+		++out;
+		*out = ((num >> 7) & 0x7f) | 0x80;
+		++out;
+		*out = (num & 0x7f);
+		++out;
 	}
 	else{
 		//9 byte
-		*salida = ((num >> 56) & 0x7f) | 0x80;
-		++salida;
-		*salida = ((num >> 49) & 0x7f) | 0x80;
-		++salida;
-		*salida = ((num >> 42) & 0x7f) | 0x80;
-		++salida;
-		*salida = ((num >> 35) & 0x7f) | 0x80;
-		++salida;
-		*salida = ((num >> 28) & 0x7f) | 0x80;
-		++salida;
-		*salida = ((num >> 21) & 0x7f) | 0x80;
-		++salida;
-		*salida = ((num >> 14) & 0x7f) | 0x80;
-		++salida;
-		*salida = ((num >> 7) & 0x7f) | 0x80;
-		++salida;
-		*salida = (num & 0x7f);
-		++salida;
+		*out = ((num >> 56) & 0x7f) | 0x80;
+		++out;
+		*out = ((num >> 49) & 0x7f) | 0x80;
+		++out;
+		*out = ((num >> 42) & 0x7f) | 0x80;
+		++out;
+		*out = ((num >> 35) & 0x7f) | 0x80;
+		++out;
+		*out = ((num >> 28) & 0x7f) | 0x80;
+		++out;
+		*out = ((num >> 21) & 0x7f) | 0x80;
+		++out;
+		*out = ((num >> 14) & 0x7f) | 0x80;
+		++out;
+		*out = ((num >> 7) & 0x7f) | 0x80;
+		++out;
+		*out = (num & 0x7f);
+		++out;
 	}
 	
-	return (salida - buff);
+	return (out - buff);
 }
 
 //Lee el primer numero en varbyte (y lo almacena en num) retornando el numero de bytes leidos
@@ -398,16 +395,16 @@ unsigned int BitsUtils::read_varbyte(unsigned char *buff, unsigned long long &nu
 	//Ademas, eso puede usarse para mejorar la seguridad (maximo 9 ciclos)
 	
 	num = 0;
-	unsigned char *entrada = buff;
-	while( (*entrada & 0x80) ){
-		num |= (*entrada & 0x7f);
+	unsigned char *in = buff;
+	while( (*in & 0x80) ){
+		num |= (*in & 0x7f);
 		num <<= 7;
-		++entrada;
+		++in;
 	}
-	num |= *entrada;
-	++entrada;
+	num |= *in;
+	++in;
 	
-	return (entrada - buff);
+	return (in - buff);
 }
 
 //Lee el primer numero en varbyte (y lo almacena en num) retornando el numero de bytes leidos
@@ -419,18 +416,18 @@ unsigned int BitsUtils::read_varbyte(unsigned char *buff, unsigned int &num){
 	//Ademas, eso puede usarse para mejorar la seguridad (maximo 9 ciclos)
 	
 	unsigned long long llnum = 0;
-	unsigned char *entrada = buff;
-	while( (*entrada & 0x80) ){
-		llnum |= (*entrada & 0x7f);
+	unsigned char *in = buff;
+	while( (*in & 0x80) ){
+		llnum |= (*in & 0x7f);
 		llnum <<= 7;
-		++entrada;
+		++in;
 	}
-	llnum |= *entrada;
-	++entrada;
+	llnum |= *in;
+	++in;
 	
 	num = (unsigned int)llnum;
 	
-	return (entrada - buff);
+	return (in - buff);
 }
 
 unsigned int BitsUtils::size_varbyte(unsigned long long num){
