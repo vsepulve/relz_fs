@@ -79,21 +79,21 @@ public:
 	//Carga un los datos de un header del fstream
 	//Para ello crea un nuevo header del tipo correcto, lo carga con load
 	//Luego agrega los datos de ese header a este objeto
-	virtual void loadBlock(fstream *lector, unsigned int bytes);
+	virtual void loadBlock(fstream *reader, unsigned int bytes);
 	
 	//Similar al anterior, pero reemplaza el bloque de pos si existe (si no, lo agrega)
-	virtual void reloadBlock(fstream *lector, unsigned int bytes, unsigned int pos);
+	virtual void reloadBlock(fstream *reader, unsigned int bytes, unsigned int pos);
 	
 	//Guarda los datos de este BlockHeaders en un fstream
 	//Esto incluye todos los datos propios incluyendo metadatos
 	//Sin embargo NO almacena el tipo de headers (eso deberia hacerlo el factory)
-	virtual unsigned int save(fstream *escritor);
+	virtual unsigned int save(fstream *writer);
 	
 	//Carga todos los datos guardados por un save
-	virtual void load(fstream *lector);
+	virtual void load(fstream *reader);
 	
 	//Igual al anterior, pero desde un BytesReader
-	virtual void load(BytesReader *lector);
+	virtual void load(BytesReader *reader);
 	
 	//Version de lectura usada previamente en el Recoder
 	//Queda en espera mientras no se reconstruya ese objeto	

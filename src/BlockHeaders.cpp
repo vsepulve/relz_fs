@@ -34,28 +34,28 @@ void BlockHeaders::setMetadata(Metadata *_metadata){
 }
 
 void BlockHeaders::addBlock(Header *header){
-	cerr<<"BlockHeaders::addBlock - No Implementado\n";
+	cerr<<"BlockHeaders::addBlock - Not Implemented\n";
 }
 
-void BlockHeaders::loadBlock(fstream *lector, unsigned int bytes){
-	cerr<<"BlockHeaders::loadBlock - No Implementado\n";
+void BlockHeaders::loadBlock(fstream *reader, unsigned int bytes){
+	cerr<<"BlockHeaders::loadBlock - Not Implemented\n";
 }
 
-void BlockHeaders::reloadBlock(fstream *lector, unsigned int bytes, unsigned int pos){
-	cerr<<"BlockHeaders::loadBlock - No Implementado\n";
+void BlockHeaders::reloadBlock(fstream *reader, unsigned int bytes, unsigned int pos){
+	cerr<<"BlockHeaders::loadBlock - Not Implemented\n";
 }
 
-unsigned int BlockHeaders::save(fstream *escritor){
-	cerr<<"BlockHeaders::save - No Implementado\n";
+unsigned int BlockHeaders::save(fstream *writer){
+	cerr<<"BlockHeaders::save - Not Implemented\n";
 	return 0;
 }
 
-void BlockHeaders::load(fstream *lector){
-	cerr<<"BlockHeaders::load - No Implementado\n";
+void BlockHeaders::load(fstream *reader){
+	cerr<<"BlockHeaders::load - Not Implemented\n";
 }
 
-void BlockHeaders::load(BytesReader *lector){
-	cerr<<"BlockHeaders::load - No Implementado\n";
+void BlockHeaders::load(BytesReader *reader){
+	cerr<<"BlockHeaders::load - Not Implemented\n";
 }
 
 unsigned int BlockHeaders::getBlockSize(){
@@ -74,21 +74,21 @@ unsigned int BlockHeaders::getDataPosition(){
 }
 
 unsigned int BlockHeaders::getBlockPosition(unsigned int block){
-	cerr<<"BlockHeaders::getBlockPosition - No Implementado\n";
+	cerr<<"BlockHeaders::getBlockPosition - Not Implemented\n";
 	return 0;
 }
 	
 unsigned int BlockHeaders::getNumBlocks(){
-	cerr<<"BlockHeaders::getNumBlocks - No Implementado\n";
+	cerr<<"BlockHeaders::getNumBlocks - Not Implemented\n";
 	return 0;
 }
 
 void BlockHeaders::prepare(){
-	cerr<<"BlockHeaders::prepare - No Implementado\n";
+	cerr<<"BlockHeaders::prepare - Not Implemented\n";
 }
 
 void BlockHeaders::unprepare(unsigned int block_ini){
-	cerr<<"BlockHeaders::unprepare - No Implementado\n";
+	cerr<<"BlockHeaders::unprepare - Not Implemented\n";
 }
 
 void BlockHeaders::adjustCase(char *buff, unsigned long long ini, unsigned int length){

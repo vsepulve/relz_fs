@@ -53,5 +53,4 @@ all: comprimir_multithread descomprimir
 	
 clean:
 	rm -f bin/* lib/*
-	touch bin/.dir
-	touch lib/.dir
+	

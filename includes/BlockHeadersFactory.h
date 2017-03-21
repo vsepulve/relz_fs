@@ -29,7 +29,7 @@ public:
 	// Construye un BlockHeaders adecuado
 	// Lo carga (headers->load)
 	// Lo retorna
-	static BlockHeaders *load(fstream *lector);
+	static BlockHeaders *load(fstream *reader);
 	
 	// Igual al anterior, pero a partir del nombre del archivo
 	static BlockHeaders *load(const char *file_name);
@@ -40,7 +40,7 @@ public:
 	// Verifica el tipo del header
 	// Escribe el tipo
 	// guarda headers en el escritor
-	static void save(BlockHeaders *headers, fstream *escritor);
+	static void save(BlockHeaders *headers, fstream *writer);
 	
 	// Retorna el numero de bytes de type
 	static unsigned int typeSize();
