@@ -301,7 +301,7 @@ unsigned int Metadata::sizeNewLines(){
 		//uncompress (largo, mas 1 entero por numero)
 		size += sizeof(int);
 		size += nl_pos->size() * sizeof(long long);
-		cout<<"Metadata::sizeNewLines - unc, size: "<<size<<" ("<<nl_pos->size()<<" pos)\n";
+//		cout<<"Metadata::sizeNewLines - unc, size: "<<size<<" ("<<nl_pos->size()<<" pos)\n";
 	}
 	else if( save_mode == META_SAVE_VBYTE ){
 	
@@ -322,7 +322,7 @@ unsigned int Metadata::sizeNewLines(){
 		
 		//Tamaño de la version norm + ex
 		
-		cout<<"Metadata::sizeNewLines - Calculando tamaño de vbyte EX\n";
+//		cout<<"Metadata::sizeNewLines - Calculando tamaño de vbyte EX\n";
 		
 		//4 enteros (size_nl, nl_norm, size_ex, n_bytes) mas los que use vbyte
 		size += 4 * sizeof(int);
@@ -349,7 +349,7 @@ unsigned int Metadata::sizeNewLines(){
 				mejor_conteo = it_deltas->second;
 			}
 		}
-		cout<<"Metadata::sizeNewLines - nl_norm: "<<nl_norm<<", preparando excepciones\n";
+//		cout<<"Metadata::sizeNewLines - nl_norm: "<<nl_norm<<", preparando excepciones\n";
 		
 		vector< pair<unsigned int, unsigned int> > nl_ex;
 		last = 0;
@@ -365,12 +365,12 @@ unsigned int Metadata::sizeNewLines(){
 			}
 		}
 		
-		cout<<"Metadata::sizeNewLines - guardando datos previos\n";
+//		cout<<"Metadata::sizeNewLines - guardando datos previos\n";
 		
-		cout<<"Metadata::sizeNewLines - Preparando guardado de excepciones\n";
+//		cout<<"Metadata::sizeNewLines - Preparando guardado de excepciones\n";
 		unsigned int size_ex = nl_ex.size();
 		BitsUtils utils;
-		cout<<"Metadata::sizeNewLines - guardando "<<size_ex<<" excepciones\n";
+//		cout<<"Metadata::sizeNewLines - guardando "<<size_ex<<" excepciones\n";
 		
 		//En este ciclo, los valores (segundo elemento de nl_ex) ya esta en delta
 		//Sin embargo, las posiciones tambien pueden guardarse en delta (pues son siempre crecientes)
@@ -388,7 +388,7 @@ unsigned int Metadata::sizeNewLines(){
 			size += utils.size_varbyte(pos);
 			size += utils.size_varbyte(nl_ex[i].second);
 		}
-		cout<<"Metadata::sizeNewLines - total bytes: "<<size<<"\n";
+//		cout<<"Metadata::sizeNewLines - total bytes: "<<size<<"\n";
 		
 	}
 	else{
@@ -784,7 +784,7 @@ void Metadata::saveLowcaseVarByte(fstream *escritor){
 	BitsUtils utils;
 	unsigned long long ini, fin;
 	unsigned long long last = 0;
-	cout<<"Metadata::saveLowcaseVarByte - Preparando "<<size<<" pares\n";
+//	cout<<"Metadata::saveLowcaseVarByte - Preparando "<<size<<" pares\n";
 	for(unsigned int i = 0; i < size; ++i){
 		ini = lowcase_runs->at(i).first - last;
 		last = lowcase_runs->at(i).first;
@@ -800,9 +800,9 @@ void Metadata::saveLowcaseVarByte(fstream *escritor){
 		
 		cur_byte += utils.write_varbyte(buff + cur_byte, ini);
 		cur_byte += utils.write_varbyte(buff + cur_byte, fin);
-		if(i < 3) cout<<"["<<lowcase_runs->at(i).first<<", "<<lowcase_runs->at(i).second<<"] -> ["<<ini<<", "<<fin<<"]\n";
+//		if(i < 3) cout<<"["<<lowcase_runs->at(i).first<<", "<<lowcase_runs->at(i).second<<"] -> ["<<ini<<", "<<fin<<"]\n";
 	}
-	cout<<"Metadata::saveLowcaseVarByte - Guardando "<<cur_byte<<" bytes ("<<((unsigned int*)buff)[0]<<")\n";
+//	cout<<"Metadata::saveLowcaseVarByte - Guardando "<<cur_byte<<" bytes ("<<((unsigned int*)buff)[0]<<")\n";
 	escritor->write((char*)&cur_byte, sizeof(int));
 	escritor->write((char*)buff, cur_byte);
 	delete [] buff;
@@ -823,7 +823,7 @@ void Metadata::loadLowcaseVarByte(fstream *lector){
 	//Version VarByte
 	unsigned int n_bytes = 0;
 	lector->read((char*)&n_bytes, sizeof(int));
-	cout<<"Metadata::loadLowcaseVarByte - Cargando "<<n_bytes<<" bytes\n";
+//	cout<<"Metadata::loadLowcaseVarByte - Cargando "<<n_bytes<<" bytes\n";
 	unsigned char *buff = new unsigned char[n_bytes];
 	lector->read((char*)buff, n_bytes);
 	unsigned int cur_byte = 0;
@@ -831,7 +831,7 @@ void Metadata::loadLowcaseVarByte(fstream *lector){
 	unsigned long long ini, fin;
 //	unsigned int delta_ini, delta_fin;
 	unsigned long long sum = 0;
-	cout<<"Metadata::loadLowcaseVarByte - Preparando "<<size<<" pares ("<<((unsigned int*)buff)[0]<<")\n";
+//	cout<<"Metadata::loadLowcaseVarByte - Preparando "<<size<<" pares ("<<((unsigned int*)buff)[0]<<")\n";
 	for(unsigned int i = 0; i < size; ++i){
 		cur_byte += utils.read_varbyte(buff + cur_byte, ini);
 		cur_byte += utils.read_varbyte(buff + cur_byte, fin);
@@ -839,9 +839,9 @@ void Metadata::loadLowcaseVarByte(fstream *lector){
 		fin += ini;
 		sum = fin;
 		lowcase_runs->push_back( pair<unsigned long long, unsigned long long>(ini, fin) );
-		if(i < 3) cout<<"["<<ini<<", "<<fin<<"]\n";
+//		if(i < 3) cout<<"["<<ini<<", "<<fin<<"]\n";
 	}
-	cout<<"Metadata::loadLowcaseVarByte - "<<cur_byte<<" de "<<n_bytes<<" bytes usados\n";
+//	cout<<"Metadata::loadLowcaseVarByte - "<<cur_byte<<" de "<<n_bytes<<" bytes usados\n";
 	delete [] buff;
 	cout<<"Metadata::loadLowcaseVarByte - Fin\n";
 }
@@ -975,7 +975,7 @@ void Metadata::saveNewLinesVarByteEx(fstream *escritor){
 	//Revisar nl_pos para encontrar norm
 	//Por ahora, uso un map <delta, cantidad>
 	//Luego lo itero para encontrar el delta mas comun
-	cout<<"Metadata::saveNewLinesVarByteEx - calculando deltas\n";
+//	cout<<"Metadata::saveNewLinesVarByteEx - calculando deltas\n";
 	unsigned int size = nl_pos->size();
 	map<unsigned int, unsigned int> mapa_deltas;
 	map<unsigned int, unsigned int>::iterator it_deltas;
@@ -994,13 +994,13 @@ void Metadata::saveNewLinesVarByteEx(fstream *escritor){
 	unsigned int nl_norm = 0;
 	unsigned int mejor_conteo = 0;
 	for( it_deltas = mapa_deltas.begin(); it_deltas != mapa_deltas.end(); it_deltas++ ){
-		cout<<"Metadata::saveNewLinesVarByteEx - delta <"<<it_deltas->first<<", "<<it_deltas->second<<">\n";
+//		cout<<"Metadata::saveNewLinesVarByteEx - delta <"<<it_deltas->first<<", "<<it_deltas->second<<">\n";
 		if( it_deltas->second > mejor_conteo ){
 			nl_norm = it_deltas->first;
 			mejor_conteo = it_deltas->second;
 		}
 	}
-	cout<<"Metadata::saveNewLinesVarByteEx - nl_norm: "<<nl_norm<<", preparando excepciones\n";
+//	cout<<"Metadata::saveNewLinesVarByteEx - nl_norm: "<<nl_norm<<", preparando excepciones\n";
 	
 	vector< pair<unsigned int, unsigned int> > nl_ex;
 	last = 0;
@@ -1017,17 +1017,17 @@ void Metadata::saveNewLinesVarByteEx(fstream *escritor){
 		}
 	}
 	
-	cout<<"Metadata::saveNewLinesVarByteEx - guardando datos previos\n";
+//	cout<<"Metadata::saveNewLinesVarByteEx - guardando datos previos\n";
 	escritor->write((char*)&size, sizeof(int));
 	escritor->write((char*)&nl_norm, sizeof(int));
 	
-	cout<<"Metadata::saveNewLinesVarByteEx - Preparando guardado de excepciones\n";
+//	cout<<"Metadata::saveNewLinesVarByteEx - Preparando guardado de excepciones\n";
 	unsigned int size_ex = nl_ex.size();
 	unsigned int worst_case = 5 * size_ex;
 	unsigned char *buff = new unsigned char[ worst_case ];
 	unsigned int cur_byte = 0;
 	BitsUtils utils;
-	cout<<"Metadata::saveNewLinesVarByteEx - guardando "<<size_ex<<" excepciones\n";
+//	cout<<"Metadata::saveNewLinesVarByteEx - guardando "<<size_ex<<" excepciones\n";
 	escritor->write((char*)&size_ex, sizeof(int));
 	//En este ciclo, los valores (segundo elemento de nl_ex) ya esta en delta
 	//Sin embargo, las posiciones tambien pueden guardarse en delta (pues son siempre crecientes)
@@ -1039,7 +1039,7 @@ void Metadata::saveNewLinesVarByteEx(fstream *escritor){
 		cur_byte += utils.write_varbyte(buff + cur_byte, nl_ex[i].second);
 //		cout<<"save Ex ["<<nl_ex[i].first<<", "<<nl_ex[i].second<<"] -> ["<<pos<<", ]\n";
 	}
-	cout<<"Metadata::saveNewLinesVarByteEx - Guardando "<<cur_byte<<" bytes ("<<((unsigned int*)buff)[0]<<")\n";
+//	cout<<"Metadata::saveNewLinesVarByteEx - Guardando "<<cur_byte<<" bytes ("<<((unsigned int*)buff)[0]<<")\n";
 	escritor->write((char*)&cur_byte, sizeof(int));
 	escritor->write((char*)buff, cur_byte);
 	delete [] buff;
@@ -1064,7 +1064,7 @@ void Metadata::loadNewLinesVarByteEx(fstream *lector){
 	
 	unsigned int n_bytes = 0;
 	lector->read((char*)&n_bytes, sizeof(int));
-	cout<<"Metadata::loadNewLinesVarByteEx - Cargando "<<n_bytes<<" bytes\n";
+//	cout<<"Metadata::loadNewLinesVarByteEx - Cargando "<<n_bytes<<" bytes\n";
 	unsigned char *buff = new unsigned char[n_bytes];
 	lector->read((char*)buff, n_bytes);
 	unsigned int cur_byte = 0;
@@ -1073,7 +1073,7 @@ void Metadata::loadNewLinesVarByteEx(fstream *lector){
 	unsigned int val_ex;
 	unsigned int sum = 0;
 	vector< pair<unsigned int, unsigned int> > nl_ex;
-	cout<<"Metadata::loadNewLinesVarByteEx - Preparando "<<size_ex<<" exs\n";
+//	cout<<"Metadata::loadNewLinesVarByteEx - Preparando "<<size_ex<<" exs\n";
 	for(unsigned int i = 0; i < size_ex; ++i){
 		cur_byte += utils.read_varbyte(buff + cur_byte, pos_ex);
 		pos_ex += sum;
@@ -1082,21 +1082,21 @@ void Metadata::loadNewLinesVarByteEx(fstream *lector){
 		nl_ex.push_back( pair<unsigned int, unsigned int>(pos_ex, val_ex) );
 //		cout<<"load Ex ["<<pos_ex<<", "<<val_ex<<"]\n";
 	}
-	cout<<"Metadata::loadNewLinesVarByteEx - "<<cur_byte<<" de "<<n_bytes<<" bytes usados\n";
+//	cout<<"Metadata::loadNewLinesVarByteEx - "<<cur_byte<<" de "<<n_bytes<<" bytes usados\n";
 	delete [] buff;
 	
-	cout<<"Metadata::loadNewLinesVarByteEx - Reconstruyendo nl_pos con "<<size_nl<<" deltas, nl_norm: "<<nl_norm<<"\n";
+//	cout<<"Metadata::loadNewLinesVarByteEx - Reconstruyendo nl_pos con "<<size_nl<<" deltas, nl_norm: "<<nl_norm<<"\n";
 	nl_pos = new vector<unsigned long long>();
 	for(unsigned int i = 0; i < size_nl; ++i){
 		nl_pos->push_back( nl_norm );
 	}
-	cout<<"Metadata::loadNewLinesVarByteEx - Ajustando con "<<size_ex<<" excepciones\n";
+//	cout<<"Metadata::loadNewLinesVarByteEx - Ajustando con "<<size_ex<<" excepciones\n";
 	for(unsigned int i = 0; i < size_ex; ++i){
 		pos_ex = nl_ex[i].first;
 		val_ex = nl_ex[i].second;
 		nl_pos->at(pos_ex) = val_ex;
 	}
-	cout<<"Metadata::loadNewLinesVarByteEx - Acumulando deltas\n";
+//	cout<<"Metadata::loadNewLinesVarByteEx - Acumulando deltas\n";
 //	if( size_nl > 0 ){
 //		cout<<"["<<nl_pos->at(0)<<"]\n";
 //	}

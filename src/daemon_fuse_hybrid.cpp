@@ -64,11 +64,11 @@ using namespace std;
 
 // Configuracion por defecto (sobreescrita con la lectura exitosa de un config)
 // ruta del directorio real
-static const char *base_path = "./test/";
+static const char *base_path = "./test_real";
 // ruta de la referencia
-static const char *reference_file = "./referencia_y01.bin";
+static const char *reference_file = "./data/ref.bin";
 // block_size para la compression
-static unsigned int compress_block_size = 1000000;
+static unsigned int compress_block_size = 100000;
 // numero maximo de threads a ser usados para comprimir
 static unsigned int compress_max_threads = 4;
 // largo de bloque para descomprimir (se pide/borra esa ram por cada descompresion completa)
@@ -1251,8 +1251,8 @@ int main(int argc, char *argv[]) {
 	
 	cout<<"Inicio - Preparando variables estaticas\n";
 	
-	if( load_config("demonio_fuse.config") 
-		|| load_config("../demonio_fuse.config")
+	if( load_config("daemon_fuse.config") 
+		|| load_config("../daemon_fuse.config")
 		){
 		cout<<"Configuracion Cargada\n";
 	}

@@ -82,10 +82,8 @@ int main(int argc, char* argv[]){
 		text = new char[largo_text + largo_ns + alfabeto.size() + 1];
 //		text = new char[largo_text + largo_ns + 1];
 		
-		/*
 		
 		// TEMPORALMENTE COMENTADO MIENTRAS PRUEBO LA BUSQUEDA
-		
 		//Agregacion de N's y del alfabeto valido completo
 		for(unsigned int i = 0; i < largo_ns; ++i){
 			text[text_size++] = 'N';
@@ -93,7 +91,7 @@ int main(int argc, char* argv[]){
 		for(unsigned int i = 0; i < alfabeto.size(); ++i){
 			text[text_size++] = alfabeto[i];
 		}
-		*/
+		
 		
 		//Carga del texto de la referencia (metodo especial para cargar bases solamente)
 		text_size += filter->readReference(entrada_referencia, text + text_size);

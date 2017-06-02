@@ -36,10 +36,10 @@ void CoderBlocksRelz::codeBlock(const char *text, unsigned int text_size, fstrea
 	unsigned int n_factores = 0;
 	unsigned int max_pos = 0;
 	
-//	cout<<"CoderBlocksRelz::codeBlock - Text: \""<<string(text, text_size)<<"\"\n";
+//	cout<<"CoderBlocksRelz::codeBlock - Text: \""<<string(text, (text_size>10)?10:text_size)<<((text_size>10)?"...":"")<<"\"\n";
 	
 	while(text_size > 0){
-//	cout<<"CoderBlocksRelz::codeBlock - referencia->find...\n";
+//		cout<<"CoderBlocksRelz::codeBlock - referencia->find...\n";
 
 		referencia->find(text + compressed_text, text_size, pos_prefijo, largo_prefijo);
 		
@@ -55,7 +55,7 @@ void CoderBlocksRelz::codeBlock(const char *text, unsigned int text_size, fstrea
 		if(pos_prefijo > max_pos){
 			max_pos = pos_prefijo;
 		}
-		cout<<"factor\t"<<pos_prefijo<<"\t"<<largo_prefijo<<"\n";
+//		cout<<"factor\t"<<n_factores<<"\t"<<pos_prefijo<<"\t"<<largo_prefijo<<"\n";
 //		cout<<"("<<pos_prefijo<<", "<<largo_prefijo<<")\n";
 //		cout<<"factor_length\t"<<largo_prefijo<<"\n";
 		buff_pos[n_factores] = pos_prefijo;

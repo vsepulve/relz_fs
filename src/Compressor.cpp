@@ -142,9 +142,9 @@ void thread_compress(Compressor::ThreadCompressData *data) {
 		return;
 	}
 	
-//	cout<<"Compressor::Thread ["<<data->id<<"] - Preparando buffers\n";
 	unsigned int buffer_size = coder->codingBufferSize(data->block_size);
 	//Se crea este buffer en lugar de dejarlo interno en coder porque puede ser bastante grande
+//	cout<<"Compressor::Thread ["<<data->id<<"] - Preparando buffer de tamaño "<<buffer_size<<"\n";
 	char *full_buffer = new char[buffer_size];
 	
 	unsigned int block = 0;
