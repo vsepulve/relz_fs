@@ -28,9 +28,9 @@ using namespace std;
 int main(int argc, char* argv[]){
 
 	if(argc != 5){
-		cout<<"\nModo de Uso: descomprimir referencia_serializada entrada_comprimida salida_texto buffer_size\n";
-		cout<<"Lee archivo \"entrada_comprimida\" y el texto de la \"referencia_serializada\"\n";
-		cout<<"Escribe el texto en \"salida_texto\" usando un bloque de descompresion de largo \"buffer_size\"\n";
+		cout<<"\nUsage: decompress serialized_reference compressed_file output_text buffer_size\n";
+		cout<<"The program reads the files \"compressed_file\" and the text from \"serialized_reference\".\n";
+		cout<<"It the writes the text in \"output_text\" using a decompression block of length \"buffer_size\".\n";
 		cout<<"\n";
 		return 0;
 	}

@@ -43,7 +43,7 @@ OBJECTS_LOC = $(OBJECTS:%.o=$(LIBDIR)/%.o)
 
 .PHONY: all clean
 
-all: comprimir_multithread descomprimir
+all: compress decompress daemon_fuse_hybrid
 
 %.o: 
 	make -C src $@

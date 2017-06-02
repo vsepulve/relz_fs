@@ -33,9 +33,9 @@ using namespace std;
 int main(int argc, char* argv[]){
 	
 	if(argc != 9){
-		cout<<"\nModo de Uso: comprimir_multithread entrada_referencia entrada_comprimir nombre_salida block_size n_threads referencia_serializada construir_referencia? usar_metadata?\n";
-		cout<<"Si construir_referencia? == 1, la construye. De otro modo, la carga.\n";
-		cout<<"Si usar_metadata? == 1, los usa. De otro modo, DESCARTA lowcase y newlines.\n";
+		cout<<"\nUsage: compress reference_text sequence_text output block_size n_threads serialized_reference build_reference? use_metadata?\n";
+		cout<<"If build_reference? == 1, the program builds it (creating serialized_reference). In any other case, the program reads serialized_reference (and omits reference_text).\n";
+		cout<<"If use_metadata? == 1, the program stores data about case and newlines. In any other case, the program OMITS case and newlines.\n";
 		cout<<"\n";
 		return 0;
 	}
