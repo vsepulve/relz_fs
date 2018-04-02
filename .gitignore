@@ -4,3 +4,5 @@ test/
 data/*.bin
 data/*.relz
 test_real/
+build/
+*.o
