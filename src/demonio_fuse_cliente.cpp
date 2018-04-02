@@ -126,10 +126,10 @@ public:
 		status = _status;
 		file_mutex = _file_mutex;
 		compressor = _compressor;
-		cout<<"FileData - Constructor (status: "<<(unsigned int)status<<", file_mutex?: "<<(file_mutex!=NULL)<<", compressor?: "<<(compressor!=NULL)<<")\n";
+//		cout<<"FileData - Constructor (status: "<<(unsigned int)status<<", file_mutex?: "<<(file_mutex!=NULL)<<", compressor?: "<<(compressor!=NULL)<<")\n";
 	}
 	~FileData(){
-		cout<<"FileData - Destructor (status: "<<(unsigned int)status<<", file_mutex?: "<<(file_mutex!=NULL)<<", compressor?: "<<(compressor!=NULL)<<")\n";
+//		cout<<"FileData - Destructor (status: "<<(unsigned int)status<<", file_mutex?: "<<(file_mutex!=NULL)<<", compressor?: "<<(compressor!=NULL)<<")\n";
 		if(file_mutex != NULL){
 			delete file_mutex;
 			file_mutex = NULL;
