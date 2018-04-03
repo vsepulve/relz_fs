@@ -48,6 +48,8 @@
 #include "CoderBlocks.h"
 #include "CoderBlocksRelz.h"
 
+#include "Configuration.h"
+
 using namespace std;
 
 // Prueba de FUSE
@@ -62,21 +64,7 @@ using namespace std;
 // Recordar cerrarlo con (o usarlo si el programa se cae para desmontar el directorio):
 // > fusermount -u /cebib
 
-// Configuracion por defecto (sobreescrita con la lectura exitosa de un config)
-// ruta del directorio real
-static const char *base_path = "./test_real";
-// ruta de la referencia
-static const char *reference_file = "./data/ref.bin";
-// block_size para la compression
-static unsigned int compress_block_size = 100000;
-// numero maximo de threads a ser usados para comprimir
-static unsigned int compress_max_threads = 4;
-// largo de bloque para descomprimir (se pide/borra esa ram por cada descompresion completa)
-static unsigned int decompress_line_size = 65536;
-// Tamaño preferido para operaciones IO (por ejemplo, write)
-// Para usarlo apropiadamente, agrego "-o big_writes" al demonio
-static unsigned int io_block_size = 131072;
-// Fin Configuracion
+static Configuration config;
 
 // Estructura para enlazar las funciones
 static struct fuse_operations my_oper;
@@ -255,11 +243,6 @@ static void tmp_path(const char *real_path, char *to_file){
 		}
 	}
 	
-//	memcpy(to_file, real_path, pos);
-//	to_file[pos] = '.';
-//	memcpy(to_file + pos + 1, real_path + pos, len - pos);
-//	sprintf(to_file + len + 1, ".tmp");
-	
 	memcpy(to_file, real_path, pos);
 	to_file[pos] = '.';
 	to_file[pos + 1] = chars_table[ cr1[0] ];
@@ -418,25 +401,25 @@ static unsigned int compression_threads(const char *path){
 	lector.seekg(0, lector.end);
 	unsigned int length = lector.tellg();
 	lector.close();
-	unsigned int n_threads = length / (compress_block_size << 4);
+	unsigned int n_threads = length / (config.compress_block_size << 4);
 	if( n_threads < 1 ){
 		return 1;
 	}
-	if( n_threads > compress_max_threads ){
-		return compress_max_threads;
+	if( n_threads > config.compress_max_threads ){
+		return config.compress_max_threads;
 	}
 	return n_threads;
 }
 
 static int my_getattr(const char *path, struct stat *stbuf){
 	cout<<" ---> my_getattr - \""<<path<<"\" \n";
-	char real_path[ strlen(base_path) + strlen(path) + 2 ];
-	joint_path( base_path, path, real_path );
+	char real_path[ strlen(config.base_path) + strlen(path) + 2 ];
+	joint_path( config.base_path, path, real_path );
 	int res = lstat(real_path, stbuf);
 	//Notar que reemplazo este valor con uno de la configuracion
 	//Es el tamaño preferido para operaciones IO (por ejemplo, write)
 	//Para usarlo apropiadamente, agrego "-o big_writes" al demonio
-	stbuf->st_blksize = io_block_size;
+	stbuf->st_blksize = config.io_block_size;
 	cout<<" ---> my_getattr - st_blksize: "<<stbuf->st_blksize<<" (st_blocks "<<stbuf->st_blocks<<")\n";
 	if (res == -1){
 		return -errno;
@@ -455,7 +438,6 @@ static int my_getattr(const char *path, struct stat *stbuf){
 		else{
 			//Asumo que en cualquier otro caso, la compresion debe estar terminada (y lo refuerzo reseteando el status)
 			//Si el status es realmente desconocido, podria realizarse una prueba del archivo para determinar
-//			status_map[path] = 2;
 			set_status(path, 2);
 			
 			cout<<" ---> my_getattr - Status Comprimido\n";
@@ -471,8 +453,8 @@ static int my_getattr(const char *path, struct stat *stbuf){
 
 static int my_access(const char *path, int mask){
 	cout<<" ---> my_access - \""<<path<<"\" \n";
-	char real_path[ strlen(base_path) + strlen(path) + 2 ];
-	joint_path( base_path, path, real_path );
+	char real_path[ strlen(config.base_path) + strlen(path) + 2 ];
+	joint_path( config.base_path, path, real_path );
 	int res = access(real_path, mask);
 	if (res == -1){
 		return -errno;
@@ -484,8 +466,8 @@ static int my_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t
 	(void) offset;
 	(void) flags;
 	cout<<" ---> my_readdir - \""<<path<<"\" \n";
-	char real_path[ strlen(base_path) + strlen(path) + 2 ];
-	joint_path( base_path, path, real_path );
+	char real_path[ strlen(config.base_path) + strlen(path) + 2 ];
+	joint_path( config.base_path, path, real_path );
 	//Esto es usando readdir_r para que sea thread-safe, pero usa malloc/free
 	DIR *directory = NULL;
 	dirent *child_dir = NULL;
@@ -537,8 +519,8 @@ static int my_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t
 static int my_mknod(const char *path, mode_t mode, dev_t dev){
 	CoutColor color(color_yellow);
 	cout<<" ---> my_mknod - \""<<path<<"\" (mode: "<<mode<<")\n";
-	char real_path[ strlen(base_path) + strlen(path) + 2 ];
-	joint_path(base_path, path, real_path);
+	char real_path[ strlen(config.base_path) + strlen(path) + 2 ];
+	joint_path(config.base_path, path, real_path);
 	//Creacion del archivo real
 	//En teoria basta con un mknod, pero esto es mas portable y seguro
 	int res = -1;
@@ -576,8 +558,8 @@ static int my_mknod(const char *path, mode_t mode, dev_t dev){
 static int my_mkdir(const char *path, mode_t mode){
 	cout<<" ---> my_mkdir - \""<<path<<"\" \n";
 	//Crear directorio real
-	char real_path[ strlen(base_path) + strlen(path) + 2 ];
-	joint_path( base_path, path, real_path );
+	char real_path[ strlen(config.base_path) + strlen(path) + 2 ];
+	joint_path( config.base_path, path, real_path );
 	int res = mkdir(real_path, mode);
 	if (res == -1){
 		return -errno;
@@ -590,14 +572,12 @@ static int my_unlink(const char *path){
 	CoutColor color(color_red);
 	cout<<" ---> my_unlink - \""<<path<<"\" \n";
 	//Borrar archivo real
-	char real_path[ strlen(base_path) + strlen(path) + 2 ];
-	joint_path( base_path, path, real_path );
+	char real_path[ strlen(config.base_path) + strlen(path) + 2 ];
+	joint_path( config.base_path, path, real_path );
 	int res = unlink(real_path);
 	
 	cout<<" ---> my_unlink - Borrando archivo de Mapas\n";
 	//Borrar datos en mapas
-//	status_map.erase(path);
-//	delete_compressor(path);
 	delete_file_data(path);
 	
 	if (res == -1){
@@ -610,8 +590,8 @@ static int my_unlink(const char *path){
 static int my_rmdir(const char *path){
 	cout<<" ---> my_rmdir - \""<<path<<"\" \n";
 	//Borrar directorio real
-	char real_path[ strlen(base_path) + strlen(path) + 2 ];
-	joint_path( base_path, path, real_path );
+	char real_path[ strlen(config.base_path) + strlen(path) + 2 ];
+	joint_path( config.base_path, path, real_path );
 	int res = rmdir(real_path);
 	if (res == -1){
 		return -errno;
@@ -630,10 +610,10 @@ static int my_rename(const char *from, const char *to){
 //		return -errno;
 //	}
 	
-	char real_from[ strlen(base_path) + strlen(from) + 2 ];
-	joint_path( base_path, from, real_from );
-	char real_to[ strlen(base_path) + strlen(to) + 2 ];
-	joint_path( base_path, to, real_to );
+	char real_from[ strlen(config.base_path) + strlen(from) + 2 ];
+	joint_path( config.base_path, from, real_from );
+	char real_to[ strlen(config.base_path) + strlen(to) + 2 ];
+	joint_path( config.base_path, to, real_to );
 	
 	//Caso especial 1: norm -> relz
 	//Se comprime el norm en el relz
@@ -644,7 +624,7 @@ static int my_rename(const char *from, const char *to){
 			return -errno;
 		}
 		cout<<" ---> my_rename - Comprimiendo en \""<<real_to<<"\"\n";
-		if( ! compressor->compress(real_from, compression_threads(real_from), compress_block_size) ){
+		if( ! compressor->compress(real_from, compression_threads(real_from), config.compress_block_size) ){
 			return -errno;
 		}
 		cout<<" ---> my_rename - Borrando \""<<real_from<<"\"\n";
@@ -666,7 +646,7 @@ static int my_rename(const char *from, const char *to){
 			return -errno;
 		}
 		cout<<" ---> my_rename - Descomprimiendo en \""<<real_to<<"\"\n";
-		if( ! compressor->decompress(real_to, decompress_line_size) ){
+		if( ! compressor->decompress(real_to, config.decompress_line_size) ){
 			return -errno;
 		}
 		cout<<" ---> my_rename - Borrando \""<<real_from<<"\"\n";
@@ -692,8 +672,8 @@ static int my_rename(const char *from, const char *to){
 
 static int my_chmod(const char *path, mode_t mode){
 	cout<<" ---> my_chmod - \""<<path<<"\" \n";
-	char real_path[ strlen(base_path) + strlen(path) + 2 ];
-	joint_path( base_path, path, real_path );
+	char real_path[ strlen(config.base_path) + strlen(path) + 2 ];
+	joint_path( config.base_path, path, real_path );
 	int res = chmod(real_path, mode);
 	if (res == -1){
 		return -errno;
@@ -703,8 +683,8 @@ static int my_chmod(const char *path, mode_t mode){
 
 static int my_chown(const char *path, uid_t uid, gid_t gid){
 	cout<<" ---> my_chown - \""<<path<<"\" \n";
-	char real_path[ strlen(base_path) + strlen(path) + 2 ];
-	joint_path( base_path, path, real_path );
+	char real_path[ strlen(config.base_path) + strlen(path) + 2 ];
+	joint_path( config.base_path, path, real_path );
 	int res = lchown(real_path, uid, gid);
 	if (res == -1){
 		return -errno;
@@ -728,8 +708,8 @@ static int my_truncate(const char *path, off_t size){
 		// Luego tomo un nuevo compresor para real_path (vacio en ese momento)
 		// Luego comprimo tmp en ese compresor y listo
 		
-		char real_path[ strlen(base_path) + strlen(path) + 2 ];
-		joint_path( base_path, path, real_path );
+		char real_path[ strlen(config.base_path) + strlen(path) + 2 ];
+		joint_path( config.base_path, path, real_path );
 		char tmp_file[ tmp_path_bytes(real_path) ];
 		tmp_path(real_path, tmp_file);
 		
@@ -748,7 +728,7 @@ static int my_truncate(const char *path, off_t size){
 			fstream escritor(tmp_file, fstream::trunc | fstream::out);
 			if( size > 0 ){
 				// Buffer y otros datos para descompresion
-				unsigned int n_chars = decompress_line_size;
+				unsigned int n_chars = config.decompress_line_size;
 				char *buff = new char[n_chars + 1];
 				long long total = 0;
 				unsigned int read_size = 0;
@@ -780,7 +760,7 @@ static int my_truncate(const char *path, off_t size){
 			// Comprimir tmp en ese compresor
 			if(compressor != NULL){
 				cout<<" ---> my_truncate - Comprimiendo\n";
-				compressor->compress(tmp_file, compression_threads(tmp_file), compress_block_size);
+				compressor->compress(tmp_file, compression_threads(tmp_file), config.compress_block_size);
 			}
 			
 			// Terminar seteando status y borrando temp
@@ -794,8 +774,8 @@ static int my_truncate(const char *path, off_t size){
 	}
 	else{
 		// truncate normal del archivo real
-		char real_path[ strlen(base_path) + strlen(path) + 2 ];
-		joint_path( base_path, path, real_path );
+		char real_path[ strlen(config.base_path) + strlen(path) + 2 ];
+		joint_path( config.base_path, path, real_path );
 		res = truncate(real_path, size);
 	}
 	if (res == -1){
@@ -806,8 +786,8 @@ static int my_truncate(const char *path, off_t size){
 
 static int my_utimens(const char *path, const struct timespec ts[2]){
 	cout<<" ---> my_utimens - Inicio (\""<<path<<"\")\n";
-//	char real_path[ strlen(base_path) + strlen(path) + 2 ];
-//	joint_path( base_path, path, real_path );
+//	char real_path[ strlen(config.base_path) + strlen(path) + 2 ];
+//	joint_path( config.base_path, path, real_path );
 //	int res = utimensat(0, real_path, ts, AT_SYMLINK_NOFOLLOW);
 //	cout<<" ---> my_utimens - res: "<<res<<" (de \""<<real_path<<"\")\n";
 //	if (res == -1){
@@ -823,8 +803,8 @@ static int my_open(const char *path, struct fuse_file_info *flags) {
 	mutex *file_mutex = get_mutex(path);
 	lock_guard<mutex> lock(*file_mutex);
 	
-	char real_path[ strlen(base_path) + strlen(path) + 2 ];
-	joint_path( base_path, path, real_path );
+	char real_path[ strlen(config.base_path) + strlen(path) + 2 ];
+	joint_path( config.base_path, path, real_path );
 	if( is_relz(path) ){
 		cout<<" ---> my_open - Archivo Comprimido\n";
 		
@@ -846,48 +826,6 @@ static int my_open(const char *path, struct fuse_file_info *flags) {
 		}//if... status agendado
 		else if( status == 2){
 			cout<<" ---> my_open - Compresion Terminada\n";
-			
-			/*
-			
-			if( is_write(flags) ){
-				
-//				cout<<" ---> my_open - Escritura\n";
-				
-				if( is_append(flags) ){
-//					cout<<" ---> my_open - Descomprimiendo para prepara escritura\n";
-//					char real_path[ strlen(base_path) + strlen(path) + 2 ];
-//					joint_path( base_path, path, real_path );
-					char tmp_file[ tmp_path_bytes(real_path) ];
-					tmp_path(real_path, tmp_file);
-//					cout<<" ---> my_open - Descomprimiendo \""<<real_path<<"\" en \""<<tmp_file<<"\" \n";
-					Compressor *compressor = get_compressor(path, real_path);
-					if(compressor != NULL){
-//						compressor->decompress(tmp_file, 1024);
-						compressor->decompress(tmp_file, decompress_line_size);
-					}
-//					cout<<" ---> my_open - Borrando y renombrando\n";
-					//remove(real_path);
-					rename(tmp_file, real_path);
-				}
-				else{
-//					cout<<" ---> my_open - Archivo sera truncado (se omite descompresion)\n";
-				}
-				
-//				cout<<" ---> my_open - Actualizando status\n";
-//				status_map[path] = 1;
-				set_status(path, 1);
-				
-//				cout<<" ---> my_open - Nuevo estado: Agendada, preparando fd\n";
-				int fd = -1;
-				fd = open(real_path, flags->flags);
-				if (fd == -1){
-					return -errno;
-				}
-				flags->fh = fd;
-				
-			}//if... escritura
-			
-			*/
 			
 		}//else if... status comprimido
 		else{
@@ -921,8 +859,8 @@ static int my_read_fd(const char *path, char *buf, size_t size, off_t offset, st
 	bool close_fd = false;
 	if(flags == NULL || flags->fh == 0){
 		//abrir el archivo localmente
-		char real_path[ strlen(base_path) + strlen(path) + 2 ];
-		joint_path( base_path, path, real_path );
+		char real_path[ strlen(config.base_path) + strlen(path) + 2 ];
+		joint_path( config.base_path, path, real_path );
 		fd = open( real_path, flags->flags );
 		close_fd = true;
 		if (fd == -1){
@@ -963,7 +901,7 @@ static int my_read(const char *path, char *buf, size_t size, off_t offset, struc
 		}//status agendado
 		else if( status == 2){
 //			cout<<" ---> my_read - Compresion Terminada, usando compressor\n";
-			Compressor *compressor = get_compressor(path, NULL, base_path);
+			Compressor *compressor = get_compressor(path, NULL, config.base_path);
 			if(compressor != NULL){
 				res = (int)(compressor->read(offset, size, buf));
 			}
@@ -989,8 +927,8 @@ static int my_write_fd(const char *path, const char *buf, size_t size, off_t off
 	bool close_fd = false;
 	if(flags == NULL || flags->fh == 0){
 		//abrir el archivo localmente
-		char real_path[ strlen(base_path) + strlen(path) + 2 ];
-		joint_path( base_path, path, real_path );
+		char real_path[ strlen(config.base_path) + strlen(path) + 2 ];
+		joint_path( config.base_path, path, real_path );
 		fd = open(real_path, O_WRONLY);
 		close_fd = true;
 		if (fd == -1){
@@ -1036,7 +974,7 @@ static int my_write(const char *path, const char *buf, size_t size, off_t offset
 		else if(status == 2){
 			cout<<" ---> my_write - Compresion Terminada, llamando write\n";
 			// Esto si el open no lo descomprime, claro
-			Compressor *compressor = get_compressor(path, NULL, base_path);
+			Compressor *compressor = get_compressor(path, NULL, config.base_path);
 			if(compressor != NULL){
 				res = (int)(compressor->write(buf, size, offset));
 			}
@@ -1059,8 +997,8 @@ static int my_write(const char *path, const char *buf, size_t size, off_t offset
 
 static int my_statfs(const char *path, struct statvfs *stbuf){
 	cout<<" ---> my_statfs - \""<<path<<"\"\n";
-	char real_path[ strlen(base_path) + strlen(path) + 2 ];
-	joint_path( base_path, path, real_path );
+	char real_path[ strlen(config.base_path) + strlen(path) + 2 ];
+	joint_path( config.base_path, path, real_path );
 	int res = statvfs(real_path, stbuf);
 	cout<<" ---> my_statfs - f_bsize: "<<stbuf->f_bsize<<", f_frsize: "<<stbuf->f_frsize<<"\n";
 	if (res == -1){
@@ -1104,8 +1042,8 @@ static int my_release(const char *path, struct fuse_file_info *flags){
 		if(status == 1){
 			cout<<" ---> my_release - Fin de compresion agendada, comprimiendo...\n";
 			//comprimir
-			char real_path[ strlen(base_path) + strlen(path) + 2 ];
-			joint_path( base_path, path, real_path );
+			char real_path[ strlen(config.base_path) + strlen(path) + 2 ];
+			joint_path( config.base_path, path, real_path );
 			char tmp_file[ tmp_path_bytes(real_path) ];
 			tmp_path(real_path, tmp_file);
 			
@@ -1114,12 +1052,11 @@ static int my_release(const char *path, struct fuse_file_info *flags){
 			rename(real_path, tmp_file);
 			Compressor *compressor = get_compressor(path, real_path);
 			if(compressor != NULL){
-				compressor->compress(tmp_file, compression_threads(tmp_file), compress_block_size);
+				compressor->compress(tmp_file, compression_threads(tmp_file), config.compress_block_size);
 			}
 			remove(tmp_file);
 			
 			//actualizar status
-//			status_map[path] = 2;
 			set_status(path, 2);
 			
 		}
@@ -1143,8 +1080,8 @@ static int my_releasedir(const char *path, struct fuse_file_info *flags){
 static int my_fallocate(const char *path, int mode, off_t offset, off_t length, struct fuse_file_info *flags) {
 	(void) flags;
 	cout<<" ---> my_fallocate - \""<<path<<"\"\n";
-	char real_path[ strlen(base_path) + strlen(path) + 2 ];
-	joint_path( base_path, path, real_path );
+	char real_path[ strlen(config.base_path) + strlen(path) + 2 ];
+	joint_path( config.base_path, path, real_path );
 	if(mode){
 		return -EOPNOTSUPP;
 	}
@@ -1157,106 +1094,16 @@ static int my_fallocate(const char *path, int mode, off_t offset, off_t length, 
 	return res;
 }
 
-static bool load_config( const char *path ){
-	
-	ifstream lector(path, ifstream::in);
-	if( ! lector.is_open() ){
-		cout<<"load_config - Problemas al abrir archivo \""<<path<<"\"\n";
-		return false;
-	}
-	
-	unsigned int buff_size = 1024;
-	char *buff = new char[buff_size];
-	memset(buff, 0, buff_size);
-	
-	string line, name, mark, value;
-	
-	while( lector.good() ){
-		lector.getline(buff, buff_size);
-		unsigned int lectura = lector.gcount();
-		unsigned int pos = 0;
-		while( (pos < lectura) && buff[pos] == ' ' ){
-			++pos;
-		}
-		if( (pos+1 >= lectura) || (buff[pos] == '#') ){
-			continue;
-		}
-		//Linea valida de largo > 0
-//		cout<<"Procesando \""<<buff<<"\" (pos: "<<pos<<" / "<<lectura<<")\n";
-		string line(buff);
-		stringstream toks(line);
-		
-		name = "";
-		mark = "";
-		value = "";
-		
-		toks>>name;
-		toks>>mark;
-		toks>>value;
-		
-		if( (mark.length() != 1) || (mark.compare("=") != 0) || (value.length() < 1) ){
-			continue;
-		}
-		
-		cout<<"Seteando \""<<name<<"\"\n";
-		
-		if( name.compare("base_path") == 0 ){
-			toks>>value;
-			cout<<"Valor \""<<value<<"\"\n";
-			char *text = new char[ 1 + value.length() ];
-			strcpy(text, value.c_str());
-			base_path = text;
-		}
-		else if( name.compare("reference_file") == 0 ){
-			toks>>value;
-			cout<<"Valor \""<<value<<"\"\n";
-			char *text = new char[ 1 + value.length() ];
-			strcpy(text, value.c_str());
-			reference_file = text;
-		}
-		else if( name.compare("compress_block_size") == 0 ){
-			toks>>value;
-			cout<<"Valor \""<<value<<"\"\n";
-			compress_block_size = atoi( value.c_str() );
-		}
-		else if( name.compare("compress_max_threads") == 0 ){
-			toks>>value;
-			cout<<"Valor \""<<value<<"\"\n";
-			compress_max_threads = atoi( value.c_str() );
-		}
-		else if( name.compare("decompress_line_size") == 0 ){
-			toks>>value;
-			cout<<"Valor \""<<value<<"\"\n";
-			decompress_line_size = atoi( value.c_str() );
-		}
-		else if( name.compare("io_block_size") == 0 ){
-			toks>>value;
-			cout<<"Valor \""<<value<<"\"\n";
-			io_block_size = atoi( value.c_str() );
-		}
-		else{
-			cout<<"Omitiendo valor de \""<<name<<"\"\n";
-		}
-	
-	}
-	delete [] buff;
-	
-	return true;
-}
-
-
 int main(int argc, char *argv[]) {
 	
-	cout<<"Inicio - Preparando variables estaticas\n";
+	if( argc < 2 ){
+		cout << "Usage: daemon_fuse_hybrid mount_directory [fuse_args] config_file\n";
+		cout << "Example: ./bin/daemon_fuse_hybrid ./test -d -o big_writes daemon_fuse.json\n";
+		return 0;
+	}
 	
-	if( load_config("daemon_fuse.config") 
-		|| load_config("../daemon_fuse.config")
-		){
-		cout<<"Configuracion Cargada\n";
-	}
-	else{
-		cout<<"Configuracion Inicial\n";
-	}
+	string config_file = argv[argc - 1];
+	config.loadConfiguration(config_file);
 	
 	//Enlace de funciones (a la C++) en el struct fuse_operations definido al inicio
 	my_oper.getattr = my_getattr;
@@ -1282,13 +1129,13 @@ int main(int argc, char *argv[]) {
 	
 	//Inicializar variables estaticas
 	referencia = new ReferenceIndexBasic();
-	referencia->load( reference_file );
+	referencia->load( config.reference_file );
 	
 	prepare_tmp_table(chars_table);
 	
-	cout<<"Inicio - Iniciando fuse_main\n";
+	cout << "Starting fuse_main...\n";
 	
-	return fuse_main(argc, argv, &my_oper, NULL);
+	return fuse_main(argc - 1, argv, &my_oper, NULL);
 }
 
 
