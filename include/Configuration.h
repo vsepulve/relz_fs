@@ -9,11 +9,20 @@
 #include <string.h>
 
 #include <map>
+#include <set>
+#include <vector>
+
+#include "ReferenceIndex.h"
+#include "ReferenceIndexBasic.h"
 
 using namespace std;
 
 class Configuration{
 private:
+
+	unsigned int nextLine(ifstream &lector, char *buff, unsigned int buff_size);
+	
+	vector< pair<string, ReferenceIndexBasic*> > references;
 	
 public:
 
@@ -21,7 +30,7 @@ public:
 	// ruta del directorio real
 	char *base_path;
 	// ruta de la referencia
-	char *reference_file;
+//	char *reference_file;
 	// block_size para la compression
 	unsigned int compress_block_size;
 	// numero maximo de threads a ser usados para comprimir
@@ -38,6 +47,10 @@ public:
 	~Configuration();
 	
 	void loadConfiguration(string &filename);
+	
+	// Retorna la referencia mas apropiada para cualquier path dentro del fs montado
+	// Esto asume que path es relativo al punto de montaje
+	ReferenceIndexBasic *getReference(const char *path);
 	
 };
 
