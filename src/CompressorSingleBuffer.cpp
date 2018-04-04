@@ -85,7 +85,7 @@ unsigned int CompressorSingleBuffer::read(unsigned long long pos_ini, unsigned i
 	//Lock desde aqui hasta el final del metodo
 	lock_guard<mutex> lock(mutex_interno);
 	
-	bool debug = false;
+	bool debug = true;
 //	if( pos_ini > 4285000000 && pos_ini < 4300000000 ){
 //		debug = true;
 //	}
@@ -516,8 +516,15 @@ unsigned int CompressorSingleBuffer::write(const char *original_text, unsigned i
 	
 	// Rename del archivo merge
 	cout<<"CompressorSingleBuffer::write - rename (\""<<path_merge<<"\", \""<<master_file<<"\")\n";
-//	remove(master_file);
-	rename(path_merge, master_file);
+//	rename(path_merge, master_file);
+	std::ifstream  src(path_merge, std::ios::binary);
+	std::ofstream  dst(master_file, std::ios::binary);
+	dst << src.rdbuf();
+	
+	src.close();
+	dst.close();
+    
+    //	std::this_thread::sleep_for (std::chrono::seconds(3));
 	
 	// Reload del decoder
 	cout<<"CompressorSingleBuffer::write - reload...\n";
