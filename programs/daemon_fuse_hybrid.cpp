@@ -893,25 +893,26 @@ static int my_read(const char *path, char *buf, size_t size, off_t offset, struc
 //	CoutColor color(color_green);
 	int res = 0;
 	if( is_relz(path) ){
-//		cout<<" ---> my_read - Archivo Comprimido\n";
+		cout<<" ---> my_read - Archivo Comprimido\n";
 //		unsigned char status = status_map[path];
 		unsigned char status = get_status(path);
 		if( status == 1 ){
-//			cout<<" ---> my_read - Compresion Agendada, usar texto\n";
+			cout<<" ---> my_read - Compresion Agendada, usar texto\n";
 			res = my_read_fd(path, buf, size, offset, flags);
 		}//status agendado
 		else if( status == 2){
-//			cout<<" ---> my_read - Compresion Terminada, usando compressor\n";
+			cout<<" ---> my_read - Compresion Terminada, usando compressor\n";
 			Compressor *compressor = get_compressor(path, NULL, config.base_path);
 			if(compressor != NULL){
+				cout<<" ---> my_read - compressor->read...\n";
 				res = (int)(compressor->read(offset, size, buf));
 			}
 			else{
-//				cout<<" ---> my_read - Advertencia, compressor NULL\n";
+				cout<<" ---> my_read - Advertencia, compressor NULL\n";
 			}
 		}//status terminado
 		else{
-//			cout<<" ---> my_read - status invalido ("<<(unsigned int)status<<"), dejando datos reales\n";
+			cout<<" ---> my_read - status invalido ("<<(unsigned int)status<<"), dejando datos reales\n";
 			res = my_read_fd(path, buf, size, offset, flags);
 		}//status desconocido
 	}//if... relz
