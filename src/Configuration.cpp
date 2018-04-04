@@ -4,7 +4,9 @@ Configuration::Configuration(){
 	base_path = (char*)("./test_real");
 	// ruta de la referencia
 //	reference_file = (char*)("./data/ref.bin");
-//	references.push_back( pair<string, string>("/", "./data/ref.bin") );
+	ReferenceIndexBasic *ref = new ReferenceIndexBasic();
+	ref->load( "./data/ref.bin" );
+	references.push_back( pair<string, ReferenceIndexBasic *>("/", ref) );
 	// block_size para la compression
 	compress_block_size = 100000;
 	// numero maximo de threads a ser usados para comprimir
