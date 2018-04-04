@@ -52,7 +52,7 @@ ReferenceIndexBasic *Configuration::getReference(const char *path){
 	for( unsigned int i = references.size() - 1; i >= 0; --i ){
 		if( str_path.length() > references[i].first.length() && str_path.find(references[i].first) == 0 ){
 			cout << "Configuration::getReference - Reference found in \"" << references[i].first << "\" for path \"" << path << "\"\n";
-			return references[0].second;
+			return references[i].second;
 		}
 	}
 	cerr << "Configuration::getReference - Reference not found.\n";
