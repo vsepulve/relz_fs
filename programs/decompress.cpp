@@ -47,6 +47,11 @@ int main(int argc, char* argv[]){
 	
 	char *reference_text = ReferenceIndexBasic::loadText(serialized_reference);
 	
+	cout<<"Testing text[0]: " << string(reference_text, 20) << "\n";
+	cout<<"Testing text[100]: " << string(reference_text + 100, 20) << "\n";
+	cout<<"Testing text[1000]: " << string(reference_text + 1000, 20) << "\n";
+	cout<<"Testing text[10000]: " << string(reference_text + 10000, 20) << "\n";
+	
 	//Usando el Compressor
 	CompressorSingleBuffer compressor(compressed_file, NULL, new DecoderBlocksRelz(reference_text));
 	
