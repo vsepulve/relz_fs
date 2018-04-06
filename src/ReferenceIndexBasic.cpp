@@ -510,8 +510,13 @@ void ReferenceIndexBasic::save(const char *ref_file){
 		cerr<<"ReferenceIndexBasic::save - Error al abrir archivo\n";
 		return;
 	}
+	// Largo del texto
 	escritor.write((char*)(&largo), sizeof(int));
+	// LArgo del arreglo (en este caso es igual)
+	escritor.write((char*)(&largo), sizeof(int));
+	// Texto
 	escritor.write((char*)ref, largo);
+	// SA
 	escritor.write((char*)arr, largo * sizeof(int));
 	escritor.close();
 }
@@ -535,6 +540,12 @@ void ReferenceIndexBasic::load(const char *ref_file){
 	}
 	
 	lector.read((char*)(&largo), sizeof(int));
+	unsigned int arr_size = 0;
+	lector.read((char*)(&arr_size), sizeof(int));
+	if(largo != arr_size){
+		cerr << "ReferenceIndexBasic::load - Error, unexpected SA size (" << arr_size << " vs " << largo << ")\n";
+		return;
+	}
 	cout<<"ReferenceIndexBasic::load - cargando referencia de "<<largo<<" chars desde \""<<ref_file<<"\"\n";
 	
 	ref = new unsigned char[largo + 1];
@@ -559,6 +570,7 @@ void ReferenceIndexBasic::load(const char *ref_file){
 char *ReferenceIndexBasic::loadText(const char *ref_file){
 	char *text = NULL;
 	unsigned int text_size = 0;
+	unsigned int arr_size = 0;
 	
 	fstream reader(ref_file, fstream::binary | fstream::in);
 	if( ! reader.good() ){
@@ -567,6 +579,7 @@ char *ReferenceIndexBasic::loadText(const char *ref_file){
 	}
 	
 	reader.read((char*)(&text_size), sizeof(int));
+	reader.read((char*)(&arr_size), sizeof(int));
 	cout<<"ReferenceIndexBasic::loadText - cargando referencia de "<<text_size<<" chars desde \""<<ref_file<<"\"\n";
 	
 	text = new char[text_size + 1];

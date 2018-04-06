@@ -29,8 +29,10 @@ ReferenceIndexRR::ReferenceIndexRR(const char *ref_file, unsigned int distance){
 	
 	//Lectura del texto
 	largo = 0;
+	unsigned int arr_size = 0;
 	lector.read((char*)(&largo), sizeof(int));
-	cout << "ReferenceIndexRR - Cargando texto de " << largo << " chars\n";
+	lector.read((char*)(&arr_size), sizeof(int));
+	cout << "ReferenceIndexRR - Cargando texto de " << largo << " chars (Original SA size: " << arr_size << ")\n";
 	
 	ref = new unsigned char[largo + 1];
 	lector.read((char*)ref, largo);
