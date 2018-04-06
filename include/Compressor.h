@@ -110,7 +110,7 @@ public:
 	
 	// Escribe texto recomprimiendo los bloques involucrados
 	// ESTO AUN NO ESTA TOTALMENTE IMPLEMENTADO
-	virtual unsigned int write(const char *text, unsigned int length, unsigned long long pos_ini);
+	virtual unsigned int write(const char *text, unsigned int length, unsigned long long pos_ini, const char *tmp_file = "./file.tmp");
 	
 	// Descompresion completa del master_file asociado a este compressor
 	// Escribe el texto descomprimido en out_file (en lineas de un cierto largo)
@@ -133,6 +133,10 @@ public:
 		else{
 			decoder->load(master_file);
 		}
+	}
+	
+	const char *getMasterFile() const{
+		return (const char*)master_file;
 	}
 	
 };
