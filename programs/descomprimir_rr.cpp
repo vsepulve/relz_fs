@@ -12,7 +12,7 @@
 
 #include "NanoTimer.h"
 #include "DecoderBlocks.h"
-#include "DecoderBlocksCompact.h"
+//#include "DecoderBlocksCompact.h"
 #include "ReferenceIndexRR.h"
 #include "CompactSequence.h"
 
