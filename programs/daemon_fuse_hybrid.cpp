@@ -205,10 +205,11 @@ static void prepare_tmp_table(char *chars_table){
 //Ntar que para generar X uso una tabla que convierte cualquier byte en un char valido
 static unsigned int tmp_path_bytes(const char *real_path){
 	if(real_path == NULL){
-		return 10;
+		return 11;
 	}
 //	return strlen(real_path) + 6;
-	return strlen(real_path) + 10;
+//	return strlen(real_path) + 10;
+	return strlen(real_path) + 11;
 }
 
 //Asume que to_file tiene al menos strlen(real_path) + 6 chars (".", ".tmp" y "\0")
@@ -253,8 +254,9 @@ static void tmp_path(const char *real_path, char *to_file){
 	to_file[pos + 6] = chars_table[ cr2[1] ];
 	to_file[pos + 7] = chars_table[ cr2[2] ];
 	to_file[pos + 8] = chars_table[ cr2[3] ];
-	memcpy(to_file + pos + 9, real_path + pos, len - pos);
-	to_file[len + 9] = 0;
+	to_file[pos + 9] = '.';
+	memcpy(to_file + pos + 10, real_path + pos, len - pos);
+	to_file[len + 10] = 0;
 	
 	cout<<"tmp_path - \""<<to_file<<"\"\n";
 }
@@ -978,10 +980,12 @@ static int my_write(const char *path, const char *buf, size_t size, off_t offset
 			// Esto si el open no lo descomprime, claro
 			Compressor *compressor = get_compressor(path, NULL, config.base_path);
 			if(compressor != NULL){
-				res = (int)(compressor->write(buf, size, offset));
+				char tmp_file[ tmp_path_bytes(compressor->getMasterFile()) ];
+				tmp_path(compressor->getMasterFile(), tmp_file);
+				res = (int)(compressor->write(buf, size, offset, tmp_file));
 			}
 			else{
-//				cout<<" ---> my_write - Advertencia, compressor NULL\n";
+				cout<<" ---> my_write - Advertencia, compressor NULL\n";
 			}
 		}
 		else{
