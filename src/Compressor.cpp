@@ -60,7 +60,7 @@ unsigned int Compressor::read(unsigned long long pos_ini, unsigned int length, c
 	//Retornar total copiado
 }
 
-unsigned int Compressor::write(const char *text, unsigned int length, unsigned long long pos_ini){
+unsigned int Compressor::write(const char *text, unsigned int length, unsigned long long pos_ini, const char *tmp_file){
 	cerr<<"Compressor::write - No Implementado\n";
 	return 0;
 	//Verificacion de seguridad

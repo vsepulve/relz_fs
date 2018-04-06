@@ -249,7 +249,7 @@ bool CompressorSingleBuffer::decompress(const char *out_file, unsigned int line_
 	return true;
 }
 
-unsigned int CompressorSingleBuffer::write(const char *original_text, unsigned int original_length, unsigned long long original_pos_ini){
+unsigned int CompressorSingleBuffer::write(const char *original_text, unsigned int original_length, unsigned long long original_pos_ini, const char *tmp_file){
 
 	bool implementacion_terminada = true;
 	if(! implementacion_terminada){
@@ -278,9 +278,15 @@ unsigned int CompressorSingleBuffer::write(const char *original_text, unsigned i
 	}
 	
 	//Prepara archivos temporales (idealmente basados en master_file, que esta lockeado)
-	const char *path_headers = "/cebib_yeast_real/headers.tmp";
-	const char *path_data = "/cebib_yeast_real/data.tmp";
-	const char *path_merge = "/cebib_yeast_real/merge.tmp";
+//	const char *path_headers = "/cebib_yeast_real/headers.tmp";
+//	const char *path_data = "/cebib_yeast_real/data.tmp";
+//	const char *path_merge = "/cebib_yeast_real/merge.tmp";
+	string path_headers(tmp_file);
+	path_headers += ".headers";
+	string path_data(tmp_file);
+	path_data += ".data";
+	string path_merge(tmp_file);
+	path_merge += ".merge";
 	
 	cout<<"CompressorSingleBuffer::write - Inicio ("<<original_length<<" chars en "<<original_pos_ini<<" usando "<<path_headers<<", "<<path_data<<", "<<path_merge<<")\n";
 	
@@ -516,13 +522,21 @@ unsigned int CompressorSingleBuffer::write(const char *original_text, unsigned i
 	
 	// Rename del archivo merge
 	cout<<"CompressorSingleBuffer::write - rename (\""<<path_merge<<"\", \""<<master_file<<"\")\n";
+	
+	// Opcion 1: Mover archivo con rename (ideal)
 //	rename(path_merge, master_file);
+
+	// Opcion 2: Copiar el archivo completo
 	std::ifstream  src(path_merge, std::ios::binary);
 	std::ofstream  dst(master_file, std::ios::binary);
 	dst << src.rdbuf();
-	
 	src.close();
 	dst.close();
+	
+	// Borrar los archivos temporales
+	remove(path_headers.c_str());
+	remove(path_data.c_str());
+	remove(path_merge.c_str());
     
     //	std::this_thread::sleep_for (std::chrono::seconds(3));
 	
