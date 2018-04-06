@@ -21,7 +21,7 @@ file(GLOB SOURCES "${CMAKE_SOURCE_DIR}/src/*.cpp")
 
 add_executable(compress "${CMAKE_SOURCE_DIR}/programs/compress.cpp")
 add_executable(decompress "${CMAKE_SOURCE_DIR}/programs/decompress.cpp")
-add_executable(compress_rr "${CMAKE_SOURCE_DIR}/programs/comprimir_rr.cpp")
+add_executable(compress_rr "${CMAKE_SOURCE_DIR}/programs/compress_rr.cpp")
 add_executable(daemon_fuse_hybrid "${CMAKE_SOURCE_DIR}/programs/daemon_fuse_hybrid.cpp")
 
 add_library(relz_fs SHARED ${SOURCES})
