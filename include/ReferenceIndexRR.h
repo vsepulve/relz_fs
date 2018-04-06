@@ -58,6 +58,10 @@ public:
 	//Metodos de carga sin construccion
 	virtual void load(const char *ref_file);
 	
+	const char *getText() const{
+		return (const char*)ref;
+	}
+	
 };
 
 
