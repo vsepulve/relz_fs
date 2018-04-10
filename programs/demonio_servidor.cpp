@@ -16,6 +16,8 @@
 #include "CheckUser.h"
 #include "ConcurrentLogger.h"
 
+#include "Configuration.h"
+
 #include "CommunicationUtils.h"
 #include "ServerThreads.h"
 #include "ClientReception.h"
@@ -28,25 +30,30 @@ unsigned int BLOCK_SIZE = 1000000;
 
 int main(int argc, char* argv[]){
 	
-	if(argc != 3){
-		cerr<<"uso: server [port] [reference_file]\n";
-		exit(-1);
+	if(argc != 2){
+		cout << "uso: server config_file\n";
+		return -1;
 	}
 	
-	int port = atoi(argv[1]);
-	const char *reference_file = argv[2];
+	string config_file = argv[1];
+	Configuration config;
+	config.loadConfiguration(config_file);
+	
+//	int port = atoi(argv[1]);
+//	const char *reference_file = argv[2];
 	
 	// Para usar el logger, primero debo agregar al user 0 (de sistema)
 	// Esto deberia hacerse internamente en la clase y de modo estatico
 	ConcurrentLogger::addUserLock(0);
+//	ConcurrentLogger::setLogBase(config.log_base);
 	
 	logger()<<"------------------------------\n";
-	logger()<<"Server::main - Inicio (port: "<<port<<", ref: "<<reference_file<<")\n";
+	logger()<<"Server::main - Inicio (port: "<< config.port <<")\n";
 	
 	CheckUser users("db/Users");
 	
 	// Inicio de enlace del puerto
-	logger()<<"Server::main - Enlazando puerto "<<port<<"\n";
+	logger()<<"Server::main - Enlazando puerto "<< config.port <<"\n";
 	logger()<<"Server::main - Creando Socket\n";
 	int sock_servidor = socket(AF_INET, SOCK_STREAM, 0);
 	if (sock_servidor < 0){
@@ -58,7 +65,7 @@ int main(int argc, char* argv[]){
 	memset((char*)&serv_addr, 0, sizeof(serv_addr));
 	serv_addr.sin_family = AF_INET;
 	serv_addr.sin_addr.s_addr = INADDR_ANY;
-	serv_addr.sin_port = htons(port);
+	serv_addr.sin_port = htons(config.port);
 	logger()<<"Server::main - Enlazando.\n";
 	if (bind(sock_servidor, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0){
 		logger()<<"Server::main - Error en bind.\n";
@@ -105,85 +112,85 @@ int main(int argc, char* argv[]){
 				logger()<<"Server::main - Creando thread_stat para user "<<conexion.getUser()<<".\n";
 				sock_cliente = conexion.getSocket();
 				conexion.setSocket(-1);
-				thread( thread_stat, sock_cliente, conexion.getUser() ).detach();
+				thread( thread_stat, sock_cliente, conexion.getUser(), &config ).detach();
 				break;
 			case REMOTE_ACCESS:
 				logger()<<"Server::main - Creando thread_access para user "<<conexion.getUser()<<".\n";
 				sock_cliente = conexion.getSocket();
 				conexion.setSocket(-1);
-				thread( thread_access, sock_cliente, conexion.getUser() ).detach();
+				thread( thread_access, sock_cliente, conexion.getUser(), &config ).detach();
 				break;
 			case REMOTE_READDIR:
 				logger()<<"Server::main - Creando thread_readdir para user "<<conexion.getUser()<<".\n";
 				sock_cliente = conexion.getSocket();
 				conexion.setSocket(-1);
-				thread( thread_readdir, sock_cliente, conexion.getUser() ).detach();
+				thread( thread_readdir, sock_cliente, conexion.getUser(), &config ).detach();
 				break;
 			case REMOTE_MKNOD:
 				logger()<<"Server::main - Creando thread_mknod para user "<<conexion.getUser()<<".\n";
 				sock_cliente = conexion.getSocket();
 				conexion.setSocket(-1);
-				thread( thread_mknod, sock_cliente, conexion.getUser() ).detach();
+				thread( thread_mknod, sock_cliente, conexion.getUser(), &config ).detach();
 				break;
 			case REMOTE_MKDIR:
 				logger()<<"Server::main - Creando thread_mkdir para user "<<conexion.getUser()<<".\n";
 				sock_cliente = conexion.getSocket();
 				conexion.setSocket(-1);
-				thread( thread_mkdir, sock_cliente, conexion.getUser() ).detach();
+				thread( thread_mkdir, sock_cliente, conexion.getUser(), &config ).detach();
 				break;
 			case REMOTE_UNLINK:
 				logger()<<"Server::main - Creando thread_unlink para user "<<conexion.getUser()<<".\n";
 				sock_cliente = conexion.getSocket();
 				conexion.setSocket(-1);
-				thread( thread_unlink, sock_cliente, conexion.getUser() ).detach();
+				thread( thread_unlink, sock_cliente, conexion.getUser(), &config ).detach();
 				break;
 			case REMOTE_RMDIR:
 				logger()<<"Server::main - Creando thread_rmdir para user "<<conexion.getUser()<<".\n";
 				sock_cliente = conexion.getSocket();
 				conexion.setSocket(-1);
-				thread( thread_rmdir, sock_cliente, conexion.getUser() ).detach();
+				thread( thread_rmdir, sock_cliente, conexion.getUser(), &config ).detach();
 				break;
 			case REMOTE_RENAME:
 				logger()<<"Server::main - Creando thread_rename para user "<<conexion.getUser()<<".\n";
 				sock_cliente = conexion.getSocket();
 				conexion.setSocket(-1);
-				thread( thread_rename, sock_cliente, conexion.getUser() ).detach();
+				thread( thread_rename, sock_cliente, conexion.getUser(), &config ).detach();
 				break;
 			case REMOTE_CHMOD:
 				logger()<<"Server::main - Creando thread_chmod para user "<<conexion.getUser()<<".\n";
 				sock_cliente = conexion.getSocket();
 				conexion.setSocket(-1);
-				thread( thread_chmod, sock_cliente, conexion.getUser() ).detach();
+				thread( thread_chmod, sock_cliente, conexion.getUser(), &config ).detach();
 				break;
 			case REMOTE_CHOWN:
 				logger()<<"Server::main - Creando thread_chown para user "<<conexion.getUser()<<".\n";
 				sock_cliente = conexion.getSocket();
 				conexion.setSocket(-1);
-				thread( thread_chown, sock_cliente, conexion.getUser() ).detach();
+				thread( thread_chown, sock_cliente, conexion.getUser(), &config ).detach();
 				break;
 			case REMOTE_TRUNCATE:
 				logger()<<"Server::main - Creando thread_truncate para user "<<conexion.getUser()<<".\n";
 				sock_cliente = conexion.getSocket();
 				conexion.setSocket(-1);
-				thread( thread_truncate, sock_cliente, conexion.getUser() ).detach();
+				thread( thread_truncate, sock_cliente, conexion.getUser(), &config ).detach();
 				break;
 			case REMOTE_STATFS:
 				logger()<<"Server::main - Creando thread_statfs para user "<<conexion.getUser()<<".\n";
 				sock_cliente = conexion.getSocket();
 				conexion.setSocket(-1);
-				thread( thread_statfs, sock_cliente, conexion.getUser() ).detach();
+				thread( thread_statfs, sock_cliente, conexion.getUser(), &config ).detach();
 				break;
 			case REMOTE_FALLOCATE:
 				logger()<<"Server::main - Creando thread_fallocate para user "<<conexion.getUser()<<".\n";
 				sock_cliente = conexion.getSocket();
 				conexion.setSocket(-1);
-				thread( thread_fallocate, sock_cliente, conexion.getUser() ).detach();
+				thread( thread_fallocate, sock_cliente, conexion.getUser(), &config ).detach();
 				break;
 			case REMOTE_RECEIVE:
 				logger()<<"Server::main - Creando thread_receive para user "<<conexion.getUser()<<".\n";
 				sock_cliente = conexion.getSocket();
 				conexion.setSocket(-1);
-				thread( thread_receive, sock_cliente, conexion.getUser() ).detach();
+				thread( thread_receive, sock_cliente, conexion.getUser(), &config ).detach();
 				break;
 			case KILL_SERVER:
 				logger()<<"Server::main - Cerrando Server.\n";
