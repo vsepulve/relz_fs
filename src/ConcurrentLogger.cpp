@@ -1,5 +1,6 @@
 #include "ConcurrentLogger.h"
 
+string ConcurrentLogger::file_base = "logs/log_";
 map<unsigned int, std::mutex*> ConcurrentLogger::mutex_map;
 std::mutex ConcurrentLogger::global_mutex;
 
@@ -7,10 +8,10 @@ ConcurrentLogger::ConcurrentLogger(unsigned int _user_id){
 	user_id = _user_id;
 	char file_name[128];
 	if(user_id == 0){
-		sprintf(file_name, "%sglobal.log", file_base);
+		sprintf(file_name, "%sglobal.log", file_base.c_str());
 	}
 	else{
-		sprintf(file_name, "%s%d.log", file_base, user_id);
+		sprintf(file_name, "%s%d.log", file_base.c_str(), user_id);
 	}
 	mutex_map[user_id]->lock();
 	escritor.open(file_name, ofstream::app);
@@ -60,6 +61,10 @@ void ConcurrentLogger::removeUserLock(unsigned int user_id){
 	}
 }
 
+void ConcurrentLogger::setLogBase(string &_file_base){
+	lock_guard<mutex> lock(global_mutex);
+	file_base = _file_base;
+}
 
 
 

@@ -58,7 +58,8 @@ class ConcurrentLogger{
 private:
 
 	//variables estaticas de la clase
-	static constexpr const char *file_base = "logs/log_";
+//	static constexpr const char *file_base = "logs/log_";
+	static string file_base;
 	static map<unsigned int, mutex*> mutex_map;
 	static mutex global_mutex;
 	
@@ -106,6 +107,8 @@ public:
 	//Esto podria controlarse con un contador de uso, pero lo dejo simple por el momento
 	//En la practica, es viable NO usar este metodo
 	static void removeUserLock(unsigned int user_id);
+	
+	static void setLogBase(string &_file_base);
 	
 };
 
