@@ -40,6 +40,12 @@ public:
 	// Tamaño preferido para operaciones IO (por ejemplo, write)
 	// Para usarlo apropiadamente, agrego "-o big_writes" al demonio
 	unsigned int io_block_size;
+	// URL del server
+	char *host;
+	// Puerto del server
+	unsigned int port;
+	// ID del usuario virtual de este cliente
+	unsigned int user_id;
 	// Fin Configuracion
 
 	Configuration();

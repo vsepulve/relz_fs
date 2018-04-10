@@ -108,6 +108,23 @@ void Configuration::loadConfiguration(string &filename){
 			strcpy(text, value.c_str());
 			base_path = text;
 		}
+		if( name.compare("host") == 0 ){
+//			toks >> value;
+			cout << "Configuration::loadConfiguration - Value \"" << value << "\"\n";
+			char *text = new char[ 1 + value.length() ];
+			strcpy(text, value.c_str());
+			host = text;
+		}
+		else if( name.compare("port") == 0 ){
+//			toks >> value;
+			cout << "Configuration::loadConfiguration - Value \"" << value << "\"\n";
+			port = atoi( value.c_str() );
+		}
+		else if( name.compare("user_id") == 0 ){
+//			toks >> value;
+			cout << "Configuration::loadConfiguration - Value \"" << value << "\"\n";
+			user_id = atoi( value.c_str() );
+		}
 		else if( name.compare("n_ref") == 0 ){
 //			toks >> value;
 			cout << "Configuration::loadConfiguration - Value \"" << value << "\"\n";
