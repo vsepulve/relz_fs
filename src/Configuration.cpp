@@ -47,6 +47,7 @@ ReferenceIndexBasic *Configuration::getReference(const char *path){
 	// buscar en el vector de referencias desde el ultimo (subdir mas largo) hasta el primero
 	// Es valido el primero en el que el subdir sea PREFIJO completo del path
 	// Por ahora retorno el primero (que DEBE ser el de /)
+	cerr << "Configuration::getReference - Start (path: \"" << path << "\")\n";
 	if( path == NULL ){
 		return references[0].second;
 	}
