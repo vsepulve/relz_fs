@@ -29,6 +29,8 @@
 #include "CommunicationUtils.h"
 #include "ClientReception.h"
 
+#include "Configuration.h"
+
 using namespace std;
 
 // tipos de request soportados por el server
@@ -64,33 +66,33 @@ enum{
 unsigned int real_path_size(const char *base_path, const char *path);
 void create_real_path(char *buff, const char *base_path, unsigned int user, const char *path);
 
-void thread_stat(int sock_cliente, unsigned int user_id);
+void thread_stat(int sock_cliente, unsigned int user_id, Configuration *config);
 
-void thread_access(int sock_cliente, unsigned int user_id);
+void thread_access(int sock_cliente, unsigned int user_id, Configuration *config);
 
-void thread_readdir(int sock_cliente, unsigned int user_id);
+void thread_readdir(int sock_cliente, unsigned int user_id, Configuration *config);
 
-void thread_mknod(int sock_cliente, unsigned int user_id);
+void thread_mknod(int sock_cliente, unsigned int user_id, Configuration *config);
 
-void thread_mkdir(int sock_cliente, unsigned int user_id);
+void thread_mkdir(int sock_cliente, unsigned int user_id, Configuration *config);
 
-void thread_unlink(int sock_cliente, unsigned int user_id);
+void thread_unlink(int sock_cliente, unsigned int user_id, Configuration *config);
 
-void thread_rmdir(int sock_cliente, unsigned int user_id);
+void thread_rmdir(int sock_cliente, unsigned int user_id, Configuration *config);
 
-void thread_rename(int sock_cliente, unsigned int user_id);
+void thread_rename(int sock_cliente, unsigned int user_id, Configuration *config);
 
-void thread_chmod(int sock_cliente, unsigned int user_id);
+void thread_chmod(int sock_cliente, unsigned int user_id, Configuration *config);
 
-void thread_chown(int sock_cliente, unsigned int user_id);
+void thread_chown(int sock_cliente, unsigned int user_id, Configuration *config);
 
-void thread_truncate(int sock_cliente, unsigned int user_id);
+void thread_truncate(int sock_cliente, unsigned int user_id, Configuration *config);
 
-void thread_statfs(int sock_cliente, unsigned int user_id);
+void thread_statfs(int sock_cliente, unsigned int user_id, Configuration *config);
 
-void thread_fallocate(int sock_cliente, unsigned int user_id);
+void thread_fallocate(int sock_cliente, unsigned int user_id, Configuration *config);
 
-void thread_receive(int sock_cliente, unsigned int user_id);
+void thread_receive(int sock_cliente, unsigned int user_id, Configuration *config);
 
 
 

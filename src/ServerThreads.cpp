@@ -2,7 +2,7 @@
 
 // Por ahora dejo esto como variable GLOBAL
 // Obviamente esto deberia ser de algun objeto de configuracion
-const char *base_path_server = "/cebib_yeast_real";
+//const char *base_path_server = "/cebib_yeast_real";
 
 unsigned int real_path_size(const char *base_path, const char *path){
 	// base + / + user(11) + / + path + 0
@@ -28,7 +28,7 @@ void create_real_path(char *buff, const char *base_path, unsigned int user, cons
 	}
 }
 
-void thread_stat(int sock_cliente, unsigned int user_id){
+void thread_stat(int sock_cliente, unsigned int user_id, Configuration *config){
 	
 	ClientReception conexion;
 	conexion.setSocket(sock_cliente);
@@ -67,8 +67,8 @@ void thread_stat(int sock_cliente, unsigned int user_id){
 	struct stat stbuf;
 	
 	if( ! error ){
-		char real_path[ real_path_size( base_path_server, path ) ];
-		create_real_path(real_path, base_path_server, user_id, path);
+		char real_path[ real_path_size( config->base_path, path ) ];
+		create_real_path(real_path, config->base_path, user_id, path);
 		logger()<<"Server::thread_stat - real_path: \""<<real_path<<"\"\n";
 		res = lstat(real_path, &stbuf);
 		new_errno = errno;
@@ -86,7 +86,7 @@ void thread_stat(int sock_cliente, unsigned int user_id){
 	
 }//fin thread_stat
 
-void thread_access(int sock_cliente, unsigned int user_id){
+void thread_access(int sock_cliente, unsigned int user_id, Configuration *config){
 	
 	ClientReception conexion;
 	conexion.setSocket(sock_cliente);
@@ -125,8 +125,8 @@ void thread_access(int sock_cliente, unsigned int user_id){
 	int new_errno = 0;
 	
 	if( ! error ){
-		char real_path[ real_path_size( base_path_server, path ) ];
-		create_real_path(real_path, base_path_server, user_id, path);
+		char real_path[ real_path_size( config->base_path, path ) ];
+		create_real_path(real_path, config->base_path, user_id, path);
 		logger()<<"Server::thread_access - real_path: \""<<real_path<<"\"\n";
 		res = access(real_path, mask);
 		new_errno = errno;
@@ -143,7 +143,7 @@ void thread_access(int sock_cliente, unsigned int user_id){
 	
 }//fin thread_access
 
-void thread_readdir(int sock_cliente, unsigned int user_id){
+void thread_readdir(int sock_cliente, unsigned int user_id, Configuration *config){
 	
 	ClientReception conexion;
 	conexion.setSocket(sock_cliente);
@@ -181,8 +181,8 @@ void thread_readdir(int sock_cliente, unsigned int user_id){
 	path[size] = 0;
 	logger()<<"Server::thread_readdir - path: \""<<path<<"\" ("<<size<<", error: "<<error<<")\n";
 	
-	char real_path[ real_path_size( base_path_server, path ) ];
-	create_real_path(real_path, base_path_server, user_id, path);
+	char real_path[ real_path_size( config->base_path, path ) ];
+	create_real_path(real_path, config->base_path, user_id, path);
 	logger()<<"Server::thread_readdir - real_path: \""<<real_path<<"\"\n";
 	
 //	unsigned int struct_size = sizeof(struct dirent);
@@ -287,7 +287,7 @@ void thread_readdir(int sock_cliente, unsigned int user_id){
 	
 }//fin thread_readdir
 
-void thread_mknod(int sock_cliente, unsigned int user_id){
+void thread_mknod(int sock_cliente, unsigned int user_id, Configuration *config){
 	
 	ClientReception conexion;
 	conexion.setSocket(sock_cliente);
@@ -334,8 +334,8 @@ void thread_mknod(int sock_cliente, unsigned int user_id){
 	int new_errno = errno;
 	
 	if( ! error ){
-		char real_path[ real_path_size( base_path_server, path ) ];
-		create_real_path(real_path, base_path_server, user_id, path);
+		char real_path[ real_path_size( config->base_path, path ) ];
+		create_real_path(real_path, config->base_path, user_id, path);
 		logger()<<"Server::thread_mknod - real_path: \""<<real_path<<"\"\n";
 		
 		if( S_ISREG(mode) ){
@@ -371,7 +371,7 @@ void thread_mknod(int sock_cliente, unsigned int user_id){
 	
 }//fin thread_mknod
 
-void thread_mkdir(int sock_cliente, unsigned int user_id){
+void thread_mkdir(int sock_cliente, unsigned int user_id, Configuration *config){
 	
 	ClientReception conexion;
 	conexion.setSocket(sock_cliente);
@@ -414,8 +414,8 @@ void thread_mkdir(int sock_cliente, unsigned int user_id){
 	int new_errno = errno;
 	
 	if( ! error ){
-		char real_path[ real_path_size( base_path_server, path ) ];
-		create_real_path(real_path, base_path_server, user_id, path);
+		char real_path[ real_path_size( config->base_path, path ) ];
+		create_real_path(real_path, config->base_path, user_id, path);
 		logger()<<"Server::thread_mkdir - real_path: \""<<real_path<<"\"\n";
 
 		res = mkdir(real_path, mode);
@@ -436,7 +436,7 @@ void thread_mkdir(int sock_cliente, unsigned int user_id){
 	
 }//fin thread_unlink
 
-void thread_unlink(int sock_cliente, unsigned int user_id){
+void thread_unlink(int sock_cliente, unsigned int user_id, Configuration *config){
 	
 	ClientReception conexion;
 	conexion.setSocket(sock_cliente);
@@ -464,8 +464,8 @@ void thread_unlink(int sock_cliente, unsigned int user_id){
 	int new_errno = errno;
 	
 	if( ! error ){
-		char real_path[ real_path_size( base_path_server, path ) ];
-		create_real_path(real_path, base_path_server, user_id, path);
+		char real_path[ real_path_size( config->base_path, path ) ];
+		create_real_path(real_path, config->base_path, user_id, path);
 		logger()<<"Server::thread_unlink - real_path: \""<<real_path<<"\"\n";
 
 		res = unlink(real_path);
@@ -486,7 +486,7 @@ void thread_unlink(int sock_cliente, unsigned int user_id){
 	
 }//fin thread_unlink
 
-void thread_rmdir(int sock_cliente, unsigned int user_id){
+void thread_rmdir(int sock_cliente, unsigned int user_id, Configuration *config){
 	
 	ClientReception conexion;
 	conexion.setSocket(sock_cliente);
@@ -514,8 +514,8 @@ void thread_rmdir(int sock_cliente, unsigned int user_id){
 	int new_errno = errno;
 	
 	if( ! error ){
-		char real_path[ real_path_size( base_path_server, path ) ];
-		create_real_path(real_path, base_path_server, user_id, path);
+		char real_path[ real_path_size( config->base_path, path ) ];
+		create_real_path(real_path, config->base_path, user_id, path);
 		logger()<<"Server::thread_rmdir - real_path: \""<<real_path<<"\"\n";
 
 		res = rmdir(real_path);
@@ -533,7 +533,7 @@ void thread_rmdir(int sock_cliente, unsigned int user_id){
 	
 }//fin thread_rmdir
 
-void thread_rename(int sock_cliente, unsigned int user_id){
+void thread_rename(int sock_cliente, unsigned int user_id, Configuration *config){
 	
 	ClientReception conexion;
 	conexion.setSocket(sock_cliente);
@@ -576,10 +576,10 @@ void thread_rename(int sock_cliente, unsigned int user_id){
 	int new_errno = errno;
 	
 	if( ! error ){
-		char real_from[ real_path_size( base_path_server, from ) ];
-		create_real_path(real_from, base_path_server, user_id, from);
-		char real_to[ real_path_size( base_path_server, to ) ];
-		create_real_path(real_to, base_path_server, user_id, to);
+		char real_from[ real_path_size( config->base_path, from ) ];
+		create_real_path(real_from, config->base_path, user_id, from);
+		char real_to[ real_path_size( config->base_path, to ) ];
+		create_real_path(real_to, config->base_path, user_id, to);
 		logger()<<"Server::thread_rename - real_from: \""<<real_from<<"\", real_to: \""<<real_to<<"\"\n";
 		
 		// Por ahora realizo el rename directo
@@ -600,7 +600,7 @@ void thread_rename(int sock_cliente, unsigned int user_id){
 	
 }//fin thread_rename
 
-void thread_chmod(int sock_cliente, unsigned int user_id){
+void thread_chmod(int sock_cliente, unsigned int user_id, Configuration *config){
 	
 	ClientReception conexion;
 	conexion.setSocket(sock_cliente);
@@ -643,8 +643,8 @@ void thread_chmod(int sock_cliente, unsigned int user_id){
 	int new_errno = errno;
 	
 	if( ! error ){
-		char real_path[ real_path_size( base_path_server, path ) ];
-		create_real_path(real_path, base_path_server, user_id, path);
+		char real_path[ real_path_size( config->base_path, path ) ];
+		create_real_path(real_path, config->base_path, user_id, path);
 		logger()<<"Server::thread_chmod - real_path: \""<<real_path<<"\"\n";
 
 		res = chmod(real_path, mode);
@@ -662,7 +662,7 @@ void thread_chmod(int sock_cliente, unsigned int user_id){
 	
 }//fin thread_chmod
 
-void thread_chown(int sock_cliente, unsigned int user_id){
+void thread_chown(int sock_cliente, unsigned int user_id, Configuration *config){
 	
 	ClientReception conexion;
 	conexion.setSocket(sock_cliente);
@@ -710,8 +710,8 @@ void thread_chown(int sock_cliente, unsigned int user_id){
 	int new_errno = errno;
 	
 	if( ! error ){
-		char real_path[ real_path_size( base_path_server, path ) ];
-		create_real_path(real_path, base_path_server, user_id, path);
+		char real_path[ real_path_size( config->base_path, path ) ];
+		create_real_path(real_path, config->base_path, user_id, path);
 		logger()<<"Server::thread_chown - real_path: \""<<real_path<<"\"\n";
 
 		res = lchown(real_path, uid, gid);
@@ -729,7 +729,7 @@ void thread_chown(int sock_cliente, unsigned int user_id){
 	
 }//fin thread_chown
 
-void thread_truncate(int sock_cliente, unsigned int user_id){
+void thread_truncate(int sock_cliente, unsigned int user_id, Configuration *config){
 	
 	ClientReception conexion;
 	conexion.setSocket(sock_cliente);
@@ -763,8 +763,8 @@ void thread_truncate(int sock_cliente, unsigned int user_id){
 	int new_errno = errno;
 	
 	if( ! error ){
-		char real_path[ real_path_size( base_path_server, path ) ];
-		create_real_path(real_path, base_path_server, user_id, path);
+		char real_path[ real_path_size( config->base_path, path ) ];
+		create_real_path(real_path, config->base_path, user_id, path);
 		logger()<<"Server::thread_truncate - real_path: \""<<real_path<<"\"\n";
 
 		res = truncate(real_path, (off_t)trunc_size);
@@ -782,7 +782,7 @@ void thread_truncate(int sock_cliente, unsigned int user_id){
 	
 }//fin thread_truncate
 
-void thread_statfs(int sock_cliente, unsigned int user_id){
+void thread_statfs(int sock_cliente, unsigned int user_id, Configuration *config){
 	
 	ClientReception conexion;
 	conexion.setSocket(sock_cliente);
@@ -825,8 +825,8 @@ void thread_statfs(int sock_cliente, unsigned int user_id){
 	int new_errno = errno;
 	
 	if( ! error ){
-		char real_path[ real_path_size( base_path_server, path ) ];
-		create_real_path(real_path, base_path_server, user_id, path);
+		char real_path[ real_path_size( config->base_path, path ) ];
+		create_real_path(real_path, config->base_path, user_id, path);
 		logger()<<"Server::thread_statfs - real_path: \""<<real_path<<"\"\n";
 
 		res = statvfs(real_path, &stbuf);
@@ -848,7 +848,7 @@ void thread_statfs(int sock_cliente, unsigned int user_id){
 	
 }//fin thread_statfs
 
-void thread_fallocate(int sock_cliente, unsigned int user_id){
+void thread_fallocate(int sock_cliente, unsigned int user_id, Configuration *config){
 	
 	ClientReception conexion;
 	conexion.setSocket(sock_cliente);
@@ -897,8 +897,8 @@ void thread_fallocate(int sock_cliente, unsigned int user_id){
 	int new_errno = errno;
 	
 	if( ! error ){
-		char real_path[ real_path_size( base_path_server, path ) ];
-		create_real_path(real_path, base_path_server, user_id, path);
+		char real_path[ real_path_size( config->base_path, path ) ];
+		create_real_path(real_path, config->base_path, user_id, path);
 		logger()<<"Server::thread_fallocate - real_path: \""<<real_path<<"\"\n";
 		
 		// Notar que en esta version estoy omitiendo mode
@@ -927,7 +927,7 @@ void thread_fallocate(int sock_cliente, unsigned int user_id){
 
 // Notar que el nombre es desde la perspectiva del cliente
 // El server esta resolviendo para ENVIAR un archivo al cliente que lo recibira
-void thread_receive(int sock_cliente, unsigned int user_id){
+void thread_receive(int sock_cliente, unsigned int user_id, Configuration *config){
 	
 	ClientReception conexion;
 	conexion.setSocket(sock_cliente);
@@ -956,8 +956,8 @@ void thread_receive(int sock_cliente, unsigned int user_id){
 	// Enviar el largo
 	// Leer y enviar el contenido del archivo (esto requiere un buffer de lectura)
 	
-	char real_path[ real_path_size( base_path_server, path ) ];
-	create_real_path(real_path, base_path_server, user_id, path);
+	char real_path[ real_path_size( config->base_path, path ) ];
+	create_real_path(real_path, config->base_path, user_id, path);
 	logger()<<"Server::thread_receive - real_path: \""<<real_path<<"\"\n";
 		
 	fstream lector(real_path, fstream::in);
