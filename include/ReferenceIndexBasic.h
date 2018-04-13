@@ -25,6 +25,9 @@ using namespace std;
 class ReferenceIndexBasic : public ReferenceIndex{
 
 private:
+	// Type of reference for save/load, redefine in each class
+	static const unsigned char type;
+	
 	//Largo (producto de strlen) del string referencia
 	unsigned int largo;
 	//String referencia. Podria contener largo ceros adicionales (para simplificar operaciones)
@@ -66,11 +69,11 @@ public:
 	//Metodos de carga sin construccion
 	virtual void load(const char *ref_file);
 	
-	unsigned int getLength(){
+	virtual unsigned int getLength(){
 		return largo;
 	}
 	
-	const char *getText() const{
+	virtual const char *getText() const{
 		return (const char*)ref;
 	}
 	

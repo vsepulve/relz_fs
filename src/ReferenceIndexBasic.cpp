@@ -1,5 +1,7 @@
 #include "ReferenceIndexBasic.h"
 	
+const unsigned char ReferenceIndexBasic::type = 1;
+
 //funcion (global por el momento) para threads
 void f_sort(unsigned int id, unsigned int **shared_arrs, unsigned int *n_largos, unsigned int n_arrs, mutex *shared_mutex, unsigned int *shared_pos, SAComparatorN3 *shared_comp){
 	
@@ -510,10 +512,12 @@ void ReferenceIndexBasic::save(const char *ref_file){
 		cerr<<"ReferenceIndexBasic::save - Error al abrir archivo\n";
 		return;
 	}
+	// Tipo de referencia (para un futuro builder y verificacion en el load)
+	escritor.write((char*)&type, 1);
 	// Largo del texto
-	escritor.write((char*)(&largo), sizeof(int));
+	escritor.write((char*)&largo, sizeof(int));
 	// LArgo del arreglo (en este caso es igual)
-	escritor.write((char*)(&largo), sizeof(int));
+	escritor.write((char*)&largo, sizeof(int));
 	// Texto
 	escritor.write((char*)ref, largo);
 	// SA
@@ -535,34 +539,34 @@ void ReferenceIndexBasic::load(const char *ref_file){
 	
 	fstream lector(ref_file, fstream::binary | fstream::in);
 	if( ! lector.good() ){
-		cerr<<"ReferenceIndexBasic::load - Error al abrir archivo\n";
+		cerr << "ReferenceIndexRR::load - Error opening file \"" << ref_file << "\"\n";
 		return;
 	}
 	
-	lector.read((char*)(&largo), sizeof(int));
+	unsigned char read_type = 0;
+	lector.read((char*)&read_type, 1);
+	if(read_type != type){
+		cerr << "ReferenceIndexBasic::load - Error, unexpected Reference Type (" << (unsigned int)read_type << " vs " << (unsigned int)type << ")\n";
+		return;
+	}
+	
+	lector.read((char*)&largo, sizeof(int));
 	unsigned int arr_size = 0;
-	lector.read((char*)(&arr_size), sizeof(int));
+	lector.read((char*)&arr_size, sizeof(int));
 	if(largo != arr_size){
 		cerr << "ReferenceIndexBasic::load - Error, unexpected SA size (" << arr_size << " vs " << largo << ")\n";
 		return;
 	}
-	cout<<"ReferenceIndexBasic::load - cargando referencia de "<<largo<<" chars desde \""<<ref_file<<"\"\n";
+	cout<<"ReferenceIndexBasic::load - Loading reference (" << largo << " chars) from \"" << ref_file << "\"\n";
 	
 	ref = new unsigned char[largo + 1];
 	lector.read((char*)ref, largo);
 	ref[largo] = 0;
+	
 	arr = new unsigned int[largo];
-	
-//	cout<<"ReferenceIndexBasic::load - Texto: \""<<(char*)ref<<"\"\n";
-	
 	lector.read((char*)arr, largo * sizeof(int));
+	
 	lector.close();
-	
-//	for(unsigned int i = 0; i < largo; ++i){
-//		cout<<"arr["<<i<<"]: "<<arr[i]<<" (\""<<&(ref[ arr[i] ])<<"\", largo "<<largo-arr[i]<<", char[0]: "<<(unsigned int)(ref[ arr[i]])<<")\n";
-//	}
-	
-//	cout<<"ReferenceIndexBasic::load - Carga Terminada\n";
 
 }
 
@@ -578,9 +582,15 @@ char *ReferenceIndexBasic::loadText(const char *ref_file){
 		return NULL;
 	}
 	
+	unsigned char read_type = 0;
+	reader.read((char*)&read_type, 1);
+	if(read_type != type){
+		cerr << "ReferenceIndexBasic::loadText - Error, unexpected Reference Type (" << (unsigned int)read_type << " vs " << (unsigned int)type << ")\n";
+		return NULL;
+	}
 	reader.read((char*)(&text_size), sizeof(int));
 	reader.read((char*)(&arr_size), sizeof(int));
-	cout<<"ReferenceIndexBasic::loadText - cargando referencia de "<<text_size<<" chars desde \""<<ref_file<<"\"\n";
+	cout<<"ReferenceIndexBasic::load - Loading reference (" << text_size << " chars) from \"" << ref_file << "\"\n";
 	
 	text = new char[text_size + 1];
 	reader.read(text, text_size);

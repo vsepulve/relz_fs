@@ -13,6 +13,8 @@ using namespace std;
 class ReferenceIndex{
 
 private: 
+	// Type of reference for save/load, redefine in each class
+	static const unsigned char type;
 
 public: 
 	ReferenceIndex();

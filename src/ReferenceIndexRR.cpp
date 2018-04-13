@@ -1,5 +1,7 @@
 #include "ReferenceIndexRR.h"
 
+const unsigned char ReferenceIndexRR::type = 2;
+
 ReferenceIndexRR::ReferenceIndexRR(){
 	arr = NULL;
 	largo = 0;
@@ -27,12 +29,16 @@ ReferenceIndexRR::ReferenceIndexRR(const char *ref_file, unsigned int distance){
 	
 	cout << "ReferenceIndexRR - Construyendo RR desde \"" << ref_file << "\", dist: " << distance << "\n";
 	
-	//Lectura del texto
+	// Lectura del tipo
+	unsigned char read_type = 0;
+	lector.read((char*)&read_type, 1);
+	
+	// Lectura del texto
 	largo = 0;
 	unsigned int arr_size = 0;
 	lector.read((char*)(&largo), sizeof(int));
 	lector.read((char*)(&arr_size), sizeof(int));
-	cout << "ReferenceIndexRR - Cargando texto de " << largo << " chars (Original SA size: " << arr_size << ")\n";
+	cout << "ReferenceIndexRR - Cargando texto de " << largo << " chars (Original SA size: " << arr_size << ", read_type: " << (unsigned int)read_type << ")\n";
 	
 	ref = new unsigned char[largo + 1];
 	lector.read((char*)ref, largo);
@@ -219,10 +225,16 @@ void ReferenceIndexRR::find(const char *text, unsigned int size, unsigned int &p
 void ReferenceIndexRR::save(const char *ref_file){
 	cout << "ReferenceIndexRR::save - guardando en \""<<ref_file<<"\"\n";
 	fstream escritor(ref_file, fstream::trunc | fstream::binary | fstream::out);
+	// Tipo de referencia (para un futuro builder y verificacion en el load)
+	escritor.write((char*)&type, 1);
+	// Largo del texto
 	escritor.write((char*)(&largo), sizeof(int));
+	// Largo del SA
 	escritor.write((char*)(&largo_arr), sizeof(int));
 	
+	// Texto completo
 	escritor.write((char*)ref, largo);
+	// Posiciones del SA
 	escritor.write((char*)arr, largo_arr * sizeof(int));
 	
 	escritor.close();
@@ -231,12 +243,30 @@ void ReferenceIndexRR::save(const char *ref_file){
 
 //Metodos de carga sin construccion
 void ReferenceIndexRR::load(const char *ref_file){
+	if(ref != NULL){
+		delete [] ref;
+		ref = NULL;
+	}
 	if(arr != NULL){
 		delete [] arr;
 		arr = NULL;
 	}
+	largo = 0;
+	largo_arr = 0;
 	
 	fstream lector(ref_file, fstream::binary | fstream::in);
+	if( ! lector.good() ){
+		cerr << "ReferenceIndexRR::load - Error opening file \"" << ref_file << "\"\n";
+		return;
+	}
+	
+	unsigned char read_type = 0;
+	lector.read((char*)&read_type, 1);
+	if(read_type != type){
+		cerr << "ReferenceIndexBasic::load - Error, unexpected Reference Type (" << (unsigned int)read_type << " vs " << (unsigned int)type << ")\n";
+		return;
+	}
+	
 	lector.read((char*)(&largo), sizeof(int));
 	lector.read((char*)(&largo_arr), sizeof(int));
 	cout << "ReferenceIndexRR::load - cargando "<<largo<<" chars y "<<largo_arr<<" ints desde \""<<ref_file<<"\"\n";
