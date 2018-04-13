@@ -35,7 +35,6 @@
 #include "ConcurrentLogger.h"
 
 #include "ReferenceIndex.h"
-#include "ReferenceIndexBasic.h"
 
 #include "Compressor.h"
 #include "CompressorSingleBuffer.h"
@@ -351,7 +350,7 @@ static Compressor *get_compressor(const char *path, const char *real_path, const
 	compressor = files_map[path].getCompressor();
 	if( compressor == NULL ){
 //		cout<<"get_compressor - Compressor NULL, creando\n";
-		ReferenceIndexBasic *referencia = config.getReference(path);
+		ReferenceIndex *referencia = config.getReference(path);
 		if( real_path != NULL ){
 //			cout<<"get_compressor - usando real_path\n";
 			compressor = new CompressorSingleBuffer(
@@ -1134,8 +1133,6 @@ int main(int argc, char *argv[]) {
 	my_oper.fallocate = my_fallocate;
 	
 	//Inicializar variables estaticas
-//	referencia = new ReferenceIndexBasic();
-//	referencia->load( config.getReference(NULL) );
 	
 	prepare_tmp_table(chars_table);
 	
