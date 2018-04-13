@@ -7,6 +7,7 @@ ServerConnection::ServerConnection(){
 
 ServerConnection::ServerConnection(const char *host, int port, unsigned int _user_id){
 	user_id = _user_id;
+	cout << "ServerConnection - Conecting to \"" << host << "\" : " << port << " (user_id: " << user_id << ")\n";
 	sock_fd = connectServer(host, port);
 }
 
