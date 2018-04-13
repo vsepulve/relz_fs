@@ -537,6 +537,14 @@ static int my_mknod(const char *path, mode_t mode, dev_t dev){
 		cout<<" ---> my_mknod - ELSE \n";
 		res = mknod(real_path, mode, dev);
 	}
+	
+	// Por ahora usare el estado local para el return
+	// El estado remoto se lo dejo al server
+	// Esto solo en la modalidad simplificada
+	// Este caso particular quizas no sea necesario
+	// Quizas suficiente esperar un release de algun write para el send
+//	remote_funcions.mknod(path, mode, dev);
+	
 	//Revision de estado
 	if(res == -1){
 		cout<<" ---> my_mknod - Error al crear archivo real\n";
@@ -558,6 +566,9 @@ static int my_mkdir(const char *path, mode_t mode){
 	char real_path[ strlen(config.base_path) + strlen(path) + 2 ];
 	joint_path( config.base_path, path, real_path );
 	int res = mkdir(real_path, mode);
+	
+	remote_funcions.mkdir(path, mode);
+	
 	if (res == -1){
 		return -errno;
 	}
@@ -572,6 +583,8 @@ static int my_unlink(const char *path){
 	char real_path[ strlen(config.base_path) + strlen(path) + 2 ];
 	joint_path( config.base_path, path, real_path );
 	int res = unlink(real_path);
+	
+	remote_funcions.unlink(path);
 	
 	cout<<" ---> my_unlink - Borrando archivo de Mapas\n";
 	//Borrar datos en mapas
@@ -590,6 +603,9 @@ static int my_rmdir(const char *path){
 	char real_path[ strlen(config.base_path) + strlen(path) + 2 ];
 	joint_path( config.base_path, path, real_path );
 	int res = rmdir(real_path);
+	
+	remote_funcions.rmdir(path);
+	
 	if (res == -1){
 		return -errno;
 	}
@@ -606,6 +622,8 @@ static int my_rename(const char *from, const char *to){
 //		cout<<" ---> my_rename - Operacion no permitida para archivos relz\n";
 //		return -errno;
 //	}
+	
+	remote_funcions.rename(from, to);
 	
 	char real_from[ strlen(config.base_path) + strlen(from) + 2 ];
 	joint_path( config.base_path, from, real_from );
@@ -672,6 +690,9 @@ static int my_chmod(const char *path, mode_t mode){
 	char real_path[ strlen(config.base_path) + strlen(path) + 2 ];
 	joint_path( config.base_path, path, real_path );
 	int res = chmod(real_path, mode);
+	
+	remote_funcions.chmod(path, mode);
+	
 	if (res == -1){
 		return -errno;
 	}
@@ -683,6 +704,9 @@ static int my_chown(const char *path, uid_t uid, gid_t gid){
 	char real_path[ strlen(config.base_path) + strlen(path) + 2 ];
 	joint_path( config.base_path, path, real_path );
 	int res = lchown(real_path, uid, gid);
+	
+	remote_funcions.chown(path, uid, gid);
+	
 	if (res == -1){
 		return -errno;
 	}
@@ -1070,6 +1094,7 @@ static int my_release(const char *path, struct fuse_file_info *flags){
 	}
 	
 	// Enviar el archivo al server
+	cout<<" ---> my_release - Iniciando sendFile\n";
 	remote_funcions.sendFile(path, real_path);
 	
 	return 0;
