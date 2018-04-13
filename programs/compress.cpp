@@ -10,7 +10,6 @@
 #include <vector>
 
 #include "ReferenceIndexBasic.h"
-#include "ReferenceIndexBasicTest.h"
 #include "ReferenceIndexRR.h"
 #include "NanoTimer.h"
 #include "BitsUtils.h"
