@@ -3,12 +3,14 @@
 const unsigned char ReferenceIndexRR::type = 2;
 
 ReferenceIndexRR::ReferenceIndexRR(){
+	ref = NULL;
 	arr = NULL;
 	largo = 0;
 	largo_arr = 0;
 }
 
 ReferenceIndexRR::ReferenceIndexRR(const char *ref_file_rr){
+	ref = NULL;
 	arr = NULL;
 	largo = 0;
 	largo_arr = 0;
@@ -16,6 +18,7 @@ ReferenceIndexRR::ReferenceIndexRR(const char *ref_file_rr){
 }
 
 ReferenceIndexRR::ReferenceIndexRR(const char *ref_file, unsigned int distance){
+	ref = NULL;
 	arr = NULL;
 	largo = 0;
 	largo_arr = 0;
