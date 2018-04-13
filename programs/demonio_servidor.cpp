@@ -192,6 +192,12 @@ int main(int argc, char* argv[]){
 				conexion.setSocket(-1);
 				thread( thread_receive, sock_cliente, conexion.getUser(), &config ).detach();
 				break;
+			case REMOTE_SEND:
+				logger()<<"Server::main - Creando thread_send para user "<<conexion.getUser()<<".\n";
+				sock_cliente = conexion.getSocket();
+				conexion.setSocket(-1);
+				thread( thread_send, sock_cliente, conexion.getUser(), &config ).detach();
+				break;
 			case KILL_SERVER:
 				logger()<<"Server::main - Cerrando Server.\n";
 				close( sock_servidor );
