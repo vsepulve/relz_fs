@@ -11,7 +11,7 @@
 #include <map>
 
 #include "ReferenceIndex.h"
-#include "ReferenceIndexBasic.h"
+#include "ReferenceFactory.h"
 #include "NanoTimer.h"
 
 #include "CoderBlocks.h"
@@ -45,7 +45,7 @@ int main(int argc, char* argv[]){
 	cout<<"Loading reference text\n";
 	NanoTimer timer;
 	
-	char *reference_text = ReferenceIndexBasic::loadText(serialized_reference);
+	char *reference_text = ReferenceFactory::loadText(serialized_reference);
 	
 	cout<<"Testing text[0]: " << string(reference_text, 20) << "\n";
 	cout<<"Testing text[100]: " << string(reference_text + 100, 20) << "\n";
