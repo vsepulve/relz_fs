@@ -13,7 +13,7 @@
 #include <vector>
 
 #include "ReferenceIndex.h"
-#include "ReferenceIndexBasic.h"
+#include "ReferenceFactory.h"
 
 using namespace std;
 
@@ -22,7 +22,7 @@ private:
 
 	unsigned int nextLine(ifstream &lector, char *buff, unsigned int buff_size);
 	
-	vector< pair<string, ReferenceIndexBasic*> > references;
+	vector< pair<string, ReferenceIndex*> > references;
 	
 public:
 
@@ -56,7 +56,7 @@ public:
 	
 	// Retorna la referencia mas apropiada para cualquier path dentro del fs montado
 	// Esto asume que path es relativo al punto de montaje
-	ReferenceIndexBasic *getReference(const char *path);
+	ReferenceIndex *getReference(const char *path);
 	
 };
 

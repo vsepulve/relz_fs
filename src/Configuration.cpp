@@ -4,9 +4,8 @@ Configuration::Configuration(){
 	base_path = (char*)("./test_real");
 	// ruta de la referencia
 //	reference_file = (char*)("./data/ref.bin");
-	ReferenceIndexBasic *ref = new ReferenceIndexBasic();
-	ref->load( "./data/ref.bin" );
-	references.push_back( pair<string, ReferenceIndexBasic *>("/", ref) );
+	ReferenceIndex *ref = ReferenceFactory::loadInstance("./data/ref.bin");
+	references.push_back( pair<string, ReferenceIndex *>("/", ref) );
 	// block_size para la compression
 	compress_block_size = 100000;
 	// numero maximo de threads a ser usados para comprimir
@@ -43,7 +42,7 @@ unsigned int Configuration::nextLine(ifstream &lector, char *buff, unsigned int 
 	return length;
 }
 
-ReferenceIndexBasic *Configuration::getReference(const char *path){
+ReferenceIndex *Configuration::getReference(const char *path){
 	// buscar en el vector de referencias desde el ultimo (subdir mas largo) hasta el primero
 	// Es valido el primero en el que el subdir sea PREFIJO completo del path
 	// Por ahora retorno el primero (que DEBE ser el de /)
@@ -165,9 +164,8 @@ void Configuration::loadConfiguration(string &filename){
 			for( auto it : referencias_sort ){
 //				references.push_back( it.second );
 				cout << "Configuration::loadConfiguration - Loading Reference \"" << it.second.second << "\"\n";
-				ReferenceIndexBasic *ref = new ReferenceIndexBasic();
-				ref->load( it.second.second.c_str() );
-				references.push_back( pair<string, ReferenceIndexBasic *>(it.second.first, ref) );
+				ReferenceIndex *ref = ReferenceFactory::loadInstance( it.second.second.c_str() );
+				references.push_back( pair<string, ReferenceIndex *>(it.second.first, ref) );
 			}
 		}
 		
