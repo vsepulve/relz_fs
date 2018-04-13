@@ -1001,6 +1001,86 @@ void thread_receive(int sock_cliente, unsigned int user_id, Configuration *confi
 	
 }
 
+// Notar que el nombre es desde la perspectiva del cliente
+// El server esta resolviendo para RECIBIR un archivo del cliente
+void thread_send(int sock_cliente, unsigned int user_id, Configuration *config){
+	
+	ClientReception conexion;
+	conexion.setSocket(sock_cliente);
+	
+//	logger(user_id)<<"Server::thread_receive - Inicio (user_id: "<<user_id<<")\n";
+	logger()<<"Server::thread_send - Inicio (user_id: "<<user_id<<")\n";
+	
+	unsigned int size = 0;
+	bool error = false;
+	if( ! conexion.readUInt(size) ){
+		logger()<<"Server::thread_send - Error al recibir size.\n";
+		size = 0;
+		error = true;
+	}
+	char path[ size + 1 ];
+	if( ! conexion.readData(path, size) ){
+		logger()<<"Server::thread_send - Error al recibir path.\n";
+		size = 0;
+		error = true;
+	}
+	path[size] = 0;
+	logger()<<"Server::thread_send - path: \""<<path<<"\" ("<<size<<", error: "<<error<<")\n";
+	
+	
+	
+	/*
+	// Abrir el archivo
+	// Tomar el largo
+	// Enviar el largo
+	// Leer y enviar el contenido del archivo (esto requiere un buffer de lectura)
+	
+	char real_path[ real_path_size( config->base_path, path ) ];
+	create_real_path(real_path, config->base_path, user_id, path);
+	logger()<<"Server::thread_receive - real_path: \""<<real_path<<"\"\n";
+		
+	fstream lector(real_path, fstream::in);
+	if( (! lector.good()) || (! lector.is_open()) ){
+		cerr<<"Compressor::thread_receive - Error abriendo archivo \""<<real_path<<"\"\n";
+		error = true;
+	}
+	
+	
+	if( ! error ){
+		lector.seekg (0, lector.end);
+		unsigned long long file_size = lector.tellg();
+		lector.seekg (0, lector.beg);
+	
+		logger()<<"Server::thread_receive - Enviando largo de archivo ("<<file_size<<")\n";
+		conexion.writeULong(file_size);
+	
+		unsigned int buff_size = 1024;
+		char buff[buff_size];
+		unsigned long long total = 0;
+		logger()<<"Server::thread_receive - Leyendo y enviando bytes.\n";
+		while(total < file_size){
+			if(total - file_size < buff_size){
+				buff_size = total - file_size;
+			}
+			lector.read(buff, buff_size);
+			conexion.writeData(buff, buff_size);
+			// Notar que estoy sumando directamente buff_size
+			// Quzias sea mejor preguntar por los bytes leidos
+			total += buff_size;
+		}
+		lector.close();
+	}
+	else{
+		conexion.writeULong(0);
+	}
+	*/
+	
+	int marca = 0;
+	conexion.writeInt(marca);
+	logger()<<"Server::thread_send - Terminando (marca: "<<marca<<")\n";
+	
+}
+
 
 
 

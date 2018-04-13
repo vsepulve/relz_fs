@@ -94,6 +94,8 @@ void thread_fallocate(int sock_cliente, unsigned int user_id, Configuration *con
 
 void thread_receive(int sock_cliente, unsigned int user_id, Configuration *config);
 
+void thread_send(int sock_cliente, unsigned int user_id, Configuration *config);
+
 
 
 
