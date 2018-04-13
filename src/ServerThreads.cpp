@@ -1027,53 +1027,56 @@ void thread_send(int sock_cliente, unsigned int user_id, Configuration *config){
 	path[size] = 0;
 	logger()<<"Server::thread_send - path: \""<<path<<"\" ("<<size<<", error: "<<error<<")\n";
 	
+	// Recibir el largo del archivo
+	// Si el largo es valido, preparar escritor y recibir bytes parea guardar
 	
-	
-	/*
-	// Abrir el archivo
-	// Tomar el largo
-	// Enviar el largo
-	// Leer y enviar el contenido del archivo (esto requiere un buffer de lectura)
-	
+	// Preparar ruta local en el server para escritor
 	char real_path[ real_path_size( config->base_path, path ) ];
 	create_real_path(real_path, config->base_path, user_id, path);
-	logger()<<"Server::thread_receive - real_path: \""<<real_path<<"\"\n";
-		
-	fstream lector(real_path, fstream::in);
-	if( (! lector.good()) || (! lector.is_open()) ){
-		cerr<<"Compressor::thread_receive - Error abriendo archivo \""<<real_path<<"\"\n";
+	logger()<<"Server::thread_send - real_path: \""<<real_path<<"\"\n";
+	
+	unsigned long long file_size = 0;
+	if( ! conexion.readULong(file_size) ){
+		logger()<<"Server::thread_send - Error al recibir file_size.\n";
+		file_size = 0;
 		error = true;
 	}
 	
+	logger()<<"Server::thread_send - file_size: "<<file_size<<" bytes\n";
 	
+	unsigned int buff_size = 1024;
+	char buff[buff_size + 1];
+	unsigned long long total = 0;
+	
+	fstream escritor(real_path, fstream::trunc | fstream::out);
 	if( ! error ){
-		lector.seekg (0, lector.end);
-		unsigned long long file_size = lector.tellg();
-		lector.seekg (0, lector.beg);
-	
-		logger()<<"Server::thread_receive - Enviando largo de archivo ("<<file_size<<")\n";
-		conexion.writeULong(file_size);
-	
-		unsigned int buff_size = 1024;
-		char buff[buff_size];
-		unsigned long long total = 0;
-		logger()<<"Server::thread_receive - Leyendo y enviando bytes.\n";
-		while(total < file_size){
-			if(total - file_size < buff_size){
-				buff_size = total - file_size;
+		while( total < file_size){
+			if( file_size - total < buff_size ){
+				buff_size = file_size - total;
 			}
-			lector.read(buff, buff_size);
-			conexion.writeData(buff, buff_size);
+			if( ! conexion.readData(buff, buff_size) ){
+				logger()<<"Server::thread_send - Error al recibir data.\n";
+				break;
+			}
+			buff[buff_size] = 0;
+//			logger()<<"Server::thread_send - buff: \""<<buff<<"\".\n";
+			if(escritor.good()){
+				escritor.write(buff, buff_size);
+			}
 			// Notar que estoy sumando directamente buff_size
-			// Quzias sea mejor preguntar por los bytes leidos
+			// Quzias sea mejor preguntar por los bytes escritos
 			total += buff_size;
 		}
-		lector.close();
+		if(escritor.good()){
+			escritor.close();
+		}
+		else{
+			logger()<<"Server::thread_send - Problemas con escritor.\n";
+		}
 	}
 	else{
 		conexion.writeULong(0);
 	}
-	*/
 	
 	int marca = 0;
 	conexion.writeInt(marca);
