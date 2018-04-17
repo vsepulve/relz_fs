@@ -31,8 +31,9 @@ unsigned int BLOCK_SIZE = 1000000;
 int main(int argc, char* argv[]){
 	
 	if(argc != 2){
-		cout << "uso: server config_file\n";
-		return -1;
+		cout << "Usage: daemon_server config_file\n";
+		cout << "Example: ./bin/daemon_server daemon_fuse.config\n";
+		return 0;
 	}
 	
 	string config_file = argv[1];
@@ -197,6 +198,12 @@ int main(int argc, char* argv[]){
 				sock_cliente = conexion.getSocket();
 				conexion.setSocket(-1);
 				thread( thread_send, sock_cliente, conexion.getUser(), &config ).detach();
+				break;
+			case REMOTE_INITIALIZE:
+				logger()<<"Server::main - Creando thread_initialize para user "<<conexion.getUser()<<".\n";
+				sock_cliente = conexion.getSocket();
+				conexion.setSocket(-1);
+				thread( thread_initialize, sock_cliente, conexion.getUser(), &config ).detach();
 				break;
 			case KILL_SERVER:
 				logger()<<"Server::main - Cerrando Server.\n";
