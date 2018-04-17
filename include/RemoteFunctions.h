@@ -51,7 +51,7 @@ public:
 	
 	int mknod(const char *path, mode_t mode, dev_t dev);
 	
-	int mkdir(const char *path, mode_t mode);
+	int remoteMkdir(const char *path, mode_t mode);
 	
 	int unlink(const char *path);
 	
@@ -92,6 +92,13 @@ public:
 	// Metodo para enviar un archivo al server desde una ruta local
 	// La idea es que release llame a este metodo para dejar el archivo en el server
 	int sendFile(const char *path, const char *path_local);
+	
+	
+	// Carga inicial de archivos desde path ("/" seria el directorio completo)
+	// Quzias sea necesario borrar primero los archivos actuales, pero omito ese paso por el momento
+	// Notar que escribe los archivos en path_local
+	int initialize(const char *path, const char *path_local);
+	
 	
 };
 

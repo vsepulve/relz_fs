@@ -178,32 +178,32 @@ int RemoteFunctions::mknod(const char *path, mode_t mode, dev_t dev){
 	return res;
 }
 
-int RemoteFunctions::mkdir(const char *path, mode_t mode){
+int RemoteFunctions::remoteMkdir(const char *path, mode_t mode){
 	ServerConnection con(host, port, user_id);
 	if( ! con.good() ){
-		cout<<" ---> RemoteFunctions::mkdir - Error de conexion.\n";
+		cout<<" ---> RemoteFunctions::remoteMkdir - Error de conexion.\n";
 		return -1;
 	}
 	if( ! con.sendRequest( REMOTE_MKDIR ) ){
-		cout<<" ---> RemoteFunctions::mkdir - Error al enviar request.\n";
+		cout<<" ---> RemoteFunctions::remoteMkdir - Error al enviar request.\n";
 		return -1;
 	}
 	if( ! con.writeString(path) ){
-		cout<<" ---> RemoteFunctions::mkdir - Error al enviar path.\n";
+		cout<<" ---> RemoteFunctions::remoteMkdir - Error al enviar path.\n";
 		return -1;
 	}
 	unsigned char n_bytes = sizeof(mode_t);
 	if( ! con.writeByte(n_bytes) ){
-		cout<<" ---> RemoteFunctions::mkdir - Error al enviar n_bytes.\n";
+		cout<<" ---> RemoteFunctions::remoteMkdir - Error al enviar n_bytes.\n";
 		return -1;
 	}
 	if( ! con.writeData( (char*)&mode, sizeof(mode_t) ) ){
-		cout<<" ---> RemoteFunctions::mkdir - Error al enviar mode.\n";
+		cout<<" ---> RemoteFunctions::remoteMkdir - Error al enviar mode.\n";
 		return -1;
 	}
 	int res = 0;
 	if( ! con.readInt(res) ){
-		cout<<" ---> RemoteFunctions::mkdir - Error al realizar mkdir.\n";
+		cout<<" ---> RemoteFunctions::remoteMkdir - Error al realizar mkdir.\n";
 		return -1;
 	}
 	int new_errno = 0;
@@ -792,6 +792,98 @@ int RemoteFunctions::sendFile(const char *path, const char *path_local){
 	return 0;
 }
 
+void create_simple_path(char *buff, const char *base_path, const char *path){
+	if( buff == NULL || base_path == NULL || path == NULL ){
+		return;
+	}
+	if( base_path[ strlen(base_path) - 1 ] == '/' ){
+		sprintf(buff, "%s", base_path);
+	}
+	else{
+		sprintf(buff, "%s/", base_path);
+	}
+	if( path[ 0 ] == '/' ){
+		strcpy(buff + strlen(buff), path + 1);
+	}
+	else{
+		strcpy(buff + strlen(buff), path);
+	}
+}
+
+	// Carga inicial de archivos desde path ("/" seria el directorio completo)
+	// Quzias sea necesario borrar primero los archivos actuales, pero omito ese paso por el momento
+	// Notar que escribe los archivos en path_local
+int RemoteFunctions::initialize(const char *path, const char *path_local){
+	ServerConnection con(host, port, user_id);
+	if( ! con.good() ){
+		cout<<" ---> RemoteFunctions::initialize - Error de conexion.\n";
+		return -1;
+	}
+	// Revisar si el archivo local existe
+	// Si existe, no hacer nada por ahora
+	// La idea es, en ese caso, revisar la version o fecha de modificacion para actualizar
+	// Si el archivo no existe, enviar peticion de archivo
+	// Tomar la respuesta (largo y luego bytes)
+	// Escribir los bytes en el archivo local mientras se leen
+	cout<<" ---> RemoteFunctions::initialize - Inicio (desde \"" << path << "\", a \"" << path_local << "\").\n";
+	
+	if( ! con.sendRequest( REMOTE_INITIALIZE ) ){
+		cout<<" ---> RemoteFunctions::initialize - Error al enviar request.\n";
+		return -1;
+	}
+	if( ! con.writeString(path) ){
+		cout<<" ---> RemoteFunctions::initialize - Error al enviar path.\n";
+		return -1;
+	}
+	
+	while(true){
+		unsigned int size = -1;
+		
+		if( (! con.readUInt(size)) ){
+			cout << " ---> RemoteFunctions::initialize - Error al recibir path size.\n";
+			return -1;
+		}
+		if( size == 0 ){
+			cout << " ---> RemoteFunctions::initialize - Fin de Archivos.\n";
+			break;
+		}
+		// Esto deberia usar la misma memoria varias veces? (por optimizacion de compilador)
+		// La otra opcion es pedirlo explicitamente (antes del while) y solo reajustar segun el tamaño
+		char buff[size + 1];
+		if( (! con.readData(buff, size)) ){
+			cout << " ---> RemoteFunctions::initialize - Error al recibir path.\n";
+			return -1;
+		}
+		buff[size] = 0;
+		bool is_dir = false;
+		unsigned char mark = 0;
+		if( (! con.readByte(mark)) ){
+			cout << " ---> RemoteFunctions::initialize - Error al recibir is_dir.\n";
+			return -1;
+		}
+		if(mark == 1){
+			is_dir = true;
+		}
+		cout << " ---> RemoteFunctions::initialize - Path: " << buff << " (is_dir: " << is_dir << ")\n";
+		
+		char real_path[strlen(path_local) + size + 2];
+		create_simple_path(real_path, path_local, buff);
+		
+		if(is_dir){
+			cout << " ---> RemoteFunctions::initialize - Creando dir \"" << real_path << "\"\n";
+			mkdir(real_path, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+			cout << " ---> RemoteFunctions::initialize - Ok\n";
+		}
+		
+	}
+	
+	
+	
+	
+	cout<<" ---> RemoteFunctions::initialize - Fin.\n";
+	return 0;
+	
+}
 
 
 
