@@ -58,7 +58,7 @@ using namespace std;
 // > fusermount -u /cebib
 
 static Configuration config;
-static RemoteFunctions remote_funcions;
+static RemoteFunctions remote_functions;
 
 // Estructura para enlazar las funciones
 static struct fuse_operations my_oper;
@@ -543,7 +543,7 @@ static int my_mknod(const char *path, mode_t mode, dev_t dev){
 	// Esto solo en la modalidad simplificada
 	// Este caso particular quizas no sea necesario
 	// Quizas suficiente esperar un release de algun write para el send
-//	remote_funcions.mknod(path, mode, dev);
+//	remote_functions.mknod(path, mode, dev);
 	
 	//Revision de estado
 	if(res == -1){
@@ -567,7 +567,7 @@ static int my_mkdir(const char *path, mode_t mode){
 	joint_path( config.base_path, path, real_path );
 	int res = mkdir(real_path, mode);
 	
-	remote_funcions.mkdir(path, mode);
+	remote_functions.remoteMkdir(path, mode);
 	
 	if (res == -1){
 		return -errno;
@@ -584,7 +584,7 @@ static int my_unlink(const char *path){
 	joint_path( config.base_path, path, real_path );
 	int res = unlink(real_path);
 	
-	remote_funcions.unlink(path);
+	remote_functions.unlink(path);
 	
 	cout<<" ---> my_unlink - Borrando archivo de Mapas\n";
 	//Borrar datos en mapas
@@ -604,7 +604,7 @@ static int my_rmdir(const char *path){
 	joint_path( config.base_path, path, real_path );
 	int res = rmdir(real_path);
 	
-	remote_funcions.rmdir(path);
+	remote_functions.rmdir(path);
 	
 	if (res == -1){
 		return -errno;
@@ -623,7 +623,7 @@ static int my_rename(const char *from, const char *to){
 //		return -errno;
 //	}
 	
-	remote_funcions.rename(from, to);
+	remote_functions.rename(from, to);
 	
 	char real_from[ strlen(config.base_path) + strlen(from) + 2 ];
 	joint_path( config.base_path, from, real_from );
@@ -691,7 +691,7 @@ static int my_chmod(const char *path, mode_t mode){
 	joint_path( config.base_path, path, real_path );
 	int res = chmod(real_path, mode);
 	
-	remote_funcions.chmod(path, mode);
+	remote_functions.chmod(path, mode);
 	
 	if (res == -1){
 		return -errno;
@@ -705,7 +705,7 @@ static int my_chown(const char *path, uid_t uid, gid_t gid){
 	joint_path( config.base_path, path, real_path );
 	int res = lchown(real_path, uid, gid);
 	
-	remote_funcions.chown(path, uid, gid);
+	remote_functions.chown(path, uid, gid);
 	
 	if (res == -1){
 		return -errno;
@@ -1095,7 +1095,7 @@ static int my_release(const char *path, struct fuse_file_info *flags){
 	
 	// Enviar el archivo al server
 	cout<<" ---> my_release - Iniciando sendFile\n";
-	remote_funcions.sendFile(path, real_path);
+	remote_functions.sendFile(path, real_path);
 	
 	return 0;
 }
@@ -1126,18 +1126,36 @@ static int my_fallocate(const char *path, int mode, off_t offset, off_t length, 
 
 static void load_remote_files(Configuration *config){
 	
+	const char *path = "/";
+	char real_path[ strlen(config->base_path) + 2 ];
+	strcpy(real_path, config->base_path);
+	if( real_path[ strlen(config->base_path)-1 ] != '/' ){
+		real_path[ strlen(config->base_path) ] = '/';
+		real_path[ strlen(config->base_path) + 1 ] = 0;
+	}
+
+	remote_functions.initialize(path, real_path);
 }
 
 int main(int argc, char *argv[]) {
 	
 	if( argc < 2 ){
-		cout << "Usage: daemon_fuse_hybrid mount_directory [fuse_args] config_file\n";
-		cout << "Example: ./bin/daemon_fuse_hybrid ./test -d -o big_writes daemon_fuse.json\n";
+		cout << "Usage: daemon_fuse_client mount_directory [fuse_args] config_file\n";
+		cout << "Example: ./bin/daemon_fuse_client ./test -d -o big_writes daemon_fuse.config\n";
 		return 0;
 	}
 	
 	string config_file = argv[argc - 1];
 	config.loadConfiguration(config_file);
+	
+	// Tabla para generacion de rutas temporales
+	prepare_tmp_table(chars_table);
+	
+	//Inicializar variables estaticas
+	remote_functions.setParameters(config.host, config.port, config.user_id);
+	
+	// Actualizar archivos locales
+	load_remote_files(&config);
 	
 	//Enlace de funciones (a la C++) en el struct fuse_operations definido al inicio
 	my_oper.getattr = my_getattr;
@@ -1160,15 +1178,6 @@ int main(int argc, char *argv[]) {
 	my_oper.release = my_release;
 	my_oper.releasedir = my_releasedir;
 	my_oper.fallocate = my_fallocate;
-	
-	// Tabla para generacion de rutas temporales
-	prepare_tmp_table(chars_table);
-	
-	//Inicializar variables estaticas
-	remote_funcions.setParameters(config.host, config.port, config.user_id);
-	
-	// Actualizar archivos locales
-	load_remote_files(&config);
 	
 	
 	cout << "Starting fuse_main...\n";
