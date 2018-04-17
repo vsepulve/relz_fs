@@ -55,6 +55,7 @@ enum{
 	REMOTE_WRITE = 17, 
 	REMOTE_RECEIVE = 18, 
 	REMOTE_SEND = 19, 
+	REMOTE_INITIALIZE = 50, 
 	KILL_SERVER = 100
 };
 
@@ -95,6 +96,13 @@ void thread_fallocate(int sock_cliente, unsigned int user_id, Configuration *con
 void thread_receive(int sock_cliente, unsigned int user_id, Configuration *config);
 
 void thread_send(int sock_cliente, unsigned int user_id, Configuration *config);
+
+
+// Thread de carga inicial
+// Luego de recibir la peticion, el server leera todos los archivos del directorio del usuario
+// Envia cada archivo, primero la ruta, luego el contenido, para que el cliente inicie
+// Quzias sea necesario enviar directorios por separado
+void thread_initialize(int sock_cliente, unsigned int user_id, Configuration *config);
 
 
 

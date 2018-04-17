@@ -1084,7 +1084,153 @@ void thread_send(int sock_cliente, unsigned int user_id, Configuration *config){
 	
 }
 
+// Returns an empty vector if the path is NOT a directory
+// Note this is only to reads the files from a directory
+void readDirectory(const char *real_path, unsigned int user_id, vector< pair<string, bool> > *output){
+	
+	cout << "readDirectory - Inicio \"" << real_path << "\" (" << output->size() << " elementos)\n";
+	
+	struct stat file_info;
+	bool is_dir = false;
+	DIR *directory = NULL;
+	dirent *child_dir = NULL;
+	dirent *test_dir = NULL;
+	// burocracia para construir el struct con memoria pedida
+	int name_max = pathconf(real_path, _PC_NAME_MAX);
+	// Si el limite no esta definido, adivino
+	if (name_max == -1){
+		name_max = 255;
+	}
+	int len = offsetof(struct dirent, d_name) + name_max + 1;
+	child_dir = (struct dirent*)malloc(len);
+	// Esta llamada parece segura (pues tiene closedir que deberia borrar la memoria local)
+	directory = opendir(real_path);
+	if(directory != NULL){
+		while(true){
+			//readdir_r es thread-safe (notar que recibe dos punteros para dejar el resultado)
+			// - El primero es un struct con memoria pedida para guardar el resultado
+			// - El segundo es espacio para un puntero al resultado (el mismo struc del segundo parametro, o NULL)
+			// - Ese segundo puntero es usado para la prueba de END OF STREAM con NULL
+			readdir_r( directory, child_dir, &test_dir );
+			if(test_dir == NULL){
+				break;
+			}
+			if( strlen(child_dir->d_name) == 0 
+				|| strcmp(child_dir->d_name, ".") == 0
+				|| strcmp(child_dir->d_name, "..") == 0 ){
+				continue;
+			}
+			cout<<"readDirectory - \""<<child_dir->d_name<<"\" (dir? "<<( (child_dir->d_type == DT_DIR)?"Si":"No" )<<")\n";
+			string child_name;
+			if( child_dir->d_name[0] != '/' ){
+				child_name += "/";
+			}
+			child_name += child_dir->d_name;
+			string child_path(real_path);
+			if(real_path[strlen(real_path) - 1] != '/' && child_dir->d_name[0] != '/'){
+				child_path += "/";
+				child_path += child_dir->d_name;
+			}
+			else if(real_path[strlen(real_path) - 1] == '/' && child_dir->d_name[0] == '/'){
+				child_path += (child_dir->d_name + 1);
+			}
+			else{
+				child_path += child_dir->d_name;
+			}
+			
+			lstat(child_path.c_str(), &file_info);
+			is_dir = S_ISDIR(file_info.st_mode);
+			
+			cout<<"readDirectory - Agregando \""<<child_path<<"\" (is_dir: "<<is_dir<<")\n";
+			output->push_back( pair<string, bool>(child_path, is_dir) );
+			
+			if(is_dir){
+				readDirectory(child_path.c_str(), user_id, output);
+			}
+			
+		}
+		closedir( directory );
+	}
+	// free del struct pedido con malloc
+	free(child_dir);
+	
+	
+}
 
+
+void thread_initialize(int sock_cliente, unsigned int user_id, Configuration *config){
+	
+	ClientReception conexion;
+	conexion.setSocket(sock_cliente);
+	
+//	logger(user_id)<<"Server::thread_receive - Inicio (user_id: "<<user_id<<")\n";
+	logger()<<"Server::thread_initialize - Inicio (user_id: "<<user_id<<")\n";
+	
+	// Primer el cliente envia el path desde el que desea inicializar
+	// El load completo seria con "/"
+	// Se enviara cada directorio y archivo a partir de path, local al USUARIO
+	unsigned int size = 0;
+	bool error = false;
+	if( ! conexion.readUInt(size) ){
+		logger()<<"Server::thread_initialize - Error al recibir size.\n";
+		size = 0;
+		error = true;
+	}
+	char path[ size + 1 ];
+	if( ! conexion.readData(path, size) ){
+		logger()<<"Server::thread_initialize - Error al recibir path.\n";
+		size = 0;
+		error = true;
+	}
+	path[size] = 0;
+	logger()<<"Server::thread_initialize - path: \""<<path<<"\" ("<<size<<", error: "<<error<<")\n";
+	
+	// Lectura recursiva usando el algoritmo del arbol
+	// Lo que puedo hacer es mandar siempre primero el path relativo y luego los datos
+	// Como el path va en formato size, chars, si size es 0 se considera el final
+	
+	// Preparar ruta local en el server para escritor
+	char real_path[ real_path_size( config->base_path, path ) ];
+	create_real_path(real_path, config->base_path, user_id, path);
+	logger()<<"Server::thread_initialize - real_path: \"" << real_path << "\"\n";
+	
+	vector< pair<string, bool> > files;
+//	readDirectory(config->base_path, path, user_id, &archivos);
+	readDirectory(real_path, user_id, &files);
+	for( auto &par : files ){
+		string child_path = par.first;
+		bool is_dir = par.second;
+		if( child_path.length() < (strlen(config->base_path) + 1) ){
+			cerr << "Server::thread_initialize - Error, Invalid path.\n";
+		}
+		const char *child = (child_path.c_str() + strlen(config->base_path) + 1);
+		unsigned int child_size = strlen(child);
+		cout << "Server::thread_initialize - Relative Path \"" << child << "\" (size: " << child_size << ", is_dir: " << is_dir << ")\n";
+		
+		if( ! conexion.writeString(child) ){
+			cout<<"Server::thread_initialize - Error al enviar path.\n";
+			return;
+		}
+		unsigned char mark = 0;
+		if(is_dir){
+			mark = 1;
+		}
+		if( ! conexion.writeByte(mark) ){
+			cout<<"Server::thread_initialize - Error al enviar is_dir.\n";
+			return;
+		}
+		
+	}
+	
+	// Envio un 0 para terminar (marca de que no hay mas archivos)
+	if( ! conexion.writeString(NULL) ){
+		cout<<"Server::thread_initialize - Error al enviar marca de fin de archivos.\n";
+		return;
+	}
+	
+	
+	
+}
 
 
 
