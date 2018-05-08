@@ -266,7 +266,7 @@ void ReferenceIndexRR::load(const char *ref_file){
 	unsigned char read_type = 0;
 	lector.read((char*)&read_type, 1);
 	if(read_type != type){
-		cerr << "ReferenceIndexBasic::load - Error, unexpected Reference Type (" << (unsigned int)read_type << " vs " << (unsigned int)type << ")\n";
+		cerr << "ReferenceIndexRR::load - Error, unexpected Reference Type (" << (unsigned int)read_type << " vs " << (unsigned int)type << ")\n";
 		return;
 	}
 	
