@@ -85,7 +85,7 @@ unsigned int CompressorSingleBuffer::read(unsigned long long pos_ini, unsigned i
 	//Lock desde aqui hasta el final del metodo
 	lock_guard<mutex> lock(mutex_interno);
 	
-	bool debug = true;
+	bool debug = false;
 //	if( pos_ini > 4285000000 && pos_ini < 4300000000 ){
 //		debug = true;
 //	}
