@@ -199,14 +199,23 @@ bool Compressor::realCompress(const char *in_file, unsigned int n_threads, unsig
 	char *text = NULL;
 	vector< pair<unsigned long long, unsigned long long> > *lowcase_runs = NULL;
 	vector<unsigned long long> *nl_pos = NULL;
+//	MetadataFasta *metadata_fasta = NULL;
 	if( use_metadata ){
-		//Definicion para metadatos: lowcase
+		// Definicion para metadatos: lowcase
 		lowcase_runs = new vector< pair<unsigned long long, unsigned long long> >();
-		//Definicion para metadatos: newlines
+		// Definicion para metadatos: newlines
 		nl_pos = new vector<unsigned long long>();
+		// Metadatos fasta
+//		metadata_fasta = new MetadataFasta();
 	}
 	if( filter != NULL ){
 		text = filter->readText(in_file, text_length, lowcase_runs);
+		
+		// Aca habria que sacar los metadatos de modo similara los newlines
+		// El objeto guardara tanto los textos como todo lo necesario para reponerlos
+		// Notar que eso deja la secuencia sola, pero con newlines normales, que seran sacados en la fase siguiente
+//		text_length = metadata_fasta->filterMetadata(text, text_length);
+		
 		text_length = filter->filterNewLines(text, text_length, nl_pos);
 	}
 	if( text == NULL ){
@@ -217,6 +226,9 @@ bool Compressor::realCompress(const char *in_file, unsigned int n_threads, unsig
 		if(nl_pos != NULL){
 			delete nl_pos;
 		}
+//		if(metadata_fasta != NULL){
+//			delete metadata_fasta;
+//		}
 		return false;
 	}
 	

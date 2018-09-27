@@ -101,7 +101,27 @@ unsigned int CompressorSingleBuffer::read(unsigned long long pos_ini, unsigned i
 	//Ajuste a posiciones relativas
 	unsigned int nl_izq = 0;
 	unsigned int nl_med = 0;
+//	unsigned long long meta_text_izq = 0;
+//	unsigned long long meta_text_med = 0;
 	if( decoder->getHeaders() != NULL && adjust_text){
+		
+		// Antes de sacar los newlines de las posiciones del read, hay que sacar los metadatos
+		
+//		meta_text_izq = decoder->getMetadataFasta()->countText(pos_ini);
+//		meta_text_med = decoder->getMetadataFasta()->countText(pos_ini + length);
+//		if(debug) cout<<"CompressorSingleBuffer::read - MetadataFast, meta_text_izq: "<<meta_text_izq<<", meta_text_med: "<<meta_text_med<<" - "<<meta_text_izq<<"\n";
+//		meta_text_med -= meta_text_izq;
+//		if( (meta_text_izq > pos_ini) || (meta_text_med > length) ){
+//			cerr<<"CompressorSingleBuffer::read - Error al ajustar posiciones de MetadataFast ("<<meta_text_izq<<" de "<<pos_ini<<", "<<meta_text_med<<" de "<<length<<")\n";
+//			meta_text_izq = 0;
+//			meta_text_med = 0;
+//		}
+//		else{
+//			pos_ini -= meta_text_izq;
+//			length -= meta_text_med;
+//			if(debug) cout<<"CompressorSingleBuffer::read - pos/len relativas: ("<<pos_ini<<", "<<length<<")\n";
+//		}
+		
 		nl_izq = decoder->getHeaders()->countNewLines(pos_ini);
 		nl_med = decoder->getHeaders()->countNewLines(pos_ini + length);
 		if(debug) cout<<"CompressorSingleBuffer::read - nl_izq: "<<nl_izq<<", nl_med: "<<nl_med<<" - "<<nl_izq<<"\n";
@@ -196,6 +216,11 @@ unsigned int CompressorSingleBuffer::read(unsigned long long pos_ini, unsigned i
 		pos_ini += nl_izq;
 		decoder->getHeaders()->adjustNewLines(out_buff, pos_ini, copied_chars, nl_izq, nl_med, adjust_buffer);
 		copied_chars += nl_med;
+		
+		// Aqui habria que reponer efectivamente los metadatos fasta
+//		pos_ini += meta_text_izq;
+//		decoder->getHeaders()->getMetadataFasta(out_buff, pos_ini, copied_chars, meta_text_izq, meta_text_med, adjust_buffer);
+//		copied_chars += meta_text_med;
 		
 		decoder->getHeaders()->adjustCase(out_buff, pos_ini, copied_chars);
 	}
