@@ -45,6 +45,9 @@ public:
 	// Este metodo SOLO extrae los caracteres 'A', 'C', 'G' y 'T' (pasa las minusculas a mayusculas)
 	virtual unsigned int readReference(const char *in_file, char *text);
 	
+	// Como el anterior pero deja pasar todo en A-Z, 0-9
+	virtual unsigned int readReferenceFull(const char *in_file, char *text);
+	
 	// Revisa el texto eliminando los '\n' y guardando el largo de cada linea en nl_pos (si es != NULL)
 	// Esta pensado para limpiar un texto YA FILTRADO por readText
 	// Retorna el nuevo largo del string (igual a text_length - NL_eliminados)

@@ -163,6 +163,48 @@ unsigned int TextFilter::readReference(const char *in_file, char *text){
 	
 }
 
+unsigned int TextFilter::readReferenceFull(const char *in_file, char *text){
+
+	cout<<"TextFilter::readReferenceFull - Inicio (leyendo \""<<in_file<<"\")\n";
+	
+	text[0] = 0;
+	unsigned int text_length = 0;
+	NanoTimer timer;
+	fstream lector(in_file, fstream::in);
+	if(! lector.good() ){
+		cerr<<"TextFilter::readReferenceFull - Error en lectura\n";
+		return 0;
+	}
+	//Tomo el largo para cargarlo completo
+	lector.seekg (0, lector.end);
+	unsigned int file_size = lector.tellg();
+	lector.seekg (0, lector.beg);
+	
+	unsigned int max_read = 64*1024;
+	char *buff = new char[max_read];
+	unsigned int total_read = 0;
+	
+	while( (total_read < file_size) && lector.good() ){
+		lector.read(buff, max_read);
+		unsigned int lectura = lector.gcount();
+		total_read += lectura;
+		for(unsigned int j = 0; j < lectura; ++j){
+			char c = toupper(buff[j]);
+			if( (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') ){
+				text[text_length++] = c;
+			}
+		}
+	}
+	
+	delete [] buff;
+	lector.close();
+	text[text_length] = 0;
+	
+	cout<<"TextFilter::readReferenceFull - Fin (chars: "<<text_length<<" en "<<timer.getMilisec()<<" ms)\n";
+	return text_length;
+	
+}
+
 //Este metodo y lo necesario para su aplicacion, quizas deberia ser estatico.
 //En ese caso, headers no necesitaria guardar una instancia, simplemente llamar TextFilter::addNewLines() o algo asi.
 unsigned long long TextFilter::filterNewLines(char *text, unsigned long long text_length, vector<unsigned long long> *nl_pos){
