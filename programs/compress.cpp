@@ -90,7 +90,8 @@ int main(int argc, char* argv[]){
 		}
 		
 		//Carga del texto de la referencia (metodo especial para cargar bases solamente)
-		text_size += filter->readReference(reference_text, text + text_size);
+//		text_size += filter->readReference(reference_text, text + text_size);
+		text_size += filter->readReferenceFull(reference_text, text + text_size);
 		
 		cout<<"Building Reference with "<<text_size<<" chars\n";
 		timer.reset();
