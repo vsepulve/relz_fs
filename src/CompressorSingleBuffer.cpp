@@ -107,8 +107,8 @@ unsigned int CompressorSingleBuffer::read(unsigned long long pos_ini, unsigned i
 		
 		// Antes de sacar los newlines de las posiciones del read, hay que sacar los metadatos
 		
-//		meta_text_izq = decoder->getMetadataFasta()->countText(pos_ini);
-//		meta_text_med = decoder->getMetadataFasta()->countText(pos_ini + length);
+//		meta_text_izq = decoder->getHeaders()->getMetadataFasta()->countText(pos_ini);
+//		meta_text_med = decoder->getHeaders()->getMetadataFasta()->countText(pos_ini + length);
 //		if(debug) cout<<"CompressorSingleBuffer::read - MetadataFast, meta_text_izq: "<<meta_text_izq<<", meta_text_med: "<<meta_text_med<<" - "<<meta_text_izq<<"\n";
 //		meta_text_med -= meta_text_izq;
 //		if( (meta_text_izq > pos_ini) || (meta_text_med > length) ){
@@ -219,7 +219,7 @@ unsigned int CompressorSingleBuffer::read(unsigned long long pos_ini, unsigned i
 		
 		// Aqui habria que reponer efectivamente los metadatos fasta
 //		pos_ini += meta_text_izq;
-//		decoder->getHeaders()->getMetadataFasta(out_buff, pos_ini, copied_chars, meta_text_izq, meta_text_med, adjust_buffer);
+//		decoder->getHeaders()->getMetadataFasta()->adjustText(out_buff, pos_ini, copied_chars, meta_text_izq, meta_text_med, adjust_buffer);
 //		copied_chars += meta_text_med;
 		
 		decoder->getHeaders()->adjustCase(out_buff, pos_ini, copied_chars);
