@@ -99,6 +99,8 @@ unsigned int BlockHeadersRelz::save(fstream *writer){
 	
 	cout<<"BlockHeadersRelz::save - Blocks written\n";
 	
+	// Aqui habria que escribir los metadatos fasta si existen
+	
 	return writer->tellp();
 	
 }
