@@ -22,6 +22,7 @@
 #include "BlockHeaders.h"
 #include "BlockHeadersFactory.h"
 #include "Metadata.h"
+#include "MetadataFasta.h"
 
 #include "TextFilter.h"
 #include "TextFilterBasic.h"

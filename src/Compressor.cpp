@@ -199,14 +199,15 @@ bool Compressor::realCompress(const char *in_file, unsigned int n_threads, unsig
 	char *text = NULL;
 	vector< pair<unsigned long long, unsigned long long> > *lowcase_runs = NULL;
 	vector<unsigned long long> *nl_pos = NULL;
-//	MetadataFasta *metadata_fasta = NULL;
+	MetadataFasta *metadata_fasta = NULL;
 	if( use_metadata ){
 		// Definicion para metadatos: lowcase
 		lowcase_runs = new vector< pair<unsigned long long, unsigned long long> >();
 		// Definicion para metadatos: newlines
 		nl_pos = new vector<unsigned long long>();
 		// Metadatos fasta
-//		metadata_fasta = new MetadataFasta();
+		// Podria necesitar un archivo temporal para escribir
+		metadata_fasta = new MetadataFasta();
 	}
 	if( filter != NULL ){
 		text = filter->readText(in_file, text_length, lowcase_runs);
@@ -214,7 +215,7 @@ bool Compressor::realCompress(const char *in_file, unsigned int n_threads, unsig
 		// Aca habria que sacar los metadatos de modo similara los newlines
 		// El objeto guardara tanto los textos como todo lo necesario para reponerlos
 		// Notar que eso deja la secuencia sola, pero con newlines normales, que seran sacados en la fase siguiente
-//		text_length = metadata_fasta->filterMetadata(text, text_length);
+		text_length = metadata_fasta->filterMetadata(text, text_length);
 		
 		text_length = filter->filterNewLines(text, text_length, nl_pos);
 	}
@@ -226,9 +227,9 @@ bool Compressor::realCompress(const char *in_file, unsigned int n_threads, unsig
 		if(nl_pos != NULL){
 			delete nl_pos;
 		}
-//		if(metadata_fasta != NULL){
-//			delete metadata_fasta;
-//		}
+		if(metadata_fasta != NULL){
+			delete metadata_fasta;
+		}
 		return false;
 	}
 	
@@ -313,6 +314,9 @@ bool Compressor::realCompress(const char *in_file, unsigned int n_threads, unsig
 	cout<<"Compressor::realCompress - Preparando nuevo header\n";
 	//Escritura de headers en el master (headers es del tipo de decoder->headers)
 	BlockHeaders *headers = decoder->getNewHeaders(text_length, block_size, new Metadata(META_SAVE_VBYTE, lowcase_runs, nl_pos) );
+	// Quizas metadata_fasta deberia ser parte de los headers, de modo que sea decoder->getHeaders()->getMetadataFasta()->metodo(...)
+	headers->setMetadataFasta(metadata_fasta);
+//	decoder->setMetadataFasta(metadata_fasta);
 	
 	//Buffer para la copia
 	unsigned int buffer_size = 1024*1024;
@@ -345,6 +349,7 @@ bool Compressor::realCompress(const char *in_file, unsigned int n_threads, unsig
 //	headers->save(&escritor);
 	BlockHeadersFactory::save(headers, &escritor);
 	delete headers;
+	
 //	cout<<"Compressor::realCompress - Agregando Datos\n";
 	for(unsigned int block = 0; block < n_blocks; ++block){
 		unsigned int thread_id = vector_thread_block[block];
