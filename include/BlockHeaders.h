@@ -14,6 +14,7 @@
 #include "BytesReader.h"
 #include "BitsUtils.h"
 #include "Metadata.h"
+#include "MetadataFasta.h"
 
 using namespace std;
 
@@ -60,6 +61,7 @@ protected:
 	//vector<Header*> headers;
 	
 	Metadata *metadata;
+	MetadataFasta *metadata_fasta;
 	
 public: 
 	
@@ -122,10 +124,14 @@ public:
 	// Retorna metadata (real, no una copia) de este objeto
 	virtual Metadata *getMetadata();
 	
+	virtual MetadataFasta *getMetadataFasta();
+	
 	// Reemplaza el metadata de este objeto
 	// No verifica ni destruye el anterior metadata
 	// El llamador de este metodo debe encargarse de eliminar un potencial metadata anterior con getMetadata()
 	virtual void setMetadata(Metadata *_metadata);
+	
+	virtual void setMetadataFasta(MetadataFasta *_metadata_fasta);
 	
 	//LLamadas directas a los metodos de metadata
 	virtual void adjustCase(char *buff, unsigned long long ini, unsigned int length);

@@ -5,6 +5,7 @@ BlockHeaders::BlockHeaders(){
 	block_size = 0;
 	data_pos = 0;
 	metadata = NULL;
+	metadata_fasta = NULL;
 	bytes_total_initial = 0;
 	unprepared_block = 0;
 }
@@ -14,6 +15,7 @@ BlockHeaders::BlockHeaders(unsigned long long _text_size, unsigned int _block_si
 	block_size = _block_size;
 	data_pos = 0;
 	metadata = _metadata;
+	metadata_fasta = NULL;
 	bytes_total_initial = 0;
 	unprepared_block = 0;
 }
@@ -23,14 +25,26 @@ BlockHeaders::~BlockHeaders(){
 		delete metadata;
 		metadata = NULL;
 	}
+	if(metadata_fasta != NULL){
+		delete metadata_fasta;
+		metadata_fasta = NULL;
+	}
 }
-	
+
 Metadata *BlockHeaders::getMetadata(){
 	return metadata;
 }
 
+MetadataFasta *BlockHeaders::getMetadataFasta(){
+	return metadata_fasta;
+}
+
 void BlockHeaders::setMetadata(Metadata *_metadata){
 	metadata = _metadata;
+}
+
+void BlockHeaders::setMetadataFasta(MetadataFasta *_metadata_fasta){
+	metadata_fasta = _metadata_fasta;
 }
 
 void BlockHeaders::addBlock(Header *header){
