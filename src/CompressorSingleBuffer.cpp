@@ -85,10 +85,7 @@ unsigned int CompressorSingleBuffer::read(unsigned long long pos_ini, unsigned i
 	//Lock desde aqui hasta el final del metodo
 	lock_guard<mutex> lock(mutex_interno);
 	
-	bool debug = false;
-//	if( pos_ini > 4285000000 && pos_ini < 4300000000 ){
-//		debug = true;
-//	}
+	bool debug = true;
 	
 	if(debug) cout<<"CompressorSingleBuffer::read - Inicio ("<<pos_ini<<", "<<length<<", total: "<<decoder->getTextSize()<<")\n";
 	
@@ -251,7 +248,7 @@ bool CompressorSingleBuffer::decompress(const char *out_file, unsigned int line_
 	unsigned long long ini = 0;
 	cout<<"CompressorSingleBuffer::decompress - Iniciando read por linea\n";
 	ini += read(ini, line_size, line);
-//	cout<<"CompressorSingleBuffer::decompress - Linea ("<<strlen(line)<<" chars, \""<<line<<"\")\n";
+	cout<<"CompressorSingleBuffer::decompress - Linea ("<<strlen(line)<<" chars, \""<<line<<"\")\n";
 //	cout<<"CompressorSingleBuffer::decompress - Linea ("<<strlen(line)<<" chars)\n";
 	while( (real_size = strlen(line)) > 0 ){
 	
@@ -263,7 +260,7 @@ bool CompressorSingleBuffer::decompress(const char *out_file, unsigned int line_
 		escritor.write(line, real_size );
 		
 		ini += read(ini, line_size, line);
-//		cout<<"CompressorSingleBuffer::decompress - Linea ("<<strlen(line)<<" chars, \""<<line<<"\")\n";
+		cout<<"CompressorSingleBuffer::decompress - Linea ("<<strlen(line)<<" chars, \""<<line<<"\")\n";
 //		cout<<"CompressorSingleBuffer::decompress - Linea ("<<strlen(line)<<" chars)\n";
 	}
 	cout<<"CompressorSingleBuffer::decompress - Escritura terminada, cerrando y liberando buffer\n";
