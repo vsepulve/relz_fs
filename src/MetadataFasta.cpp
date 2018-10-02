@@ -209,8 +209,96 @@ unsigned int MetadataFasta::size(){
 }
 	
 	
+void MetadataFasta::adjustText(char *out_buff, unsigned long long pos_ini, unsigned int copied_chars, char *adjust_buffer){
+	
+	cout << "MetadataFasta::adjustText - Start (pos_ini: " << pos_ini << ", copied_chars: " << copied_chars << ")\n";
+	
+	cout << "MetadataFasta::adjustText - Original text: \"" << out_buff << "\"\n";
+	
+	
+	unsigned int write_pos = 0;
+	unsigned int read_pos = 0;
+	for( unsigned int i = 0; i < pos_text.size(); ++i ){
+		// Obviamente el primer paso se saca de una busqueda binaria simple
+		// Aqui estoy perdiendo la cola de potenciales metadatos previos, hay que considerar el largo tambien
+		
+		if( pos_text[i] < pos_ini ){
+			if( pos_text[i] + length_line[i] >= pos_ini ){
+				// Caso especial, escribir la cola de una linea de metadata cortada
+				cout << "MetadataFasta::adjustText - Special case, adding truncated metadata\n";
+				unsigned int len = pos_text[i] + length_line[i] - pos_ini;
+				unsigned long long pos = pos_storage[i] + length_line[i] - len;
+				cout << "MetadataFasta::adjustText - Adding " << len << " chars from metadata (+1 newline)\n";
+				memcpy(adjust_buffer + write_pos, metadata_text + pos, len);
+				write_pos += len;
+				adjust_buffer[write_pos++] = '\n';
+			}
+			continue;
+		}
+		if( pos_text[i] >= pos_ini + copied_chars ){
+			break;
+		}
+		
+		// Copia de chars del texto previo al metadata
+		unsigned int copy_len = pos_text[i] - pos_ini;
+		cout << "MetadataFasta::adjustText - Adding " << copy_len << " chars from original text\n";
+		memcpy(adjust_buffer + write_pos, out_buff + read_pos, copy_len);
+		write_pos += copy_len;
+		read_pos += copy_len;
+		cout << "MetadataFasta::adjustText - Adding " << length_line[i] << " chars from metadata (+1 newline)\n";
+		memcpy(adjust_buffer + write_pos, metadata_text + pos_storage[i], length_line[i]);
+		write_pos += length_line[i];
+		adjust_buffer[write_pos++] = '\n';
+		// Condicion de salida si ya escribio lo suficiente?
+		// Quizas recibir el largo esperado del texto de salida
+	}
+	
+	// Agergar la cola del texto
+	if( write_pos < copied_chars ){
+		cout << "MetadataFasta::adjustText - Adding " << (copied_chars - write_pos) << " chars from original text to finish\n";
+		memcpy(adjust_buffer + write_pos, out_buff + read_pos, copied_chars - write_pos);
+		write_pos = copied_chars;
+	}
+	
+	// Si habiamos escrito mas, basta con desecharlo
+	write_pos = copied_chars;
+	
+	// Devolver texto a la salida
+	memcpy(out_buff, adjust_buffer, write_pos);
+	out_buff[write_pos] = 0;
+	
+	cout << "MetadataFasta::adjustText - Resulting text: \"" << out_buff << "\"\n";
+	
+	
+	cout << "MetadataFasta::adjustText - End\n";
+
+}
 
 
+unsigned long long MetadataFasta::countText(unsigned long long pos){
+
+	cout << "MetadataFasta::countText - Start (pos: " << pos << ")\n";
+	
+	unsigned long long res = 0;
+	for( unsigned int i = 0; i < pos_text.size(); ++i ){
+		if( pos_text[i] >= pos ){
+			break;
+		}
+		unsigned long long ini = pos_text[i];
+		// agreggo el newline
+		unsigned int len = length_line[i] + 1;
+		
+		// pos: 10, ini: 7, len: 6 => len deseado 3
+		if( ini + len > pos ){
+			len = pos - ini;
+		}
+		res += len;
+	}
+	
+	cout << "MetadataFasta::countText - End (res: " << res << ")\n";
+	
+	return res;
+}
 
 
 

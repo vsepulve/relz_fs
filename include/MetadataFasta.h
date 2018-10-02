@@ -37,6 +37,10 @@ public:
 	// Size in bytes of the whole metadata structure stored with save
 	unsigned int size();
 	
+	void adjustText(char *out_buff, unsigned long long pos_ini, unsigned int copied_chars, char *adjust_buffer);
+	
+	unsigned long long countText(unsigned long long pos);
+	
 };
 
 
