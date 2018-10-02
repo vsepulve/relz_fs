@@ -100,6 +100,15 @@ unsigned int BlockHeadersRelz::save(fstream *writer){
 	cout<<"BlockHeadersRelz::save - Blocks written\n";
 	
 	// Aqui habria que escribir los metadatos fasta si existen
+	unsigned char marca = 0;
+	if( metadata_fasta == NULL ){
+		writer->write((char*)&marca, 1);
+	}
+	else{
+		marca = 1;
+		writer->write((char*)&marca, 1);
+		metadata_fasta->save(writer);
+	}
 	
 	return writer->tellp();
 	
@@ -141,6 +150,18 @@ void BlockHeadersRelz::load(fstream *reader){
 		reader->read((char*)(&bytes_len), sizeof(int));
 		header = new HeaderRelz(n_factores, bytes_pos, bytes_len);
 		headers.push_back( header );
+	}
+	
+	// Leer metadata fasta si existen
+	if( metadata_fasta != NULL ){
+		delete metadata_fasta;
+		metadata_fasta = NULL;
+	}
+	unsigned char marca = 0;
+	reader->read((char*)&marca, 1);
+	if( marca != 0 ){
+		metadata_fasta = new MetadataFasta();
+		metadata_fasta->load(reader);
 	}
 	
 }
@@ -215,16 +236,18 @@ void BlockHeadersRelz::prepare(){
 	//Marca del factory
 	data_pos = BlockHeadersFactory::typeSize();
 	
-	
 //	//Metadatos (4 enteros mas metadata)
 //	data_pos += 4 * sizeof(int) + metadata->size();
 	//Metadatos (3 enteros + 1 long long mas metadata)
 	data_pos += 3 * sizeof(int) + sizeof(long long) + metadata->size();
 	
-	
 	//headers (N * 3 enteros)
 	data_pos += headers.size() * 3 * sizeof(int);
-	cout<<"BlockHeadersRelz::prepare - data_pos: "<<data_pos<<" (type: "<<BlockHeadersFactory::typeSize()<<", meta: "<<(4 * sizeof(int) + metadata->size())<<", headers: "<<(headers.size() * 3 * sizeof(int))<<")\n";
+	
+	// Metadatos Fasta (1 byte para la marca, mas el size)
+	data_pos += 1 + metadata_fasta->size();
+	
+	cout<<"BlockHeadersRelz::prepare - data_pos: "<<data_pos<<" (type: "<<BlockHeadersFactory::typeSize()<<", meta: "<<(4 * sizeof(int) + metadata->size())<<", headers: "<<(headers.size() * 3 * sizeof(int))<<", fasta: 1 + " << metadata_fasta->size() << ")\n";
 }
 
 void BlockHeadersRelz::unprepare(unsigned int block_ini){
