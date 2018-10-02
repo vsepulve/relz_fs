@@ -14,10 +14,13 @@
 
 using namespace std;
 class MetadataFasta {
-
-public:
 	
 protected: 
+	vector<unsigned long long> pos_text;
+	vector<unsigned long long> pos_storage;
+	vector<unsigned int> length_line;
+	char *metadata_text;
+	unsigned long long metadata_length;
 	
 public: 
 	
@@ -26,6 +29,13 @@ public:
 	virtual ~MetadataFasta();
 	
 	unsigned long long filterMetadata(char *text, unsigned long long text_length);
+	
+	void save(fstream *writer);
+	
+	void load(fstream *reader);
+	
+	// Size in bytes of the whole metadata structure stored with save
+	unsigned int size();
 	
 };
 
