@@ -104,8 +104,8 @@ unsigned int CompressorSingleBuffer::read(unsigned long long pos_ini, unsigned i
 		
 		// Antes de sacar los newlines de las posiciones del read, hay que sacar los metadatos
 		
-		meta_text_izq = decoder->getHeaders()->getMetadataFasta()->countText(pos_ini);
-		meta_text_med = decoder->getHeaders()->getMetadataFasta()->countText(pos_ini + length);
+		meta_text_izq = decoder->getHeaders()->getMetadataFasta()->countTextBin(pos_ini);
+		meta_text_med = decoder->getHeaders()->getMetadataFasta()->countTextBin(pos_ini + length);
 		if(debug) cout<<"CompressorSingleBuffer::read - MetadataFast, meta_text_izq: "<<meta_text_izq<<", meta_text_med: "<<meta_text_med<<" - "<<meta_text_izq<<"\n";
 		meta_text_med -= meta_text_izq;
 		if( (meta_text_izq > pos_ini) || (meta_text_med > length) ){
