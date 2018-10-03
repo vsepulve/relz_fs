@@ -12,6 +12,8 @@
 #include <vector>
 #include <map>
 
+#include "NanoTimer.h"
+
 using namespace std;
 class MetadataFasta {
 	
@@ -40,6 +42,7 @@ public:
 	void adjustText(char *out_buff, unsigned long long pos_ini, unsigned int copied_chars, char *adjust_buffer);
 	
 	unsigned long long countText(unsigned long long pos);
+	unsigned long long countTextBin(unsigned long long pos);
 	
 };
 
