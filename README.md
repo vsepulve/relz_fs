@@ -12,17 +12,25 @@ make
 sudo make install
 ```
 
-The main programs of this version of the code are compress, decompress, and daemon_fuse_hybrid, created by the main Makefile.
+The main programs of this version of the code are compress, decompress, and daemon_fuse_hybrid.
 
-Test
+Compile
 -------------------
 ```
+mkdir build
+cd build
+cmake ..
 make
-./bin/compress data/ref.txt data/seq.txt data/seq.relz 100000 4 data/ref.bin 1 1
-./bin/decompress data/ref.bin data/seq.relz data/seq_decomp.txt 100000
+```
+
+Test (from build/ directory)
+-------------------
+```
+./bin/compress ../data/ref.txt ../data/seq.txt ../data/seq.relz 100000 4 ../data/ref.bin 1 1
+./bin/decompress ../data/ref.bin ../data/seq.relz ../data/seq_decomp.txt 100000
 mkdir test test_real
-./bin/daemon_fuse_hybrid -d ./test
-cp data/seq.txt test/seq.relz
+./bin/daemon_fuse_hybrid -d ./test ../daemon_fuse.config
+cp ../data/seq.txt test/seq.relz
 ls -l test/ test_real/
 ```
 
