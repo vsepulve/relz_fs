@@ -12,6 +12,8 @@
 #include <vector>
 #include <map>
 
+#include <lzma.h>
+
 #include "NanoTimer.h"
 
 using namespace std;
@@ -23,6 +25,10 @@ protected:
 	vector<unsigned int> length_line;
 	char *metadata_text;
 	unsigned long long metadata_length;
+	
+	unsigned char* CompressWithLzma(const char *text, size_t length, int level, size_t &output_length);
+//	std::string DecompressWithLzma(const std::string& in);
+	char* DecompressWithLzma(const unsigned char *input, size_t length, size_t &output_length);
 	
 public: 
 	
