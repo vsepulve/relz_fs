@@ -404,17 +404,35 @@ void MetadataFasta::adjustText(char *out_buff, unsigned long long pos_ini, unsig
 	unsigned int read_pos = 0;
 	bool first = true;
 	unsigned int special_copy = 0;
-	for( unsigned int i = 0; i < pos_text.size(); ++i ){
+	
+	
+//	// Version Binaria
+//	unsigned int l = 0;
+//	unsigned int h = pos_text.size() - 1;
+//	unsigned int m;
+//	while(l < h){
+//		m = l + ((h-l)>>1);
+//		if( pos_text[m] < pos_ini ){
+//			l = m+1;
+//		}
+//		else{
+//			h = m;
+//		}
+//	}
+//	unsigned int line_pos = h;
+	
+	for( unsigned int line_pos = 0; line_pos < pos_text.size(); ++line_pos ){
+//	for( ; line_pos < pos_text.size(); ++line_pos ){
 		// Obviamente el primer paso se saca de una busqueda binaria simple
 		// Aqui estoy perdiendo la cola de potenciales metadatos previos, hay que considerar el largo tambien
 		
-		if( pos_text[i] < pos_ini ){
-			if( pos_text[i] + length_line[i] >= pos_ini ){
+		if( pos_text[line_pos] < pos_ini ){
+			if( pos_text[line_pos] + length_line[line_pos] >= pos_ini ){
 				// Caso especial, escribir la cola de una linea de metadata cortada
 				cout << "MetadataFasta::adjustText - Special case, adding truncated metadata\n";
-				special_copy = pos_text[i] + length_line[i] - pos_ini;
-				unsigned long long pos = pos_storage[i] + length_line[i] - special_copy;
-				cout << "MetadataFasta::adjustText - Adding " << special_copy << " chars from metadata (+1 newline) from pos " << pos << " (" << pos_storage[i] << " + " << length_line[i] << " - " << special_copy << ")\n";
+				special_copy = pos_text[line_pos] + length_line[line_pos] - pos_ini;
+				unsigned long long pos = pos_storage[line_pos] + length_line[line_pos] - special_copy;
+				cout << "MetadataFasta::adjustText - Adding " << special_copy << " chars from metadata (+1 newline) from pos " << pos << " (" << pos_storage[line_pos] << " + " << length_line[line_pos] << " - " << special_copy << ")\n";
 				memcpy(adjust_buffer + write_pos, metadata_text + pos, special_copy);
 				write_pos += special_copy;
 				adjust_buffer[write_pos++] = '\n';
@@ -422,13 +440,13 @@ void MetadataFasta::adjustText(char *out_buff, unsigned long long pos_ini, unsig
 			}
 			continue;
 		}
-		if( pos_text[i] >= pos_ini + copied_chars ){
+		if( pos_text[line_pos] >= pos_ini + copied_chars ){
 			break;
 		}
 		
 		// Copia de chars del texto previo al metadata
-		unsigned int copy_len = pos_text[i];
-		cout << "MetadataFasta::adjustText - Initial copy_len: " << pos_text[i] << "\n";
+		unsigned int copy_len = pos_text[line_pos];
+		cout << "MetadataFasta::adjustText - Initial copy_len: " << pos_text[line_pos] << "\n";
 		if( first ){
 			if( pos_ini > copy_len ){
 				copy_len = 0;
@@ -442,15 +460,15 @@ void MetadataFasta::adjustText(char *out_buff, unsigned long long pos_ini, unsig
 			else{
 				copy_len -= special_copy;
 			}
-			cout << "MetadataFasta::adjustText - Mod copy_len: " << pos_text[i] << " - " << pos_ini << " - " << special_copy << "\n";
+			cout << "MetadataFasta::adjustText - Mod copy_len: " << pos_text[line_pos] << " - " << pos_ini << " - " << special_copy << "\n";
 		}
 
-//		unsigned int copy_len = pos_text[i];
+//		unsigned int copy_len = pos_text[line_pos];
 //		cout << "MetadataFasta::adjustText - Initial copy_len: " << copy_len << "\n";
 		if( ! first ){
 			// Descuento la linea anterior
-			copy_len -= (pos_text[i-1] + length_line[i-1] + 1);
-			cout << "MetadataFasta::adjustText - Adjusted copy_len: " << copy_len << " (ajuste: - " << pos_text[i-1] << " - " << length_line[i-1] << " - 1)\n";
+			copy_len -= (pos_text[line_pos-1] + length_line[line_pos-1] + 1);
+			cout << "MetadataFasta::adjustText - Adjusted copy_len: " << copy_len << " (ajuste: - " << pos_text[line_pos-1] << " - " << length_line[line_pos-1] << " - 1)\n";
 		}
 		
 		first = false;
@@ -459,9 +477,9 @@ void MetadataFasta::adjustText(char *out_buff, unsigned long long pos_ini, unsig
 		memcpy(adjust_buffer + write_pos, out_buff + read_pos, copy_len);
 		write_pos += copy_len;
 		read_pos += copy_len;
-		cout << "MetadataFasta::adjustText - Adding " << length_line[i] << " chars from metadata (+1 newline)\n";
-		memcpy(adjust_buffer + write_pos, metadata_text + pos_storage[i], length_line[i]);
-		write_pos += length_line[i];
+		cout << "MetadataFasta::adjustText - Adding " << length_line[line_pos] << " chars from metadata (+1 newline)\n";
+		memcpy(adjust_buffer + write_pos, metadata_text + pos_storage[line_pos], length_line[line_pos]);
+		write_pos += length_line[line_pos];
 		adjust_buffer[write_pos++] = '\n';
 		adjust_buffer[write_pos] = 0;
 		// Condicion de salida si ya escribio lo suficiente?
