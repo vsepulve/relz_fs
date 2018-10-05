@@ -215,7 +215,9 @@ bool Compressor::realCompress(const char *in_file, unsigned int n_threads, unsig
 		// Aca habria que sacar los metadatos de modo similara los newlines
 		// El objeto guardara tanto los textos como todo lo necesario para reponerlos
 		// Notar que eso deja la secuencia sola, pero con newlines normales, que seran sacados en la fase siguiente
-		text_length = metadata_fasta->filterMetadata(text, text_length);
+		if( metadata_fasta != NULL ){
+			text_length = metadata_fasta->filterMetadata(text, text_length);
+		}
 		
 		text_length = filter->filterNewLines(text, text_length, nl_pos);
 	}
