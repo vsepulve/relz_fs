@@ -5,12 +5,25 @@
 #include <sstream>
 #include <fstream>
 #include <string.h>
+
 #include <random>
+#include <algorithm>
 
 #include <map>
 #include <vector>
 
+#include "NanoTimer.h"
+
 using namespace std;
+
+unsigned long long karpRabin(const char *filtered_text, unsigned int segment_length, unsigned int *pow_table, unsigned int kr_mod){
+	unsigned long long hash = 0;
+	for(unsigned int i = 0, k = segment_length-1; i < segment_length; i++, k--) {
+		hash = hash + ((unsigned long long)(filtered_text[i]) * pow_table[k]) % kr_mod;
+		hash = hash % kr_mod;
+	}
+	return hash;
+}
 
 int main(int argc, char* argv[]){
 	
@@ -85,7 +98,12 @@ int main(int argc, char* argv[]){
 	reader.close();
 	
 	filtered_text[write_pos] = 0;
-	cout << "Filtered Text: \"" << filtered_text<< "\"\n";
+//	cout << "Filtered Text: \"" << filtered_text<< "\"\n";
+	
+	if( write_pos <= segment_length ){
+		cout << "Error, filtered_text too small (" << write_pos << ", segment_length: " << segment_length << ")\n";
+		return 0;
+	}
 	
 	fstream writer(output_file, fstream::out | fstream::trunc );
 	
@@ -93,14 +111,78 @@ int main(int argc, char* argv[]){
 	// La idea seria iterar por el texto generando los kmers de cierto largo con sus frecuencias y la posicion del primero
 	// Depsues, ordenamos por frecuencia y agregamos una cierta cantidad de los mas frecuentes
 	
+	// Mapa para frecs con hash -> pair(frec, pos)
+	map<unsigned long long, pair<unsigned int, unsigned int> > frecs;
+	
+	unsigned int voc_bits = 8;
+	unsigned int kr_mod = 15485863;
+	unsigned int table_size = 10000000;
+	cout << "Preparing KarpRabin (voc_bits: " << voc_bits << ", kr_mod: " << kr_mod << "), PowTable of size " << 10000000 << "\n";
+	unsigned int *pow_table = new unsigned int[table_size];
+	pow_table[0] = 1;
+	for(unsigned int i = 1; i < table_size; ++i){
+		pow_table[i] = (pow_table[i-1] * (1<<voc_bits)) % kr_mod;
+	}
+	// Preparacion del primer hash
+	unsigned long long hash = 0;
+	unsigned long long test_hash = 0;
+	for(unsigned int i = 0, k = segment_length-1; i < segment_length; i++, k--) {
+		hash = hash + ((unsigned long long)(filtered_text[i]) * pow_table[k]) % kr_mod;
+		hash = hash % kr_mod;
+	}
+	string line(filtered_text, segment_length);
+	cout << "hash (" << line << "): " << hash << " (" << karpRabin(line.data(), line.length(), pow_table, kr_mod) << ")\n";
+	frecs[hash] = pair<unsigned int, unsigned int>(1, 0);
+	
+	NanoTimer timer;
+	for(unsigned int i = 0; i < write_pos-segment_length; ++i){
+		// substract char i
+//		cout << "Removing char " << i << "\n";
+		unsigned long long kr1 = ((unsigned long long)(filtered_text[i]) * pow_table[0]) % kr_mod;
+//		cout << "hash (" << filtered_text[i] << "): " << kr1 << "\n";
+		hash = (hash + kr_mod - ((kr1 * pow_table[segment_length-1]) % kr_mod)) % kr_mod;
+		
+		string line(filtered_text + i + 1, segment_length - 1);
+//		cout << "hash (" << line << "): " << hash << " (" << karpRabin(line.data(), line.length(), pow_table, kr_mod) << ")\n";
+		
+		// add char i + segment_length
+//		cout << "Adding char " << (i + segment_length) << "\n";
+		unsigned long long kr2 = ((unsigned long long)(filtered_text[i + segment_length]) * pow_table[0]) % kr_mod;
+		hash = (kr2 + (hash * pow_table[1]) % kr_mod) % kr_mod;
+		
+		// Debug Test
+		line = string(filtered_text + i + 1, segment_length);
+		test_hash = karpRabin(line.data(), line.length(), pow_table, kr_mod);
+//		cout << "hash (" << line << "): " << hash << " (" << test_hash << ")\n";
+		if( hash != test_hash ){
+			cout << "Error en karp rabin\n";
+			return 0;
+		}
+		
+		auto it = frecs.find(hash);
+		if( it == frecs.end() ){
+			frecs[hash] = pair<unsigned int, unsigned int>(1, i+1);
+		}
+		else{
+			(frecs[hash].first)++;
+		}
+	}
+	cout << "KarpRabin finished in " << timer. getMilisec() << " ms\n";
+	
+	vector< pair<unsigned int, unsigned int> > arr_frecs;
+	for( auto it : frecs ){
+		arr_frecs.push_back(it.second);
+	}
+	sort(arr_frecs.begin(), arr_frecs.end());
+	for( pair<unsigned int, unsigned int> par : arr_frecs ){
+		string line(filtered_text + par.second, segment_length);
+		cout << "frec[" << line << "]: " << par.first << "\n";
+	}
+	
 	
 	
 	
 	// Fase de segmentos aleatorios
-	if( write_pos <= segment_length ){
-		cout << "Error, filtered_text too small (" << write_pos << ", segment_length: " << segment_length << ")\n";
-		return 0;
-	}
 	
 //	random_device seed;
 //	mt19937 generator(seed());
