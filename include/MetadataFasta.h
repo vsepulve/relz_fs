@@ -31,6 +31,10 @@ protected:
 //	std::string DecompressWithLzma(const std::string& in);
 	char* DecompressWithLzma(const unsigned char *input, size_t length, size_t &output_length);
 	
+	unsigned char *compressed_buff;
+	size_t compressed_bytes;
+	bool already_compressed;
+	
 public: 
 	
 	MetadataFasta();

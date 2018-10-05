@@ -3,6 +3,9 @@
 MetadataFasta::MetadataFasta(){
 	metadata_text = NULL;
 	metadata_length = 0;
+	compressed_buff = NULL;
+	compressed_bytes = 0;
+	already_compressed = false;
 }
 
 MetadataFasta::~MetadataFasta(){
@@ -11,18 +14,20 @@ MetadataFasta::~MetadataFasta(){
 		metadata_text = NULL;
 	}
 	metadata_length = 0;
+	if( compressed_buff != NULL ){
+		delete [] compressed_buff;
+		compressed_buff = NULL;
+	}
+	compressed_bytes = 0;
 }
 	
 unsigned char* MetadataFasta::CompressWithLzma(const char *text, size_t length, int level, size_t &output_length){
-//std::string MetadataFasta::CompressWithLzma(const std::string& in, int level) {
-	
 	size_t worst_space = length + (length >> 2) + 128;
 	unsigned char *tmp_buff = new unsigned char[worst_space];
 	cout << "CompressWithLzma - worst_space: " << worst_space << "\n";
 	output_length = 0;
 	int res = lzma_easy_buffer_encode(
 			level, LZMA_CHECK_CRC32, NULL,
-//			static_cast<const unsigned char*>(text), 
 			(const unsigned char*)text, 
 			length,
 			tmp_buff, 
@@ -41,19 +46,6 @@ unsigned char* MetadataFasta::CompressWithLzma(const char *text, size_t length, 
 	result[output_length] = 0;
 	delete [] tmp_buff;
 	return result;
-
-//  std::string result;
-//  result.resize(in.size() + (in.size() >> 2) + 128);
-//  cout << "CompressWithLzma - worst out_pos: " << (in.size() + (in.size() >> 2) + 128) << "\n";
-//  size_t out_pos = 0;
-//  if (LZMA_OK != lzma_easy_buffer_encode(
-//      level, LZMA_CHECK_CRC32, NULL,
-//      reinterpret_cast<uint8_t*>(const_cast<char*>(in.data())), in.size(),
-//      reinterpret_cast<uint8_t*>(&result[0]), &out_pos, result.size()))
-//    abort();
-//  cout << "CompressWithLzma - out_pos: " << out_pos << "\n";
-//  result.resize(out_pos);
-//	return result;
 }
 
 //std::string MetadataFasta::DecompressWithLzma(const std::string& in) {
@@ -235,9 +227,14 @@ void MetadataFasta::save(fstream *writer){
 	delete [] buff;
 	
 	char compression_mark = 0;
-	size_t compressed_size = 0;
-	unsigned char *compressed = CompressWithLzma(metadata_text, (size_t)metadata_length, 6, compressed_size);
-	if( compressed == NULL || (compressed_size > (size_t)metadata_length) ){
+//	size_t compressed_size = 0;
+//	unsigned char *compressed = CompressWithLzma(metadata_text, (size_t)metadata_length, 6, compressed_size);
+	if( ! already_compressed ){
+		compressed_bytes = 0;
+		compressed_buff = CompressWithLzma(metadata_text, (size_t)metadata_length, 6, compressed_bytes);
+		already_compressed = true;
+	}
+	if( compressed_buff == NULL || (compressed_bytes > (size_t)metadata_length) ){
 		cout << "MetadataFasta::save - Saving metadata text UNCOMPRESSED\n";
 		writer->write(&compression_mark, 1);
 		writer->write((char*)&metadata_length, sizeof(long long));
@@ -247,12 +244,12 @@ void MetadataFasta::save(fstream *writer){
 		cout << "MetadataFasta::save - Saving metadata text LZMA\n";
 		compression_mark = 1;
 		writer->write(&compression_mark, 1);
-		writer->write((char*)&compressed_size, sizeof(size_t));
-		writer->write((char*)compressed, compressed_size);
+		writer->write((char*)&compressed_bytes, sizeof(size_t));
+		writer->write((char*)compressed_buff, compressed_bytes);
 	}
-	if( compressed != NULL ){
-		delete [] compressed;
-	}
+//	if( compressed != NULL ){
+//		delete [] compressed;
+//	}
 	
 	cout << "MetadataFasta::save - End\n";
 	
@@ -421,9 +418,14 @@ unsigned int MetadataFasta::size(){
 	// compression_mark
 	size_bytes += 1;
 	
-	size_t compressed_size = 0;
-	unsigned char *compressed = CompressWithLzma(metadata_text, (size_t)metadata_length, 6, compressed_size);
-	if( compressed == NULL || (compressed_size > (size_t)metadata_length) ){
+//	size_t compressed_size = 0;
+//	unsigned char *compressed = CompressWithLzma(metadata_text, (size_t)metadata_length, 6, compressed_size);
+	if( ! already_compressed ){
+		compressed_bytes = 0;
+		compressed_buff = CompressWithLzma(metadata_text, (size_t)metadata_length, 6, compressed_bytes);
+		already_compressed = true;
+	}
+	if( compressed_buff == NULL || (compressed_bytes > (size_t)metadata_length) ){
 		cout << "MetadataFasta::size - UNCOMPRESSED\n";
 		
 		// metadata_length
@@ -435,15 +437,15 @@ unsigned int MetadataFasta::size(){
 	else{
 		cout << "MetadataFasta::size - LZMA\n";
 		
-		// compressed_size
+		// compressed_bytes
 		size_bytes += sizeof(size_t);
 		
-		// compressed
-		size_bytes += compressed_size;
+		// compressed_buff
+		size_bytes += compressed_bytes;
 	}
-	if( compressed != NULL ){
-		delete [] compressed;
-	}
+//	if( compressed != NULL ){
+//		delete [] compressed;
+//	}
 	
 	cout << "MetadataFasta::size - Total Size: " << size_bytes << " (numbers: " << size_bytes_nums << " (" << (double)size_bytes_nums/(3*pos_text.size()) << " bytes/num), text: " << (size_bytes - size_bytes_nums) << ")\n";
 	
