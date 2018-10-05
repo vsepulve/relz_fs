@@ -245,9 +245,14 @@ void BlockHeadersRelz::prepare(){
 	data_pos += headers.size() * 3 * sizeof(int);
 	
 	// Metadatos Fasta (1 byte para la marca, mas el size)
-	data_pos += 1 + metadata_fasta->size();
+	data_pos += 1;
+	unsigned int metadata_fasta_size = 0;
+	if( metadata_fasta != NULL ){
+		metadata_fasta_size = metadata_fasta->size();
+		data_pos += metadata_fasta_size;
+	}
 	
-	cout<<"BlockHeadersRelz::prepare - data_pos: "<<data_pos<<" (type: "<<BlockHeadersFactory::typeSize()<<", meta: "<<(4 * sizeof(int) + metadata->size())<<", headers: "<<(headers.size() * 3 * sizeof(int))<<", fasta: 1 + " << metadata_fasta->size() << ")\n";
+	cout<<"BlockHeadersRelz::prepare - data_pos: "<<data_pos<<" (type: "<<BlockHeadersFactory::typeSize()<<", meta: "<<(4 * sizeof(int) + metadata->size())<<", headers: "<<(headers.size() * 3 * sizeof(int))<<", fasta: 1 + " << metadata_fasta_size << ")\n";
 }
 
 void BlockHeadersRelz::unprepare(unsigned int block_ini){
