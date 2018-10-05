@@ -15,6 +15,7 @@
 #include <lzma.h>
 
 #include "NanoTimer.h"
+#include "BitsUtils.h"
 
 using namespace std;
 class MetadataFasta {
