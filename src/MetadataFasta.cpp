@@ -119,7 +119,7 @@ unsigned long long MetadataFasta::filterMetadata(char *text, unsigned long long 
 	
 	while( read_pos < text_length ){
 		
-		cout << "MetadataFasta::filterMetadata - Reading from " << read_pos << " / " << text_length << "\n";
+//		cout << "MetadataFasta::filterMetadata - Reading from " << read_pos << " / " << text_length << "\n";
 		
 		// getline
 		unsigned long long line_start = read_pos;
