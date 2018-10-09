@@ -124,7 +124,7 @@ public:
 	// Retorna metadata (real, no una copia) de este objeto
 	virtual Metadata *getMetadata();
 	
-	virtual MetadataFasta *getMetadataFasta();
+//	virtual MetadataFasta *getMetadataFasta();
 	
 	// Reemplaza el metadata de este objeto
 	// No verifica ni destruye el anterior metadata
@@ -138,6 +138,10 @@ public:
 	virtual unsigned int countNewLines(unsigned long long pos);
 	virtual void adjustNewLines(char *buff, unsigned long long ini, unsigned int length, unsigned int nl_izq, unsigned int nl_med, char *copy_buff = NULL);
 	virtual void filterNewText(const char *in_buff, unsigned int length, unsigned long long pos_ini, char *out_buff, unsigned int &adjusted_length, unsigned long long &adjusted_pos_ini);
+	
+	virtual void adjustText(char *out_buff, unsigned long long pos_ini, unsigned int copied_chars, char *adjust_buffer);
+	virtual unsigned long long countText(unsigned long long pos);
+	virtual unsigned long long countTextBin(unsigned long long pos);
 	
 	// Este metodo especial es para el write (ajusta el text_size interno solo si es necesario)
 	virtual void increaseTextSize(unsigned long long _text_size){

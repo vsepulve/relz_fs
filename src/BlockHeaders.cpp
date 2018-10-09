@@ -35,9 +35,9 @@ Metadata *BlockHeaders::getMetadata(){
 	return metadata;
 }
 
-MetadataFasta *BlockHeaders::getMetadataFasta(){
-	return metadata_fasta;
-}
+//MetadataFasta *BlockHeaders::getMetadataFasta(){
+//	return metadata_fasta;
+//}
 
 void BlockHeaders::setMetadata(Metadata *_metadata){
 	metadata = _metadata;
@@ -136,6 +136,28 @@ void BlockHeaders::filterNewText(const char *in_buff, unsigned int length, unsig
 	}
 	metadata->filterNewText(in_buff, length, pos_ini, out_buff, adjusted_length, adjusted_pos_ini);
 }
+	
+void BlockHeaders::adjustText(char *out_buff, unsigned long long pos_ini, unsigned int copied_chars, char *adjust_buffer){
+	if( metadata_fasta == NULL ){
+		return;
+	}
+	metadata_fasta->adjustText(out_buff, pos_ini, copied_chars, adjust_buffer);
+}
+
+unsigned long long BlockHeaders::countTextBin(unsigned long long pos){
+	if( metadata_fasta == NULL ){
+		return 0;
+	}
+	return metadata_fasta->countTextBin(pos);
+}
+
+unsigned long long BlockHeaders::countText(unsigned long long pos){
+	if( metadata_fasta == NULL ){
+		return 0;
+	}
+	return metadata_fasta->countText(pos);
+}
+
 
 
 
