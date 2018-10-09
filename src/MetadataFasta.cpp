@@ -455,9 +455,11 @@ unsigned int MetadataFasta::size(){
 	
 void MetadataFasta::adjustText(char *out_buff, unsigned long long pos_ini, unsigned int copied_chars, char *adjust_buffer){
 	
-	cout << "MetadataFasta::adjustText - Start (pos_ini: " << pos_ini << ", copied_chars: " << copied_chars << ")\n";
+	bool debug = false;
 	
-	cout << "MetadataFasta::adjustText - Original text: \"" << out_buff << "\"\n";
+	if(debug) cout << "MetadataFasta::adjustText - Start (pos_ini: " << pos_ini << ", copied_chars: " << copied_chars << ")\n";
+	
+//	cout << "MetadataFasta::adjustText - Original text: \"" << out_buff << "\"\n";
 	
 	unsigned int write_pos = 0;
 	unsigned int read_pos = 0;
@@ -488,10 +490,10 @@ void MetadataFasta::adjustText(char *out_buff, unsigned long long pos_ini, unsig
 		if( pos_text[line_pos] < pos_ini ){
 			if( pos_text[line_pos] + length_line[line_pos] >= pos_ini ){
 				// Caso especial, escribir la cola de una linea de metadata cortada
-				cout << "MetadataFasta::adjustText - Special case, adding truncated metadata\n";
+				if(debug) cout << "MetadataFasta::adjustText - Special case, adding truncated metadata\n";
 				special_copy = pos_text[line_pos] + length_line[line_pos] - pos_ini;
 				unsigned long long pos = pos_storage[line_pos] + length_line[line_pos] - special_copy;
-				cout << "MetadataFasta::adjustText - Adding " << special_copy << " chars from metadata (+1 newline) from pos " << pos << " (" << pos_storage[line_pos] << " + " << length_line[line_pos] << " - " << special_copy << ")\n";
+				if(debug) cout << "MetadataFasta::adjustText - Adding " << special_copy << " chars from metadata (+1 newline) from pos " << pos << " (" << pos_storage[line_pos] << " + " << length_line[line_pos] << " - " << special_copy << ")\n";
 				memcpy(adjust_buffer + write_pos, metadata_text + pos, special_copy);
 				write_pos += special_copy;
 				adjust_buffer[write_pos++] = '\n';
@@ -505,7 +507,7 @@ void MetadataFasta::adjustText(char *out_buff, unsigned long long pos_ini, unsig
 		
 		// Copia de chars del texto previo al metadata
 		unsigned int copy_len = pos_text[line_pos];
-		cout << "MetadataFasta::adjustText - Initial copy_len: " << pos_text[line_pos] << "\n";
+		if(debug) cout << "MetadataFasta::adjustText - Initial copy_len: " << pos_text[line_pos] << "\n";
 		if( first ){
 			if( pos_ini > copy_len ){
 				copy_len = 0;
@@ -519,7 +521,7 @@ void MetadataFasta::adjustText(char *out_buff, unsigned long long pos_ini, unsig
 			else{
 				copy_len -= special_copy;
 			}
-			cout << "MetadataFasta::adjustText - Mod copy_len: " << pos_text[line_pos] << " - " << pos_ini << " - " << special_copy << "\n";
+			if(debug) cout << "MetadataFasta::adjustText - Mod copy_len: " << pos_text[line_pos] << " - " << pos_ini << " - " << special_copy << "\n";
 		}
 
 //		unsigned int copy_len = pos_text[line_pos];
@@ -527,16 +529,16 @@ void MetadataFasta::adjustText(char *out_buff, unsigned long long pos_ini, unsig
 		if( ! first ){
 			// Descuento la linea anterior
 			copy_len -= (pos_text[line_pos-1] + length_line[line_pos-1] + 1);
-			cout << "MetadataFasta::adjustText - Adjusted copy_len: " << copy_len << " (ajuste: - " << pos_text[line_pos-1] << " - " << length_line[line_pos-1] << " - 1)\n";
+			if(debug) cout << "MetadataFasta::adjustText - Adjusted copy_len: " << copy_len << " (ajuste: - " << pos_text[line_pos-1] << " - " << length_line[line_pos-1] << " - 1)\n";
 		}
 		
 		first = false;
 		
-		cout << "MetadataFasta::adjustText - Adding " << copy_len << " chars from original text\n";
+		if(debug) cout << "MetadataFasta::adjustText - Adding " << copy_len << " chars from original text\n";
 		memcpy(adjust_buffer + write_pos, out_buff + read_pos, copy_len);
 		write_pos += copy_len;
 		read_pos += copy_len;
-		cout << "MetadataFasta::adjustText - Adding " << length_line[line_pos] << " chars from metadata (+1 newline)\n";
+		if(debug) cout << "MetadataFasta::adjustText - Adding " << length_line[line_pos] << " chars from metadata (+1 newline)\n";
 		memcpy(adjust_buffer + write_pos, metadata_text + pos_storage[line_pos], length_line[line_pos]);
 		write_pos += length_line[line_pos];
 		adjust_buffer[write_pos++] = '\n';
@@ -549,7 +551,7 @@ void MetadataFasta::adjustText(char *out_buff, unsigned long long pos_ini, unsig
 	
 	// Agergar la cola del texto
 	if( write_pos < copied_chars ){
-		cout << "MetadataFasta::adjustText - Adding " << (copied_chars - write_pos) << " chars from original text to finish\n";
+		if(debug) cout << "MetadataFasta::adjustText - Adding " << (copied_chars - write_pos) << " chars from original text to finish\n";
 		memcpy(adjust_buffer + write_pos, out_buff + read_pos, copied_chars - write_pos);
 		write_pos = copied_chars;
 		adjust_buffer[write_pos] = 0;
@@ -564,10 +566,10 @@ void MetadataFasta::adjustText(char *out_buff, unsigned long long pos_ini, unsig
 	memcpy(out_buff, adjust_buffer, write_pos);
 	out_buff[write_pos] = 0;
 	
-	cout << "MetadataFasta::adjustText - Resulting text: \"" << out_buff << "\"\n";
+//	cout << "MetadataFasta::adjustText - Resulting text: \"" << out_buff << "\"\n";
 	
 	
-	cout << "MetadataFasta::adjustText - End\n";
+	if(debug) cout << "MetadataFasta::adjustText - End\n";
 
 }
 
@@ -597,11 +599,13 @@ unsigned long long MetadataFasta::countText(unsigned long long pos){
 }
 
 unsigned long long MetadataFasta::countTextBin(unsigned long long pos){
-
-//	cout << "MetadataFasta::countTextBin - Start (pos: " << pos << ")\n";
+	
+	bool debug = false;
+	
+	if(debug) cout << "MetadataFasta::countTextBin - Start (pos: " << pos << ")\n";
 	
 	if( pos >= (pos_text.back() + length_line.back() + length_line.size()) ){
-//		cout << "MetadataFasta::countTextBin - Greater than collection\n";
+		if(debug) cout << "MetadataFasta::countTextBin - Greater than collection\n";
 		return (pos_storage.back() + length_line.back() + length_line.size());
 	}
 	
@@ -618,26 +622,26 @@ unsigned long long MetadataFasta::countTextBin(unsigned long long pos){
 			h = m;
 		}
 	}
-//	cout<<"MetadataFasta::countTextBin - BB finished (h: " << h << " por " << pos_text[h] << " / " << pos << ")\n";
+	if(debug) cout<<"MetadataFasta::countTextBin - BB finished (h: " << h << " por " << pos_text[h] << " / " << pos << ")\n";
 	if( (h > 0) && (pos_text[h] + 1) > pos ){
-//		cout<<"MetadataFasta::countTextBin - Adjusting\n";
+		if(debug) cout<<"MetadataFasta::countTextBin - Adjusting\n";
 		--h;
 	}
 	
-//	cout<<"MetadataFasta::countTextBin - h: " << h << ", pos_text: " << pos_text[h] << ", pos_storage: " << pos_storage[h] << ", length_line: " << length_line[h] << "\n";
+	if(debug) cout<<"MetadataFasta::countTextBin - h: " << h << ", pos_text: " << pos_text[h] << ", pos_storage: " << pos_storage[h] << ", length_line: " << length_line[h] << "\n";
 	
 	unsigned long long res = pos_storage[h] + h;
 	
-//	cout<<"MetadataFasta::countTextBin - " << pos << " < " << (pos_text[h] + length_line[h] + h + 1) << "? por h: " << h << "\n";
-	if( pos < (pos_text[h] + length_line[h] + 1) ){
-//		cout<<"MetadataFasta::countTextBin - Adding " << (pos - pos_text[h]) << "\n";
+	if(debug) cout<<"MetadataFasta::countTextBin - " << pos << " < " << (pos_text[h] + length_line[h] + h + 1) << "? por h: " << h << "\n";
+	if( (pos >= pos_text[h]) && pos < (pos_text[h] + length_line[h] + 1) ){
+		if(debug) cout<<"MetadataFasta::countTextBin - Adding " << (pos - pos_text[h]) << "\n";
 		res +=  (pos - pos_text[h]);
 	}
 	else{
 		res += length_line[h] + 1;
 	}
 	
-//	cout << "MetadataFasta::countTextBin - End (res: " << res << ")\n";
+	if(debug) cout << "MetadataFasta::countTextBin - End (res: " << res << ")\n";
 	
 	return res;
 }

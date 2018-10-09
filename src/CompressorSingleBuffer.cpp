@@ -85,7 +85,7 @@ unsigned int CompressorSingleBuffer::read(unsigned long long pos_ini, unsigned i
 	//Lock desde aqui hasta el final del metodo
 	lock_guard<mutex> lock(mutex_interno);
 	
-	bool debug = true;
+	bool debug = false;
 	
 	if(debug) cout<<"CompressorSingleBuffer::read - Inicio ("<<pos_ini<<", "<<length<<", total: "<<decoder->getTextSize()<<")\n";
 	
@@ -104,12 +104,13 @@ unsigned int CompressorSingleBuffer::read(unsigned long long pos_ini, unsigned i
 		
 		// Antes de sacar los newlines de las posiciones del read, hay que sacar los metadatos
 		
-		meta_text_izq = decoder->getHeaders()->getMetadataFasta()->countTextBin(pos_ini);
-		meta_text_med = decoder->getHeaders()->getMetadataFasta()->countTextBin(pos_ini + length);
+		meta_text_izq = decoder->getHeaders()->countTextBin(pos_ini);
+		meta_text_med = decoder->getHeaders()->countTextBin(pos_ini + length);
 		if(debug) cout<<"CompressorSingleBuffer::read - MetadataFast, meta_text_izq: "<<meta_text_izq<<", meta_text_med: "<<meta_text_med<<" - "<<meta_text_izq<<"\n";
 		meta_text_med -= meta_text_izq;
 		if( (meta_text_izq > pos_ini) || (meta_text_med > length) ){
 			cerr<<"CompressorSingleBuffer::read - Error al ajustar posiciones de MetadataFast ("<<meta_text_izq<<" de "<<pos_ini<<", "<<meta_text_med<<" de "<<length<<")\n";
+			exit(0);
 			meta_text_izq = 0;
 			meta_text_med = 0;
 		}
@@ -217,7 +218,7 @@ unsigned int CompressorSingleBuffer::read(unsigned long long pos_ini, unsigned i
 		// Aqui habria que reponer efectivamente los metadatos fasta
 		if(debug) cout<<"CompressorSingleBuffer::read - Adjusting Fasta (pos_ini: " << pos_ini << ", copied_chars: " << copied_chars << ")\n";
 		pos_ini += meta_text_izq;
-		decoder->getHeaders()->getMetadataFasta()->adjustText(out_buff, pos_ini, copied_chars + meta_text_med, adjust_buffer);
+		decoder->getHeaders()->adjustText(out_buff, pos_ini, copied_chars + meta_text_med, adjust_buffer);
 		copied_chars += meta_text_med;
 		
 		decoder->getHeaders()->adjustCase(out_buff, pos_ini, copied_chars);
@@ -249,7 +250,7 @@ bool CompressorSingleBuffer::decompress(const char *out_file, unsigned int line_
 	unsigned long long ini = 0;
 	cout<<"CompressorSingleBuffer::decompress - Iniciando read por linea\n";
 	ini += read(ini, line_size, line);
-	cout<<"CompressorSingleBuffer::decompress - Linea ("<<strlen(line)<<" chars, \""<<line<<"\")\n";
+//	cout<<"CompressorSingleBuffer::decompress - Linea ("<<strlen(line)<<" chars, \""<<line<<"\")\n";
 //	cout<<"CompressorSingleBuffer::decompress - Linea ("<<strlen(line)<<" chars)\n";
 	while( (real_size = strlen(line)) > 0 ){
 	
@@ -261,7 +262,7 @@ bool CompressorSingleBuffer::decompress(const char *out_file, unsigned int line_
 		escritor.write(line, real_size );
 		
 		ini += read(ini, line_size, line);
-		cout<<"CompressorSingleBuffer::decompress - Linea ("<<strlen(line)<<" chars, \""<<line<<"\")\n";
+//		cout<<"CompressorSingleBuffer::decompress - Linea ("<<strlen(line)<<" chars, \""<<line<<"\")\n";
 //		cout<<"CompressorSingleBuffer::decompress - Linea ("<<strlen(line)<<" chars)\n";
 	}
 	cout<<"CompressorSingleBuffer::decompress - Escritura terminada, cerrando y liberando buffer\n";
