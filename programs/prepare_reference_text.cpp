@@ -132,13 +132,13 @@ int main(int argc, char* argv[]){
 		}
 		// Preparacion del primer hash
 		unsigned long long hash = 0;
-		unsigned long long test_hash = 0;
+//		unsigned long long test_hash = 0;
 		for(unsigned int i = 0, k = kr_length-1; i < kr_length; i++, k--) {
 			hash = hash + ((unsigned long long)(filtered_text[i]) * pow_table[k]) % kr_mod;
 			hash = hash % kr_mod;
 		}
 		string line(filtered_text, kr_length);
-		cout << "hash (" << line << "): " << hash << " (" << karpRabin(line.data(), line.length(), pow_table, kr_mod) << ")\n";
+//		cout << "hash (" << line << "): " << hash << " (" << karpRabin(line.data(), line.length(), pow_table, kr_mod) << ")\n";
 		frecs[hash] = pair<unsigned int, unsigned int>(1, 0);
 	
 		timer.reset();
@@ -158,20 +158,22 @@ int main(int argc, char* argv[]){
 			hash = (kr2 + (hash * pow_table[1]) % kr_mod) % kr_mod;
 		
 			// Debug Test
-			line = string(filtered_text + i + 1, kr_length);
-			test_hash = karpRabin(line.data(), line.length(), pow_table, kr_mod);
+//			line = string(filtered_text + i + 1, kr_length);
+//			test_hash = karpRabin(line.data(), line.length(), pow_table, kr_mod);
 	//		cout << "hash (" << line << "): " << hash << " (" << test_hash << ")\n";
-			if( hash != test_hash ){
-				cout << "Error en karp rabin\n";
-				return 0;
-			}
-		
-			auto it = frecs.find(hash);
+//			if( hash != test_hash ){
+//				cout << "Error en karp rabin\n";
+//				return 0;
+//			}
+			
+//			auto it = frecs.find(hash);
+			map<unsigned long long, pair<unsigned int, unsigned int>>::iterator it = frecs.find(hash);
 			if( it == frecs.end() ){
 				frecs[hash] = pair<unsigned int, unsigned int>(1, i+1);
 			}
 			else{
-				(frecs[hash].first)++;
+//				(frecs[hash].first)++;
+				(it->second.first)++;
 			}
 		}
 		delete [] pow_table;
