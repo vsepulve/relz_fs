@@ -26,6 +26,7 @@ add_executable(daemon_fuse_hybrid "${CMAKE_SOURCE_DIR}/programs/daemon_fuse_hybr
 add_executable(daemon_server "${CMAKE_SOURCE_DIR}/programs/daemon_server.cpp")
 add_executable(daemon_fuse_client "${CMAKE_SOURCE_DIR}/programs/daemon_fuse_client.cpp")
 add_executable(prepare_reference_text "${CMAKE_SOURCE_DIR}/programs/prepare_reference_text.cpp")
+add_executable(test_read "${CMAKE_SOURCE_DIR}/programs/test_read.cpp")
 
 add_library(relz_fs SHARED ${SOURCES})
 link_directories(${CMAKE_BINARY_DIR})
@@ -37,6 +38,7 @@ target_link_libraries(daemon_fuse_hybrid relz_fs pthread fuse lzma)
 target_link_libraries(daemon_server relz_fs pthread fuse lzma)
 target_link_libraries(daemon_fuse_client relz_fs pthread fuse lzma)
 target_link_libraries(prepare_reference_text relz_fs pthread fuse lzma)
+target_link_libraries(test_read relz_fs pthread fuse lzma)
 
 if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     set (CMAKE_INSTALL_PREFIX "/usr/" CACHE PATH "default install path" FORCE )
