@@ -63,17 +63,17 @@ int main(int argc, char* argv[]){
 	
 	random_device dev;
 	mt19937 gen(dev());
-	uniform_int_distribution<unsigned long long> pos_dist(0, size - 1);
+	uniform_int_distribution<unsigned long long> pos_dist(0ull, size - len_read - 1ull);
 	unsigned long long total_bytes = 0;
 	
 	timer.reset();
 	cout << "Starting Read Test\n";
 	for(unsigned int i = 0; i < n_tests; ++i){
 		unsigned long long pos = pos_dist(gen);
-//		cout << "test " << i << " - pos: " << pos << "\n";
+		cout << "test " << i << " - pos: " << pos << "\n";
 		unsigned long long bytes = compressor.read(pos, len_read, buff);
 		total_bytes += bytes;
-//		cout << "test " << i << " - bytes: " << bytes << "\n";
+		cout << "test " << i << " - bytes: " << bytes << "\n";
 	}
 	double milisec = timer.getMilisec();
 	cout << "Read Speed: " << (total_bytes / ((milisec/1000) * 1024*1024)) << " MB/s (total_bytes: " << total_bytes << ", milisec: " << milisec << ")\n";
