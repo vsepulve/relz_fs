@@ -85,7 +85,7 @@ unsigned int CompressorSingleBuffer::read(unsigned long long pos_ini, unsigned i
 	//Lock desde aqui hasta el final del metodo
 	lock_guard<mutex> lock(mutex_interno);
 	
-	bool debug = false;
+	bool debug = true;
 	
 	if(debug) cout<<"CompressorSingleBuffer::read - Inicio ("<<pos_ini<<", "<<length<<", total: "<<decoder->getTextSize()<<")\n";
 	
@@ -104,8 +104,8 @@ unsigned int CompressorSingleBuffer::read(unsigned long long pos_ini, unsigned i
 		
 		// Antes de sacar los newlines de las posiciones del read, hay que sacar los metadatos
 		
-		meta_text_izq = decoder->getHeaders()->countTextBin(pos_ini);
-		meta_text_med = decoder->getHeaders()->countTextBin(pos_ini + length);
+		meta_text_izq = decoder->getHeaders()->countText(pos_ini);
+		meta_text_med = decoder->getHeaders()->countText(pos_ini + length);
 		if(debug) cout<<"CompressorSingleBuffer::read - MetadataFast, meta_text_izq: "<<meta_text_izq<<", meta_text_med: "<<meta_text_med<<" - "<<meta_text_izq<<"\n";
 		meta_text_med -= meta_text_izq;
 		if( (meta_text_izq > pos_ini) || (meta_text_med > length) ){

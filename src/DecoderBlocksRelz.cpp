@@ -102,7 +102,7 @@ void DecoderBlocksRelz::load(const char *_master_file){
 }
 
 unsigned int DecoderBlocksRelz::decodeBlock(unsigned int block, char *buff){
-//	cout<<"DecoderBlocksRelz::decodeBlock - Inicio ("<<block<<", n_blocks: "<<headers->getNumBlocks()<<")\n";
+	cout<<"DecoderBlocksRelz::decodeBlock - Inicio ("<<block<<", n_blocks: "<<headers->getNumBlocks()<<")\n";
 	
 	if( headers == NULL || texto_ref == NULL || (block >= headers->getNumBlocks())){
 		buff[0] = 0;
@@ -120,7 +120,7 @@ unsigned int DecoderBlocksRelz::decodeBlock(unsigned int block, char *buff){
 		extraer_factores = false;
 	}
 	
-//	cout<<"DecoderBlocksRelz::decodeBlock - extraer_factores: "<<extraer_factores<<"\n";
+	cout<<"DecoderBlocksRelz::decodeBlock - extraer_factores: "<<extraer_factores<<"\n";
 	
 	//Procesar pos y len en buffers internos
 	if(extraer_factores){
@@ -155,7 +155,7 @@ unsigned int DecoderBlocksRelz::decodeBlock(unsigned int block, char *buff){
 		cur_block = block;
 	}
 	
-//	cout<<"DecoderBlocksRelz::decodeBlock - Extrayendo texto\n";
+	cout<<"DecoderBlocksRelz::decodeBlock - Extrayendo texto\n";
 	//extraer texto de los factores
 	unsigned int copied_chars = 0;
 	for(unsigned int i = 0; i < cur_block_factores; ++i){

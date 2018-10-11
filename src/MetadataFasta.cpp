@@ -455,7 +455,7 @@ unsigned int MetadataFasta::size(){
 	
 void MetadataFasta::adjustText(char *out_buff, unsigned long long pos_ini, unsigned int copied_chars, char *adjust_buffer){
 	
-	bool debug = false;
+	bool debug = true;
 	
 	if(debug) cout << "MetadataFasta::adjustText - Start (pos_ini: " << pos_ini << ", copied_chars: " << copied_chars << ")\n";
 	
