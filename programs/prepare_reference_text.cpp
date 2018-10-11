@@ -209,9 +209,9 @@ int main(int argc, char* argv[]){
 //	random_device seed;
 //	mt19937 generator(seed());
 	mt19937 generator(0);
-	uniform_int_distribution<> pos_dist(0, write_pos - segment_length - 1);
+	uniform_int_distribution<unsigned long long> pos_dist(0ull, write_pos - segment_length - 1ull);
 	for(unsigned int i = 0; i < n_segments; ++i){
-		unsigned int pos = pos_dist(generator);
+		unsigned long long pos = pos_dist(generator);
 		writer.write(filtered_text + pos, segment_length);
 	}
 	
