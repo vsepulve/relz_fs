@@ -24,16 +24,25 @@ protected:
 	vector<unsigned long long> pos_text;
 	vector<unsigned long long> pos_storage;
 	vector<unsigned int> length_line;
-	char *metadata_text;
+	// char *metadata_text;
 	unsigned long long metadata_length;
 	
 	unsigned char* CompressWithLzma(const char *text, size_t length, int level, size_t &output_length);
-//	std::string DecompressWithLzma(const std::string& in);
 	char* DecompressWithLzma(const unsigned char *input, size_t length, size_t &output_length);
 	
 	unsigned char *compressed_buff;
 	size_t compressed_bytes;
-	bool already_compressed;
+	// bool already_compressed;
+	
+	unsigned int blocksize;
+	unsigned int n_blocks;
+	vector<size_t> blocks_pos;
+	
+	// Buffer for current block
+	char *block_buff;
+	unsigned int cur_block;
+	
+	void copyMetadataText(char *output, unsigned long long abs_pos, unsigned int length);
 	
 public: 
 	
@@ -41,7 +50,7 @@ public:
 	
 	virtual ~MetadataFasta();
 	
-	unsigned long long filterMetadata(char *text, unsigned long long text_length);
+	unsigned long long filterMetadata(char *text, unsigned long long text_length, unsigned int _blocksize);
 	
 	void save(fstream *writer);
 	
