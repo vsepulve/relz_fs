@@ -236,7 +236,7 @@ ReferenceIndexBasic::~ReferenceIndexBasic(){
 
 //Busca el "text" en el arreglo de sufijos
 //Guarda la posicio y el largo del mayor prefijo comun
-void ReferenceIndexBasic::find(const char *text, unsigned int size, unsigned int &position, unsigned int &length) const{
+void ReferenceIndexBasic::find(const char *text, unsigned int size, unsigned int &position, unsigned int &length, bool verify_range, unsigned int min_pos, unsigned int max_pos) const{
 	position = 0;
 	length = 0;
 	
@@ -315,6 +315,20 @@ void ReferenceIndexBasic::find(const char *text, unsigned int size, unsigned int
 		}
 		
 //		cout<<"ReferenceIndexBasic::find - der: "<<der<<"\n";
+		
+		// Verificar rango de posiciones
+		if( verify_range ){
+			bool valid = false;
+			for(unsigned int i = izq; i <= der; ++i){
+				if( arr[i] >= min_pos && arr[i] <= max_pos ){
+					valid = true;
+					break;
+				}
+			}
+			if(! valid){
+				break;
+			}
+		}
 		
 		//si limite izq > der, salir y usar el ultimo rango valido
 		if(izq == der){
