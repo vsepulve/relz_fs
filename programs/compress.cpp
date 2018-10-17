@@ -78,6 +78,27 @@ int main(int argc, char* argv[]){
 		vector<char> alphabet;
 		filter->getAlphabet( &alphabet );
 		
+		// En esta version clono la referencia para agregar el vocabulario adicional cada 512 MB
+		text = new char[text_len + 1];
+		text_size += filter->readReference(reference_text, text + text_size);
+		
+		unsigned int range = 1024 * 1024 * 512;
+		
+		cout << "Reserving space for " << (1 + text_len / range) << " additions (of " << (ns_len + alphabet.size()) << " chars)\n";
+		char *text_extra = new char[ text_len + 1 + (1 + text_len / range) * (ns_len + alphabet.size()) ];
+		
+		unsigned int total_copy = 0;
+		unsigned int write_pos = 0;
+		while( total_copy < text_len ){
+			
+			
+			
+		}
+		
+		
+		
+		
+		
 		text = new char[text_len + ns_len + alphabet.size() + 1];
 //		text = new char[text_len + ns_len + 1];
 		

@@ -22,7 +22,7 @@ public:
 
 	// Busca el "text" de largo "size" en el arreglo de sufijos
 	// Guarda la posicion y el largo ("position" y "length") del mayor prefijo comun
-	virtual void find(const char *text, unsigned int size, unsigned int &position, unsigned int &length) const;
+	virtual void find(const char *text, unsigned int size, unsigned int &position, unsigned int &length, bool verify_range = false, unsigned int min_pos = 0, unsigned int max_pos = 0xffffffff) const;
 	
 	// Metodos de save para carga sin construccion
 	virtual void save(const char *ref_file);

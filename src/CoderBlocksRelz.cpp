@@ -35,12 +35,26 @@ void CoderBlocksRelz::codeBlock(const char *text, unsigned int text_size, fstrea
 	unsigned int largo_prefijo = 0;
 	unsigned int n_factores = 0;
 	
+	unsigned int min_pos = 0;
+	unsigned int max_pos = 0;
+	unsigned int range = 1024*1024*512;
+	unsigned int max_range = 0xffffffff - range;
+	
 //	cout<<"CoderBlocksRelz::codeBlock - Text: \""<<string(text, (text_size>10)?10:text_size)<<((text_size>10)?"...":"")<<"\"\n";
 	
 	while(text_size > 0){
 //		cout<<"CoderBlocksRelz::codeBlock - referencia->find...\n";
 		
-		referencia->find(text + compressed_text, text_size, pos_prefijo, largo_prefijo);
+		min_pos = 0;
+		if( text_pos > range ){
+			min_pos = text_pos - range;
+		}
+		max_pos = 0xffffffff;
+		if( text_pos < max_range ){
+			max_pos = text_pos + range;
+		}
+		
+		referencia->find(text + compressed_text, text_size, pos_prefijo, largo_prefijo, true, min_pos, max_pos);
 		
 		if(largo_prefijo == 0){
 			cout<<"CoderBlocksRelz::codeBlock - Error - Prefijo de largo 0, saliendo\n";

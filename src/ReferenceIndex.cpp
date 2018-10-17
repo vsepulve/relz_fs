@@ -6,7 +6,7 @@ ReferenceIndex::ReferenceIndex(){}
 
 ReferenceIndex::~ReferenceIndex(){}
 
-void ReferenceIndex::find(const char *text, unsigned int size, unsigned int &position, unsigned int &length) const{
+void ReferenceIndex::find(const char *text, unsigned int size, unsigned int &position, unsigned int &length, bool verify_range, unsigned int min_pos, unsigned int max_pos) const{
 	cerr << "ReferenceIndex::find - Error, Not Implemented.\n";
 	position = 0;
 	length = 0;
