@@ -6,7 +6,7 @@ CoderBlocks::CoderBlocks(){
 CoderBlocks::~CoderBlocks(){
 }
 
-void CoderBlocks::codeBlock(const char *text, unsigned int text_size, fstream *file_headers, fstream *file_data, unsigned int &bytes_headers, unsigned int &bytes_data, char *full_buffer){
+void CoderBlocks::codeBlock(const char *text, unsigned int text_size, fstream *file_headers, fstream *file_data, unsigned int &bytes_headers, unsigned int &bytes_data, char *full_buffer, unsigned int text_pos){
 }
 
 unsigned int CoderBlocks::codingBufferSize(unsigned int block_size){
