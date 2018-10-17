@@ -62,31 +62,45 @@ unsigned int PositionsCoderBlocks::encodeBlockMaxBits(unsigned int *arr_pos, uns
 	return n_escribir * sizeof(int);
 }
 
-unsigned int PositionsCoderBlocks::encodeBlockMaxDeltaBits(unsigned int *arr_pos, unsigned int n_factores, unsigned char max_bits, fstream *escritor){
+unsigned int PositionsCoderBlocks::encodeBlockMaxDeltaBits(unsigned int *arr_pos, unsigned int n_factores, fstream *escritor){
 	if(escritor == NULL || (! escritor->good()) ){
 		return 0;
 	}
 	prepareBuffer(n_factores + 1);
 	memset(buff, 0, (n_factores + 1) * sizeof(int));
+	
+	// Calcular min_value y max_value para pasar a deltas
+	unsigned int min_value = 0xffffffff;
+	unsigned int max_value = 0;
+	for(unsigned int i = 0; i < n_factores; ++i){
+		if( arr_pos[i] < min_value ){
+			min_value = arr_pos[i];
+		}
+		if( arr_pos[i] > max_value ){
+			max_value = arr_pos[i];
+		}
+	}
+	unsigned char max_bits = utils.n_bits(max_value - min_value);
+	
 	unsigned int pos_buff = 0;
 	utils.bitput(buff, pos_buff, 8, max_bits);
 	pos_buff += 8;
+	
+	utils.bitput(buff, pos_buff, 32, min_value);
+	pos_buff += 32;
+	
 	for(unsigned int i = 0; i < n_factores; ++i){
-		utils.bitput(buff, pos_buff, max_bits, arr_pos[i]);
+		utils.bitput(buff, pos_buff, max_bits, (arr_pos[i] - min_value));
 		pos_buff += max_bits;
 	}
-//	unsigned int n_escribir = pos_buff / 32;
-//	if(n_escribir * 32 < pos_buff){
-//		++n_escribir;
-//	}
+	
 	unsigned int n_escribir = (pos_buff >> 5);
 	if( (n_escribir << 5) < pos_buff ){
 		++n_escribir;
 	}
-//	unsigned int pos_ini = escritor->tellp();
+	
 	escritor->write((char*)buff, n_escribir * sizeof(int));
-//	unsigned int pos_fin = escritor->tellp();
-//	return pos_fin - pos_ini;
+	
 	return n_escribir * sizeof(int);
 }
 
@@ -174,9 +188,13 @@ void PositionsCoderBlocks::decodeBlockMaxDeltaBits(unsigned int byte_start, unsi
 	unsigned char max_bits = 0;
 	max_bits = utils.bitget(buff, pos_buff, 8);
 	pos_buff += 8;
+	unsigned int min_value = 0;
+	min_value = utils.bitget(buff, pos_buff, 32);
+	pos_buff += 32;
+	
 //	cout<<"PositionsCoderBlocks::decodeBlockMaxDeltaBits - max_bits: "<<(unsigned int)max_bits<<"\n";
 	for(unsigned int i = 0; i < n_factores; ++i){
-		arr_pos[i] = utils.bitget(buff, pos_buff, max_bits);
+		arr_pos[i] = min_value + utils.bitget(buff, pos_buff, max_bits);
 		pos_buff += max_bits;
 	}
 //	cout<<"PositionsCoderBlocks::decodeBlockMaxDeltaBits - Fin\n";
