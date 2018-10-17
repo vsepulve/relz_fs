@@ -39,7 +39,7 @@ public:
 	virtual ~CoderBlocksRelz();
 	
 //	virtual void codeBlock(const char *text, unsigned int text_size, fstream *file_headers, fstream *file_data, unsigned int &bytes_headers, unsigned int &bytes_data, const ReferenceIndex *referencia, char *full_buffer);
-	virtual void codeBlock(const char *text, unsigned int text_size, fstream *file_headers, fstream *file_data, unsigned int &bytes_headers, unsigned int &bytes_data, char *full_buffer);
+	virtual void codeBlock(const char *text, unsigned int text_size, fstream *file_headers, fstream *file_data, unsigned int &bytes_headers, unsigned int &bytes_data, char *full_buffer, unsigned int text_pos = 0);
 	
 	//Retorna el tamaño en bytes del buffer necesario para codeBlock
 	virtual unsigned int codingBufferSize(unsigned int block_size);
