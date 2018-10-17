@@ -46,6 +46,10 @@ public:
 	//Retorna el numero de bytes escritos
 	unsigned int encodeBlockMaxBits(unsigned int *arr_pos, unsigned int n_factores, unsigned char max_bits, fstream *escritor);
 	
+	//Como el anterior, pero escribe en un archivo dado
+	//Retorna el numero de bytes escritos
+	unsigned int encodeBlockMaxDeltaBits(unsigned int *arr_pos, unsigned int n_factores, unsigned char max_bits, fstream *escritor);
+	
 	//Metodo de Escritura
 	//Retorna el numero de bytes escritos
 	unsigned int encodeBlockVarByte(unsigned int *arr_pos, unsigned int n_factores, fstream *escritor);
@@ -58,6 +62,12 @@ public:
 	//Comienza leyendo max_bits y luego carga n_factores posiciones en arr_pos
 	//Asume que arr_pos tiene al menos (n_factores + 1) ints de espacio
 	void decodeBlockMaxBits(unsigned int byte_start, unsigned int n_bytes, unsigned int n_factores, unsigned int *arr_pos);
+	
+	//Metodo de Lectura
+	//Lee el archivo (ya abierto) desde byte_start
+	//Comienza leyendo max_bits, min_value y luego carga n_factores posiciones en arr_pos
+	//Asume que arr_pos tiene al menos (n_factores + 1) ints de espacio
+	void decodeBlockMaxDeltaBits(unsigned int byte_start, unsigned int n_bytes, unsigned int n_factores, unsigned int *arr_pos);
 	
 	//Metodo de Lectura
 	//Lee el archivo (ya abierto) desde byte_start
