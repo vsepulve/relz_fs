@@ -179,6 +179,7 @@ unsigned long long MetadataFasta::filterMetadata(char *text, unsigned long long 
 	// Aqui mismo deberia comprimir el texto
 //	CompressWithLzma(const char *text, size_t length, int level, size_t &output_length)
 	blocksize = _blocksize;
+	metadata_length = metadata_pos;
 	n_blocks = metadata_pos / blocksize;
 	if( n_blocks * blocksize < metadata_pos ){
 		++n_blocks;
@@ -247,6 +248,8 @@ void MetadataFasta::save(fstream *writer){
 	
 	unsigned int n_lines = pos_text.size();
 	writer->write((char*)&n_lines, sizeof(int));
+	
+	writer->write((char*)&metadata_length, sizeof(long long));
 	
 	BitsUtils utils;
 	unsigned long long last;
@@ -346,6 +349,10 @@ void MetadataFasta::load(fstream *reader){
 	unsigned int n_lines = 0;
 	reader->read((char*)&n_lines, sizeof(int));
 	cout << "MetadataFasta::load - n_lines: " << n_lines << "\n";
+	
+	metadata_length = 0;
+	reader->read((char*)&metadata_length, sizeof(long long));
+	cout << "MetadataFasta::load - metadata_length: " << metadata_length << "\n";
 	
 //	cout << "MetadataFasta::load - Loading pos_text\n";
 	
@@ -494,6 +501,9 @@ unsigned int MetadataFasta::size(){
 	
 	// n_lines
 	size_bytes += sizeof(int);
+	
+	// metadata_length
+	size_bytes += sizeof(long long);
 	
 	BitsUtils utils;
 	unsigned long long last;
