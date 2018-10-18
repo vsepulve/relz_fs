@@ -33,7 +33,7 @@ MetadataFasta::~MetadataFasta(){
 unsigned char* MetadataFasta::CompressWithLzma(const char *text, size_t length, int level, size_t &output_length){
 	size_t worst_space = length + (length >> 2) + 128;
 	unsigned char *tmp_buff = new unsigned char[worst_space];
-	cout << "CompressWithLzma - worst_space: " << worst_space << "\n";
+//	cout << "CompressWithLzma - worst_space: " << worst_space << "\n";
 	output_length = 0;
 	int res = lzma_easy_buffer_encode(
 			level, LZMA_CHECK_CRC32, NULL,
@@ -49,7 +49,7 @@ unsigned char* MetadataFasta::CompressWithLzma(const char *text, size_t length, 
 		output_length = 0;
 		return NULL;
 	}
-	cout << "CompressWithLzma - final space: " << output_length << "\n";
+//	cout << "CompressWithLzma - final space: " << output_length << "\n";
 	unsigned char *result = new unsigned char[output_length + 1];
 	memcpy(result, tmp_buff, output_length);
 	result[output_length] = 0;
@@ -166,10 +166,10 @@ unsigned long long MetadataFasta::filterMetadata(char *text, unsigned long long 
 //	cout << "MetadataFasta::filterMetadata - Resulting metadata (" << metadata_pos << "): \"" << buff_metadata << "\"\n";
 //	cout << "MetadataFasta::filterMetadata - Resulting text (" << text_pos << "): \"" << buff_text << "\"\n";
 	
-	cout << "MetadataFasta::filterMetadata - Stored lines: " << pos_text.size() << "\n";
-	for( unsigned int i = 0; i < ( (pos_text.size()<20)?pos_text.size():20 ); ++i ){
-		cout << "MetadataFasta::filterMetadata - Metadata[" << i << "]: (" << pos_text[i] << ", " << pos_storage[i] << ", " << length_line[i] << ")\n";
-	}
+//	cout << "MetadataFasta::filterMetadata - Stored lines: " << pos_text.size() << "\n";
+//	for( unsigned int i = 0; i < ( (pos_text.size()<20)?pos_text.size():20 ); ++i ){
+//		cout << "MetadataFasta::filterMetadata - Metadata[" << i << "]: (" << pos_text[i] << ", " << pos_storage[i] << ", " << length_line[i] << ")\n";
+//	}
 	
 	// Devolver texto filtrado y borrar buffer
 	memcpy( text, buff_text, text_pos );
@@ -190,12 +190,12 @@ unsigned long long MetadataFasta::filterMetadata(char *text, unsigned long long 
 	unsigned char *tmp_buff = NULL;
 	vector<unsigned char*> arr_tmp_buff;
 	for(unsigned int i = 0; i < n_blocks-1; ++i){
-		cout << "MetadataFasta::filterMetadata - Compressing block " << i << "\n";
+//		cout << "MetadataFasta::filterMetadata - Compressing block " << i << "\n";
 		buff_length = 0;
 //		string s(read_buff, blocksize);
 //		cout << "MetadataFasta::filterMetadata - String: \"" << s << "\"\n";
 		tmp_buff = CompressWithLzma(read_buff, blocksize, 6, buff_length);
-		cout << "MetadataFasta::filterMetadata - Adding block of " << buff_length << " bytes\n";
+//		cout << "MetadataFasta::filterMetadata - Adding block of " << buff_length << " bytes\n";
 		arr_tmp_buff.push_back(tmp_buff);
 		// Temporalmente uso blocks_pos para guardar los TAMAÑOS de los bloques
 		blocks_pos.push_back(buff_length);
@@ -205,7 +205,7 @@ unsigned long long MetadataFasta::filterMetadata(char *text, unsigned long long 
 	cout << "MetadataFasta::filterMetadata - Compressing block " << (n_blocks-1) << "\n";
 	buff_length = 0;
 	tmp_buff = CompressWithLzma(read_buff, metadata_pos - (n_blocks-1)*blocksize, 6, buff_length);
-	cout << "MetadataFasta::filterMetadata - Adding block of " << buff_length << " bytes\n";
+//	cout << "MetadataFasta::filterMetadata - Adding block of " << buff_length << " bytes\n";
 	arr_tmp_buff.push_back(tmp_buff);
 	blocks_pos.push_back(buff_length);
 	buff_pos += buff_length;
@@ -219,16 +219,16 @@ unsigned long long MetadataFasta::filterMetadata(char *text, unsigned long long 
 	size_t last = 0;
 	for(unsigned int i = 0; i < blocks_pos.size(); ++i){
 		buff_length = blocks_pos[i];
-		cout << "MetadataFasta::filterMetadata - buff_length[" << i << "]: " << buff_length << "\n";
+//		cout << "MetadataFasta::filterMetadata - buff_length[" << i << "]: " << buff_length << "\n";
 		memcpy((char*)(compressed_buff + last), (char*)(arr_tmp_buff[i]), buff_length);
 		blocks_pos[i] = last;
 		last += buff_length;
 	}
 	blocks_pos.push_back(last);
-	cout << "MetadataFasta::filterMetadata - final blocks_pos\n";
-	for( size_t pos : blocks_pos ){
-		cout << "MetadataFasta::filterMetadata - pos: " << pos << "\n";
-	}
+//	cout << "MetadataFasta::filterMetadata - final blocks_pos\n";
+//	for( size_t pos : blocks_pos ){
+//		cout << "MetadataFasta::filterMetadata - pos: " << pos << "\n";
+//	}
 	
 	// Almacenar texto de metadata y borrar buffer
 //	metadata_length = metadata_pos;
@@ -422,10 +422,10 @@ void MetadataFasta::load(fstream *reader){
 		blocks_pos.push_back(acum);
 	}
 	
-	cout << "MetadataFasta::load - final blocks_pos\n";
-	for( size_t pos : blocks_pos ){
-		cout << "MetadataFasta::load - pos: " << pos << "\n";
-	}
+//	cout << "MetadataFasta::load - final blocks_pos\n";
+//	for( size_t pos : blocks_pos ){
+//		cout << "MetadataFasta::load - pos: " << pos << "\n";
+//	}
 	
 	delete [] buff;
 	
@@ -469,11 +469,10 @@ void MetadataFasta::load(fstream *reader){
 //	cout << "MetadataFasta::load - Resulting metadata (" << metadata_length << "): \"" << metadata_text << "\"\n";
 //	cout << "MetadataFasta::load - Resulting text (" << text_pos << "): \"" << buff_text << "\"\n";
 	
-	cout << "MetadataFasta::load - Stored lines: " << pos_text.size() << "\n";
-//	for( unsigned int i = 0; i < ( (pos_text.size()<20)?pos_text.size():20 ); ++i ){
-	for( unsigned int i = 0; i < pos_text.size(); ++i ){
-		cout << "MetadataFasta::load - Metadata[" << i << "]: (" << pos_text[i] << ", " << pos_storage[i] << ", " << length_line[i] << ")\n";
-	}
+//	cout << "MetadataFasta::load - Stored lines: " << pos_text.size() << "\n";
+//	for( unsigned int i = 0; i < pos_text.size(); ++i ){
+//		cout << "MetadataFasta::load - Metadata[" << i << "]: (" << pos_text[i] << ", " << pos_storage[i] << ", " << length_line[i] << ")\n";
+//	}
 	
 //	cout << "MetadataFasta::load - Testing countTextBin\n";
 //	for(unsigned int i = 0; i < 100000; ++i){
