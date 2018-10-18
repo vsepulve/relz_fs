@@ -1,9 +1,10 @@
 # README #
 
-Prototype of a compressed filesystem for genomic data, using Relative Lempel-Ziv and FUSE library (https://github.com/libfuse/libfuse). It includes some test programs and the basic implementation of the filesystem. It also includes a basic implementation of a search system for the compressed files.
+Prototype of a compressed filesystem for genomic data, using Relative Lempel-Ziv and FUSE library (https://github.com/libfuse/libfuse). This prototype also makes usage of LZMA library. It includes some test programs and the basic implementation of the filesystem.
 
 Dependecies
 -------------------
+To install FUSE
 ```
 tar -xzf utils/fuse-2.9.4.tar.gz
 cd fuse-2.9.4/
@@ -11,6 +12,15 @@ cd fuse-2.9.4/
 make
 sudo make install
 ```
+If necessary, to install XZ for LZMA
+```
+tar -xzf utils/xz-5.2.4.tar.gz
+cd xz-5.2.4/
+./configure
+make
+sudo make install
+```
+
 
 The main programs of this version of the code are compress, decompress, and daemon_fuse_hybrid.
 
