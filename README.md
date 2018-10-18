@@ -21,8 +21,7 @@ make
 sudo make install
 ```
 
-
-The main programs of this version of the code are compress, decompress, and daemon_fuse_hybrid.
+The main programs of this version of the code are prepare\_reference\_text, compress, decompress, and daemon\_fuse\_hybrid.
 
 Compile
 -------------------
@@ -32,6 +31,21 @@ cd build
 cmake ..
 make
 ```
+
+Preparing the Reference
+-------------------
+In cases where there is no appropriate sequence to be used as a reference (for example, when dealing with a collection of reads), this program can extract part of the text from the collection to build a reference. It receives a text input, an output to write the reference, and the expected size for the reference in bytes.
+An example could be:
+```
+./bin/prepare_reference_text ../data/reads_cut.fa ../data/reads_ref.txt 300000
+./bin/compress ../data/reads_ref.txt ../data/reads_cut.fa ../data/reads_cut.relz 100000 4 ../data/reads_ref.bin 1 1
+```
+That would prepare the text data/reads\_ref.txt as a reference, and compress the data data/reads\_cut.txt to data/reads\_cut.relz, building the binary reference in data/reads\_ref.bin.
+
+
+
+
+
 
 Test (from build/ directory)
 -------------------
