@@ -42,6 +42,21 @@ An example could be:
 ```
 That would prepare the text data/reads\_ref.txt as a reference, and compress the data data/reads\_cut.txt to data/reads\_cut.relz, building the binary reference in data/reads\_ref.bin.
 
+Compressing
+-------------------
+The bin/compress program is responsible for both the compressing test sequences and constructing the index of a reference text. The generated binary reference can then be reused without having to build it again. 
+The parameters of the program include the reference text, the input sequence, the output compressed file, the blocksize, the number of threads to be used both in the index construction and the compression, the output to write the indexed reference, a flag indicating whether the reference should be built, and a flag indicating whether metadata should be included in the output compressed file.
+An example could be:
+```
+./bin/compress ../data/tair10_cut.fa ../data/thaliana_cut.fa ../data/thaliana_cut.relz 100000 4 ../../data/tair10_cut.bin 1 1
+```
+On the other hand, if the reference is already built, we can skip that step with a command like:
+```
+./bin/compress -- ../data/thaliana_cut.fa ../data/thaliana_cut.relz 100000 4 ../../data/tair10_cut.bin 0 1
+```
+
+
+
 
 
 
