@@ -639,11 +639,11 @@ void MetadataFasta::copyMetadataText(char *output, unsigned long long abs_pos, u
 
 void MetadataFasta::adjustText(char *out_buff, unsigned long long pos_ini, unsigned int copied_chars, char *adjust_buffer){
 	
-	bool debug = true;
+	bool debug = false;
 	
-	if(debug) cout << "MetadataFasta::adjustText - Start (pos_ini: " << pos_ini << ", copied_chars: " << copied_chars << ")\n";
+//	if(debug) cout << "MetadataFasta::adjustText - Start (pos_ini: " << pos_ini << ", copied_chars: " << copied_chars << ")\n";
 	
-	if(debug) cout << "MetadataFasta::adjustText - Original text: \"" << out_buff << "\"\n";
+//	if(debug) cout << "MetadataFasta::adjustText - Original text: \"" << out_buff << "\"\n";
 	
 	unsigned int write_pos = 0;
 	unsigned int read_pos = 0;
