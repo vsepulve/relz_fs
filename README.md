@@ -48,14 +48,21 @@ The bin/compress program is responsible for both the compressing test sequences 
 The parameters of the program include the reference text, the input sequence, the output compressed file, the blocksize, the number of threads to be used both in the index construction and the compression, the output to write the indexed reference, a flag indicating whether the reference should be built, and a flag indicating whether metadata should be included in the output compressed file.
 An example could be:
 ```
-./bin/compress ../data/tair10_cut.fa ../data/thaliana_cut.fa ../data/thaliana_cut.relz 100000 4 ../../data/tair10_cut.bin 1 1
+./bin/compress ../data/tair10_cut.fa ../data/thaliana_cut.fa ../data/thaliana_cut.relz 100000 4 ../data/tair10_cut.bin 1 1
 ```
 On the other hand, if the reference is already built, we can skip that step with a command like:
 ```
-./bin/compress -- ../data/thaliana_cut.fa ../data/thaliana_cut.relz 100000 4 ../../data/tair10_cut.bin 0 1
+./bin/compress -- ../data/thaliana_cut.fa ../data/thaliana_cut.relz 100000 4 ../data/tair10_cut.bin 0 1
 ```
 
-
+Decompression
+-------------------
+The bin/decompress program receives the indexed reference used for the compression, a compressed file as input, a path to write the output file, and the size of the buffer used for writing.
+An example, followed by a verification, could be:
+```
+./bin/decompress ../data/tair10_cut.bin ../data/thaliana_cut.relz ../data/thaliana_output.fa 100000
+diff ../data/thaliana_cut.fa ../data/thaliana_output.fa
+```
 
 
 
