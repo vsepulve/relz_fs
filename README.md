@@ -79,9 +79,10 @@ mkdir test/reads
 cp ../data/reads_cut.fa test/reads/reads_cut.relz
 ls -l test/reads/ test_real/reads/
 ```
+The configuration file daemon\_fuse\_local.config explains in comments the parameters used. The main part of the configuration is the definition of references associated with different subdirectories in the virutal filesystem. First, the number of references is defined, and then each one of them is associated with a path. The first references is associated to the "/" path, relative to the mounting point (so, in the examples, "/" actually refers to the "./test/" directory).
+The system uses the references of the most precise subdirectory defined in the references association block from the configuration. If a subdirectory has no reference associated with it, the one from its parent directory is used (so the first reference, associated with "/" will be used if no other reference is defined).
 
-
-
+For the client/server version, the program bin/daemon\_server should be used and configured in the same way as a local filesystem (using bin/daemon\_fuse\_hybrid), and the bin/daemon\_fuse\_client serves as the client filesystem, configured with a very similar daemon\_fuse\_client.config configuration file. In that case, the variables "host" and "port" defined in both configuration files are used for the communication, so they must match.
 
 
 
