@@ -64,6 +64,16 @@ An example, followed by a verification, could be:
 diff ../data/thaliana_cut.fa ../data/thaliana_output.fa
 ```
 
+Sampling and Compression
+-------------------
+The program bin/compress\_rr performs the sampling of the reference's index and compresses a sequence with the newly generated sampled reference.
+The parameters of the program are the indexed (full) reference, the output for the sampled reference, the sequence to be compressed, the output for the compressed sequence, the blocksize, number of threads, the samplig rate and the flag that defines if metadata should be considered.
+An example could be:
+```
+./bin/compress_rr ../data/tair10_cut.bin ../data/tair10_cut_rr10.bin ../data/thaliana_cut.fa ../data/thaliana_cut_rr10.relz 100000 4 10 1
+./bin/compress_rr ../data/reads_ref.bin ../data/reads_ref_rr10.bin ../data/reads_cut.fa ../data/reads_cut_rr10.relz 100000 4 10 1
+```
+
 Filesystem Daemon
 -------------------
 The bin/daemon\_fuse\_hybrid program works as a local file system. It receives optional arguments for fuse, the mounting point for the filesystem, and a configuration file for the daemon. In the following example we use "-d" and "-o big\_writes" as fuse arguments (debug, and the possibility of making large writings), we define "./test" as the mounting point, and use daemon\_fuse\_local.config to configure the daemon. First we create two directories, one to serve as the virtual mounting point, and another to store the real compressed files.
