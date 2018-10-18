@@ -64,20 +64,38 @@ An example, followed by a verification, could be:
 diff ../data/thaliana_cut.fa ../data/thaliana_output.fa
 ```
 
-
-
-
-
-
-Test (from build/ directory)
+Filesystem Daemon
 -------------------
+The bin/daemon\_fuse\_hybrid program works as a local file system. It receives optional arguments for fuse, the mounting point for the filesystem, and a configuration file for the daemon. In the following example we use "-d" and "-o big\_writes" as fuse arguments (debug, and the possibility of making large writings), we define "./test" as the mounting point, and use daemon\_fuse\_local.config to configure the daemon. First we create two directories, one to serve as the virtual mounting point, and another to store the real compressed files.
 ```
-./bin/compress ../data/ref.txt ../data/seq.txt ../data/seq.relz 100000 4 ../data/ref.bin 1 1
-./bin/decompress ../data/ref.bin ../data/seq.relz ../data/seq_decomp.txt 100000
 mkdir test test_real
-./bin/daemon_fuse_hybrid -d ./test ../daemon_fuse.config
-cp ../data/seq.txt test/seq.relz
+./bin/daemon_fuse_hybrid -d -o big_writes ./test ../daemon_fuse_local.config
+```
+While the daemon is running, the virtual directory can be used as follows:
+```
+cp ../data/thaliana_cut.fa test/thaliana_cut.relz
 ls -l test/ test_real/
+mkdir test/reads
+cp ../data/reads_cut.fa test/reads/reads_cut.relz
+ls -l test/reads/ test_real/reads/
 ```
 
-Note that in the example, the test/ folder is the mounting point (the virtual directory) while test_real/ is the folder that stores the compressed data. Note also that the system only compresses files if the extension of the target is "relz", so they will appear uncompressed in test/ while they are actually stored in compressed form in the real directory.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
