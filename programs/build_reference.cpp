@@ -61,7 +61,7 @@ int main(int argc, char* argv[]){
 		return 0;
 	}
 	reader.seekg (0, reader.end);
-	unsigned int text_len = reader.tellg();
+	unsigned int file_size = reader.tellg();
 	reader.seekg (0, reader.beg);
 	reader.close();
 	
@@ -71,19 +71,19 @@ int main(int argc, char* argv[]){
 	filter->getAlphabet( &alphabet );
 	unsigned int type_flags = 0;
 	
-	if( force_ranges && text_len > 256*1024*1024 ){
+	if( force_ranges && file_size > 256*1024*1024 ){
 		unsigned int range = 1024*1024;
-		if( text_len < 512*1024*1024 ){
+		if( file_size < 512*1024*1024 ){
 			range *= 128;
 			type_flags = 1;
 			ns_len = 128;
 		}
-		else if( text_len < 1024*1024*1024 ){
+		else if( file_size < 1024*1024*1024 ){
 			range *= 256;
 			type_flags = 2;
 			ns_len = 256;
 		}
-		else if( text_len < 2ull*1024*1024*1024 ){
+		else if( file_size < 2ull*1024*1024*1024 ){
 			range *= 512;
 			type_flags = 3;
 			ns_len = 512;
@@ -95,32 +95,36 @@ int main(int argc, char* argv[]){
 		}
 		cout << "Positional Range of " << range << " bytes, type_flags: " << type_flags << "\n";
 		
-		unsigned int n_adds = text_len / range;
-		if( n_adds * range < text_len ){
+		unsigned int n_adds = file_size / range;
+		if( n_adds * range < file_size ){
 			++n_adds;
 		}
 		
-		cout << "Adding " << n_adds << " voc extensions (" << text_len << " / " << range << ")\n";
-		char *text_original = new char[text_len + 1];
-		filter->readReferenceFull(reference_text, text_original);
-		text = new char[text_len + 1 + n_adds * (ns_len + alphabet.size())];
+		cout << "Adding " << n_adds << " voc extensions (" << file_size << " / " << range << ")\n";
+		char *text_original = new char[file_size + 1];
+		unsigned int real_text_size = filter->readReferenceFull(reference_text, text_original);
+		text = new char[real_text_size + 1 + n_adds * (ns_len + alphabet.size())];
 		
 		unsigned int read_pos = 0;
 		unsigned int total_copied = 0;
-		while( total_copied < text_len ){
-			unsigned int copy_len = range;
-			if( total_copied + copy_len > text_len ){
-				copy_len = text_len - total_copied;
-			}
+		while( read_pos < real_text_size ){
+			cout << "Adding " << ns_len << " N's\n";
 			for(unsigned int i = 0; i < ns_len; ++i){
 				text[total_copied++] = 'N';
 			}
+			cout << "Adding " << alphabet.size() << " symbols\n";
 			for(unsigned int i = 0; i < alphabet.size(); ++i){
 				text[total_copied++] = alphabet[i];
 			}
+			unsigned int copy_len = range;
+			if( read_pos + copy_len > real_text_size ){
+				copy_len = real_text_size - read_pos;
+			}
+			cout << "Adding " << copy_len << " bytes\n";
 			memcpy(text + total_copied, text_original + read_pos, copy_len);
 			total_copied += copy_len;
 			read_pos += copy_len;
+			cout << "total_copied: " << read_pos << "/" << real_text_size << "\n";
 		}
 		
 		delete [] text_original;
@@ -128,8 +132,8 @@ int main(int argc, char* argv[]){
 		text[text_size] = 0;
 	}
 	else{
-		// text = new char[text_len + 1];
-		text = new char[text_len + ns_len + alphabet.size() + 1];
+		// text = new char[file_size + 1];
+		text = new char[file_size + ns_len + alphabet.size() + 1];
 		
 		for(unsigned int i = 0; i < ns_len; ++i){
 			text[text_size++] = 'N';
