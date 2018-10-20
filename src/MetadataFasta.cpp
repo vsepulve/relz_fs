@@ -33,7 +33,7 @@ MetadataFasta::~MetadataFasta(){
 unsigned char* MetadataFasta::CompressWithLzma(const char *text, size_t length, int level, size_t &output_length){
 	size_t worst_space = length + (length >> 2) + 128;
 	unsigned char *tmp_buff = new unsigned char[worst_space];
-	cout << "CompressWithLzma - worst_space: " << worst_space << "\n";
+//	cout << "CompressWithLzma - worst_space: " << worst_space << "\n";
 	output_length = 0;
 	int res = lzma_easy_buffer_encode(
 			level, LZMA_CHECK_CRC32, NULL,
@@ -49,7 +49,7 @@ unsigned char* MetadataFasta::CompressWithLzma(const char *text, size_t length, 
 		output_length = 0;
 		return NULL;
 	}
-	cout << "CompressWithLzma - final space: " << output_length << "\n";
+//	cout << "CompressWithLzma - final space: " << output_length << "\n";
 	unsigned char *result = new unsigned char[output_length + 1];
 	memcpy(result, tmp_buff, output_length);
 	result[output_length] = 0;
@@ -166,10 +166,10 @@ unsigned long long MetadataFasta::filterMetadata(char *text, unsigned long long 
 //	cout << "MetadataFasta::filterMetadata - Resulting metadata (" << metadata_pos << "): \"" << buff_metadata << "\"\n";
 //	cout << "MetadataFasta::filterMetadata - Resulting text (" << text_pos << "): \"" << buff_text << "\"\n";
 	
-	cout << "MetadataFasta::filterMetadata - Stored lines: " << pos_text.size() << "\n";
-	for( unsigned int i = 0; i < ( (pos_text.size()<20)?pos_text.size():20 ); ++i ){
-		cout << "MetadataFasta::filterMetadata - Metadata[" << i << "]: (" << pos_text[i] << ", " << pos_storage[i] << ", " << length_line[i] << ")\n";
-	}
+//	cout << "MetadataFasta::filterMetadata - Stored lines: " << pos_text.size() << "\n";
+//	for( unsigned int i = 0; i < ( (pos_text.size()<20)?pos_text.size():20 ); ++i ){
+//		cout << "MetadataFasta::filterMetadata - Metadata[" << i << "]: (" << pos_text[i] << ", " << pos_storage[i] << ", " << length_line[i] << ")\n";
+//	}
 	
 	// Devolver texto filtrado y borrar buffer
 	memcpy( text, buff_text, text_pos );
@@ -179,6 +179,7 @@ unsigned long long MetadataFasta::filterMetadata(char *text, unsigned long long 
 	// Aqui mismo deberia comprimir el texto
 //	CompressWithLzma(const char *text, size_t length, int level, size_t &output_length)
 	blocksize = _blocksize;
+	metadata_length = metadata_pos;
 	n_blocks = metadata_pos / blocksize;
 	if( n_blocks * blocksize < metadata_pos ){
 		++n_blocks;
@@ -190,12 +191,12 @@ unsigned long long MetadataFasta::filterMetadata(char *text, unsigned long long 
 	unsigned char *tmp_buff = NULL;
 	vector<unsigned char*> arr_tmp_buff;
 	for(unsigned int i = 0; i < n_blocks-1; ++i){
-		cout << "MetadataFasta::filterMetadata - Compressing block " << i << "\n";
+//		cout << "MetadataFasta::filterMetadata - Compressing block " << i << "\n";
 		buff_length = 0;
 //		string s(read_buff, blocksize);
 //		cout << "MetadataFasta::filterMetadata - String: \"" << s << "\"\n";
 		tmp_buff = CompressWithLzma(read_buff, blocksize, 6, buff_length);
-		cout << "MetadataFasta::filterMetadata - Adding block of " << buff_length << " bytes\n";
+//		cout << "MetadataFasta::filterMetadata - Adding block of " << buff_length << " bytes\n";
 		arr_tmp_buff.push_back(tmp_buff);
 		// Temporalmente uso blocks_pos para guardar los TAMAÑOS de los bloques
 		blocks_pos.push_back(buff_length);
@@ -205,7 +206,7 @@ unsigned long long MetadataFasta::filterMetadata(char *text, unsigned long long 
 	cout << "MetadataFasta::filterMetadata - Compressing block " << (n_blocks-1) << "\n";
 	buff_length = 0;
 	tmp_buff = CompressWithLzma(read_buff, metadata_pos - (n_blocks-1)*blocksize, 6, buff_length);
-	cout << "MetadataFasta::filterMetadata - Adding block of " << buff_length << " bytes\n";
+//	cout << "MetadataFasta::filterMetadata - Adding block of " << buff_length << " bytes\n";
 	arr_tmp_buff.push_back(tmp_buff);
 	blocks_pos.push_back(buff_length);
 	buff_pos += buff_length;
@@ -219,16 +220,16 @@ unsigned long long MetadataFasta::filterMetadata(char *text, unsigned long long 
 	size_t last = 0;
 	for(unsigned int i = 0; i < blocks_pos.size(); ++i){
 		buff_length = blocks_pos[i];
-		cout << "MetadataFasta::filterMetadata - buff_length[" << i << "]: " << buff_length << "\n";
+//		cout << "MetadataFasta::filterMetadata - buff_length[" << i << "]: " << buff_length << "\n";
 		memcpy((char*)(compressed_buff + last), (char*)(arr_tmp_buff[i]), buff_length);
 		blocks_pos[i] = last;
 		last += buff_length;
 	}
 	blocks_pos.push_back(last);
-	cout << "MetadataFasta::filterMetadata - final blocks_pos\n";
-	for( size_t pos : blocks_pos ){
-		cout << "MetadataFasta::filterMetadata - pos: " << pos << "\n";
-	}
+//	cout << "MetadataFasta::filterMetadata - final blocks_pos\n";
+//	for( size_t pos : blocks_pos ){
+//		cout << "MetadataFasta::filterMetadata - pos: " << pos << "\n";
+//	}
 	
 	// Almacenar texto de metadata y borrar buffer
 //	metadata_length = metadata_pos;
@@ -247,6 +248,8 @@ void MetadataFasta::save(fstream *writer){
 	
 	unsigned int n_lines = pos_text.size();
 	writer->write((char*)&n_lines, sizeof(int));
+	
+	writer->write((char*)&metadata_length, sizeof(long long));
 	
 	BitsUtils utils;
 	unsigned long long last;
@@ -347,6 +350,10 @@ void MetadataFasta::load(fstream *reader){
 	reader->read((char*)&n_lines, sizeof(int));
 	cout << "MetadataFasta::load - n_lines: " << n_lines << "\n";
 	
+	metadata_length = 0;
+	reader->read((char*)&metadata_length, sizeof(long long));
+	cout << "MetadataFasta::load - metadata_length: " << metadata_length << "\n";
+	
 //	cout << "MetadataFasta::load - Loading pos_text\n";
 	
 	BitsUtils utils;
@@ -422,10 +429,10 @@ void MetadataFasta::load(fstream *reader){
 		blocks_pos.push_back(acum);
 	}
 	
-	cout << "MetadataFasta::load - final blocks_pos\n";
-	for( size_t pos : blocks_pos ){
-		cout << "MetadataFasta::load - pos: " << pos << "\n";
-	}
+//	cout << "MetadataFasta::load - final blocks_pos\n";
+//	for( size_t pos : blocks_pos ){
+//		cout << "MetadataFasta::load - pos: " << pos << "\n";
+//	}
 	
 	delete [] buff;
 	
@@ -433,6 +440,18 @@ void MetadataFasta::load(fstream *reader){
 	cout << "MetadataFasta::load - Loading " << compressed_bytes << " bytes of compressed data\n";
 	compressed_buff = new unsigned char[compressed_bytes + 1];
 	reader->read((char*)compressed_buff, compressed_bytes);
+	
+//	cout << "MetadataFasta::load - Testing loaded text (" << n_blocks << " blocks)\n";
+//	for( unsigned int i = 0; i < n_blocks; ++i ){
+//		unsigned char *input = compressed_buff + blocks_pos[i];
+//		size_t compressed_size = blocks_pos[i+1] - blocks_pos[i];
+//		size_t uncompressed_size = 0;
+//		char *tmp = DecompressWithLzma(input, compressed_size, uncompressed_size);
+//		cout << "MetadataFasta::load - Block[" << i << "]: \"" << tmp << "\"\n";
+//		delete [] tmp;
+//	}
+	
+	
 	
 //	cout << "MetadataFasta::load - Preparing Metadata text\n";
 //	char compression_mark = 0;
@@ -469,11 +488,10 @@ void MetadataFasta::load(fstream *reader){
 //	cout << "MetadataFasta::load - Resulting metadata (" << metadata_length << "): \"" << metadata_text << "\"\n";
 //	cout << "MetadataFasta::load - Resulting text (" << text_pos << "): \"" << buff_text << "\"\n";
 	
-	cout << "MetadataFasta::load - Stored lines: " << pos_text.size() << "\n";
-//	for( unsigned int i = 0; i < ( (pos_text.size()<20)?pos_text.size():20 ); ++i ){
-	for( unsigned int i = 0; i < pos_text.size(); ++i ){
-		cout << "MetadataFasta::load - Metadata[" << i << "]: (" << pos_text[i] << ", " << pos_storage[i] << ", " << length_line[i] << ")\n";
-	}
+//	cout << "MetadataFasta::load - Stored lines: " << pos_text.size() << "\n";
+//	for( unsigned int i = 0; i < pos_text.size(); ++i ){
+//		cout << "MetadataFasta::load - Metadata[" << i << "]: (" << pos_text[i] << ", " << pos_storage[i] << ", " << length_line[i] << ")\n";
+//	}
 	
 //	cout << "MetadataFasta::load - Testing countTextBin\n";
 //	for(unsigned int i = 0; i < 100000; ++i){
@@ -495,6 +513,9 @@ unsigned int MetadataFasta::size(){
 	
 	// n_lines
 	size_bytes += sizeof(int);
+	
+	// metadata_length
+	size_bytes += sizeof(long long);
 	
 	BitsUtils utils;
 	unsigned long long last;
@@ -592,7 +613,10 @@ void MetadataFasta::copyMetadataText(char *output, unsigned long long abs_pos, u
 	// Asegurar que el texto este en el buffer
 	unsigned int block_start = (unsigned int)( (abs_pos)/blocksize );
 	unsigned int block_end = (unsigned int)( (abs_pos + length)/blocksize );
-	if( block_end > block_start+1 || block_start > n_blocks || block_end > n_blocks ){
+	if( block_end == block_start && block_start < n_blocks-1 ){
+		++block_end;
+	}
+	if( block_end > block_start+1 || block_start >= n_blocks || block_end >= n_blocks ){
 		cerr << "MetadataFasta::copyMetadataText - Error in copy\n";
 		return;
 	}
@@ -634,17 +658,18 @@ void MetadataFasta::copyMetadataText(char *output, unsigned long long abs_pos, u
 	if(debug) cout << "MetadataFasta::copyMetadataText - memcpy(output, block_buff + " << pos_buff << ", " << length << ")\n";
 	memcpy(output, block_buff + pos_buff, length);
 	output[length] = 0;
+	if(debug) cout << "MetadataFasta::copyMetadataText - output: \"" << output << "\"\n";
 	
 	if(debug) cout << "MetadataFasta::copyMetadataText - End\n";
 }
 
 void MetadataFasta::adjustText(char *out_buff, unsigned long long pos_ini, unsigned int copied_chars, char *adjust_buffer){
 	
-	bool debug = true;
+	bool debug = false;
 	
 	if(debug) cout << "MetadataFasta::adjustText - Start (pos_ini: " << pos_ini << ", copied_chars: " << copied_chars << ")\n";
 	
-	if(debug) cout << "MetadataFasta::adjustText - Original text: \"" << out_buff << "\"\n";
+//	if(debug) cout << "MetadataFasta::adjustText - Original text: \"" << out_buff << "\"\n";
 	
 	unsigned int write_pos = 0;
 	unsigned int read_pos = 0;
@@ -744,8 +769,6 @@ void MetadataFasta::adjustText(char *out_buff, unsigned long long pos_ini, unsig
 		// Quizas recibir el largo esperado del texto de salida
 	}
 	
-//	cout << "MetadataFasta::adjustText - adjust_buffer: \"" << adjust_buffer << "\" (write_pos: " << write_pos << ", strlen: " << strlen(adjust_buffer) << ")\n";
-	
 	// Agergar la cola del texto
 	if( write_pos < copied_chars ){
 		if(debug) cout << "MetadataFasta::adjustText - Adding " << (copied_chars - write_pos) << " chars from original text to finish\n";
@@ -754,7 +777,7 @@ void MetadataFasta::adjustText(char *out_buff, unsigned long long pos_ini, unsig
 		adjust_buffer[write_pos] = 0;
 	}
 	
-//	cout << "MetadataFasta::adjustText - adjust_buffer (final): \"" << adjust_buffer << "\"\n";
+//	if(debug) cout << "MetadataFasta::adjustText - adjust_buffer (final): \"" << adjust_buffer << "\"\n";
 	
 	// Si habiamos escrito mas, basta con desecharlo
 	write_pos = copied_chars;

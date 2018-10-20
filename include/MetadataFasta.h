@@ -64,6 +64,10 @@ public:
 	unsigned long long countText(unsigned long long pos);
 	unsigned long long countTextBin(unsigned long long pos);
 	
+	unsigned long long getTextSize(){
+		return (metadata_length + pos_text.size());
+	}
+	
 };
 
 

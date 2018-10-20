@@ -77,10 +77,14 @@ unsigned int BlockHeaders::getBlockSize(){
 }
 
 unsigned long long BlockHeaders::getTextSize(){
+	unsigned int size = text_size;
 	if( metadata != NULL ){
-		return text_size + metadata->totalNewLines();
+		size += metadata->totalNewLines();
 	}
-	return text_size;
+	if(metadata_fasta != NULL){
+		size += metadata_fasta->getTextSize();
+	}
+	return size;
 }
 
 unsigned int BlockHeaders::getDataPosition(){

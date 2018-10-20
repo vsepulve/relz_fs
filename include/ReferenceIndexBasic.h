@@ -28,13 +28,15 @@ private:
 	// Type of reference for save/load, redefine in each class
 	static const unsigned char type;
 	
+	// Variable to store special characteristics (PositionalRanges and others)
+	unsigned int type_flags;
+	
 	//Largo (producto de strlen) del string referencia
 	unsigned int largo;
 	//String referencia. Podria contener largo ceros adicionales (para simplificar operaciones)
 	unsigned char *ref;
 	//Arreglo de sufijos explicito
 	unsigned int *arr;
-
 	//Contadores para la prueba de uso (notar que es del mismo largo que arr)
 	unsigned int *arr_uso;
 	

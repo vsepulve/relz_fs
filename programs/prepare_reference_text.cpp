@@ -27,8 +27,9 @@ unsigned long long karpRabin(const char *filtered_text, unsigned int segment_len
 
 int main(int argc, char* argv[]){
 	
-	if(argc != 8){
-		cout << "\nUsage: prepare_reference_text input_file output_file filter? segment_length segments_size kr_length kr_size\n";
+	if(argc != 4){
+//		cout << "\nUsage: prepare_reference_text input_file output_file filter? segment_length segments_size kr_length kr_size\n";
+		cout << "\nUsage: prepare_reference_text input_file output_file output_size\n";
 		cout << "Simple program to prepare a reference text from a large text\n";
 		cout << "The output is uppercased and with only 1 newline symbol at the end\n";
 		cout << "If filter is == 1, the program omits lines starting with '>', ';' and '#' from the input file\n";
@@ -36,13 +37,23 @@ int main(int argc, char* argv[]){
 		return 0;
 	}
 	
+//	const char *input_file = argv[1];
+//	const char *output_file = argv[2];
+//	bool filter = (atoi(argv[3]) == 1);
+//	unsigned int segment_length = atoi(argv[4]);
+//	unsigned int segments_size = atoi(argv[5]);
+//	unsigned int kr_length = atoi(argv[6]);
+//	unsigned int kr_size = atoi(argv[7]);
+	
 	const char *input_file = argv[1];
 	const char *output_file = argv[2];
-	bool filter = (atoi(argv[3]) == 1);
-	unsigned int segment_length = atoi(argv[4]);
-	unsigned int segments_size = atoi(argv[5]);
-	unsigned int kr_length = atoi(argv[6]);
-	unsigned int kr_size = atoi(argv[7]);
+	unsigned int output_size = atoi(argv[3]);
+	
+	bool filter = true;
+	unsigned int segment_length = 5000;
+	unsigned int segments_size = output_size * 0.9;
+	unsigned int kr_length = 128;
+	unsigned int kr_size = output_size * 0.1;
 	
 	unsigned int n_segments = segments_size / segment_length;
 	unsigned int n_kr = kr_size / kr_length;
@@ -193,7 +204,7 @@ int main(int argc, char* argv[]){
 		for(unsigned int i = 0; i < n_kr; ++i){
 			pair<unsigned int, unsigned int> par = arr_frecs[ arr_frecs.size() - 1 - i ];
 			string line(filtered_text + par.second, kr_length);
-			cout << "frec[" << line << "]: " << par.first << "\n";
+//			cout << "frec[" << line << "]: " << par.first << "\n";
 			if( par.first <= 1 ){
 				cout << "Min frec, stoping\n";
 				break;
