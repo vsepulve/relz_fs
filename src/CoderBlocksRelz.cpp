@@ -53,23 +53,27 @@ void CoderBlocksRelz::codeBlock(const char *text, unsigned int text_size, fstrea
 	}
 	unsigned int max_range = 0xffffffff - range;
 	
+	cout<<"CoderBlocksRelz::codeBlock - Starting codeBlock with type_flags: " << type_flags << " (range: " << range << ")\n";
+	
 //	cout<<"CoderBlocksRelz::codeBlock - Text: \""<<string(text, (text_size>10)?10:text_size)<<((text_size>10)?"...":"")<<"\"\n";
 	
 	while(text_size > 0){
 //		cout<<"CoderBlocksRelz::codeBlock - referencia->find...\n";
 		
-		min_pos = 0;
-		max_pos = 0xffffffff;
-		if(type_flags != 0){
+		if( type_flags == 0 ){
+			referencia->find(text + compressed_text, text_size, pos_prefijo, largo_prefijo);
+		}
+		else{
+			min_pos = 0;
+			max_pos = 0xffffffff;
 			if( text_pos > range ){
 				min_pos = text_pos - range;
 			}
 			if( text_pos < max_range ){
 				max_pos = text_pos + range;
 			}
+			referencia->find(text + compressed_text, text_size, pos_prefijo, largo_prefijo, true, min_pos, max_pos);
 		}
-		
-		referencia->find(text + compressed_text, text_size, pos_prefijo, largo_prefijo, true, min_pos, max_pos);
 		
 		if(largo_prefijo == 0){
 			cout<<"CoderBlocksRelz::codeBlock - Error - Prefijo de largo 0, saliendo\n";
@@ -100,9 +104,9 @@ void CoderBlocksRelz::codeBlock(const char *text, unsigned int text_size, fstrea
 	bytes_len = inner_len_coder.encodeBlockGolomb(buff_len, n_factores, file_data);
 	bytes_data = bytes_pos + bytes_len;
 	
-//	cout<<"CoderBlocksRelz::codeBlock - Escribiendo header\n";
+	cout<<"CoderBlocksRelz::codeBlock - Writing header (bytes_pos: " << bytes_pos << ", bytes_len: " << bytes_len << ")\n";
 	
-	//Escribir header
+	// Escribir header
 	BlockHeadersRelz::HeaderRelz header(n_factores, bytes_pos, bytes_len);
 	header.save(file_headers);
 	bytes_headers = header.size();
@@ -110,7 +114,7 @@ void CoderBlocksRelz::codeBlock(const char *text, unsigned int text_size, fstrea
 }
 
 CoderBlocks* CoderBlocksRelz::copy() const{
-	CoderBlocks *coder_copy = new CoderBlocksRelz(referencia);
+	CoderBlocks *coder_copy = new CoderBlocksRelz(referencia, type_flags);
 	return (CoderBlocks*)coder_copy;
 }
 
