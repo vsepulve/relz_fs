@@ -136,11 +136,20 @@ unsigned int DecoderBlocksRelz::decodeBlock(unsigned int block, char *buff){
 		//Aqui es seguro que hay al menos un bloque mas (el bloque vacio del final, por ejemplo)
 		
 //		cout<<"DecoderBlocksRelz::decodeBlock - pos_coder->decodeBlockMaxBits...\n";
-		pos_coder->decodeBlockMaxBits(
-			headers_relz->getBytesPos(block), 
-			headers_relz->getBytesLen(block) - headers_relz->getBytesPos(block), 
-			headers_relz->getFactors(block), 
-			buff_pos);
+		if( type_flags == 0 ){
+			pos_coder->decodeBlockMaxBits(
+				headers_relz->getBytesPos(block), 
+				headers_relz->getBytesLen(block) - headers_relz->getBytesPos(block), 
+				headers_relz->getFactors(block), 
+				buff_pos);
+		}
+		else{
+			pos_coder->decodeBlockMaxDeltaBits(
+				headers_relz->getBytesPos(block), 
+				headers_relz->getBytesLen(block) - headers_relz->getBytesPos(block), 
+				headers_relz->getFactors(block), 
+				buff_pos);
+		}
 		
 //		cout<<"DecoderBlocksRelz::decodeBlock - len_coder->decodeBlockGolomb...\n";
 		len_coder->decodeBlockGolomb(
