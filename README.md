@@ -1,6 +1,6 @@
 # README #
 
-Prototype of a compressed filesystem for genomic data, using Relative Lempel-Ziv and FUSE library (https://github.com/libfuse/libfuse). This prototype also makes usage of LZMA library. It includes some test programs and the basic implementation of the filesystem.
+Prototype of a compressed filesystem for genomic data, using Relative Lempel-Ziv and FUSE library (https://github.com/libfuse/libfuse). This prototype is a proof of concept to show that relative compression specifically designed for genomic data can be applied in a filesystem. It was designed to use RLZ for sequence data, but the capability of separating metadata text from fasta files and compressing it with LZMA was later added. It includes some test programs and the basic implementation of the filesystem.
 
 Dependecies
 -------------------
