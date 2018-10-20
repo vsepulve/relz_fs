@@ -32,7 +32,7 @@ cmake ..
 make
 ```
 
-Preparing the Reference
+Preparing the Reference Text
 -------------------
 In cases where there is no appropriate sequence to be used as a reference (for example, when dealing with a collection of reads), this program can extract part of the text from the collection to build a reference. It receives a text input, an output to write the reference, and the expected size for the reference in bytes.
 An example could be:
@@ -41,6 +41,14 @@ An example could be:
 ./bin/compress ../data/reads_ref.txt ../data/reads_cut.fa ../data/reads_cut.relz 100000 4 ../data/reads_ref.bin 1 1
 ```
 That would prepare the text data/reads\_ref.txt as a reference, and compress the data data/reads\_cut.txt to data/reads\_cut.relz, building the binary reference in data/reads\_ref.bin.
+
+Building (indexing) the Reference
+-------------------
+The first step to use the system is the indexing of the reference text to generate binary references used for the rest of the processes. The program bin/build\_reference performs the indexing, and its arguments are the reference text file, the output to write the binary and indexed reference, and the number of threads used for construction.
+An example could be:
+```
+./bin/build_reference ../data/tair10_cut.fa ../data/thaliana_cut.bin 4
+```
 
 Compressing
 -------------------
