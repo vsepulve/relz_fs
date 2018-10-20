@@ -7,6 +7,7 @@ ReferenceIndexRR::ReferenceIndexRR(){
 	arr = NULL;
 	largo = 0;
 	largo_arr = 0;
+	type_flags = 0;
 }
 
 ReferenceIndexRR::ReferenceIndexRR(const char *ref_file_rr){
@@ -14,6 +15,7 @@ ReferenceIndexRR::ReferenceIndexRR(const char *ref_file_rr){
 	arr = NULL;
 	largo = 0;
 	largo_arr = 0;
+	type_flags = 0;
 	load(ref_file_rr);
 }
 
@@ -22,6 +24,7 @@ ReferenceIndexRR::ReferenceIndexRR(const char *ref_file, unsigned int distance){
 	arr = NULL;
 	largo = 0;
 	largo_arr = 0;
+	type_flags = 0;
 
 	fstream lector(ref_file, fstream::binary | fstream::in);
 	

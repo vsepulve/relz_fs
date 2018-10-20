@@ -46,12 +46,14 @@ ReferenceIndexBasic::ReferenceIndexBasic(){
 	ref = NULL;
 	arr = NULL;
 	largo = 0;
+	type_flags = 0;
 }
 	
 ReferenceIndexBasic::ReferenceIndexBasic(const char *_referencia, unsigned int n_threads){
 	
 	cout<<"ReferenceIndexBasic - inicio\n";
 	
+	type_flags = 0;
 	largo = strlen(_referencia);
 	arr = new unsigned int[largo];
 	
