@@ -116,8 +116,8 @@ void thread_compress(Compressor::ThreadCompressData *data) {
 		return;
 	}
 	
-	//Datos compartidos (punteros)
-	//Coder para ESTE thread (copia del original)
+	// Datos compartidos (punteros)
+	// Coder para ESTE thread (copia del original)
 	CoderBlocks *coder = data->coder->copy();
 	unsigned int *shared_pos = data->shared_pos;
 	mutex *shared_mutex = data->shared_mutex;
@@ -171,7 +171,7 @@ void thread_compress(Compressor::ThreadCompressData *data) {
 		bytes_headers = 0;
 		bytes_data = 0;
 //		cout<<"Compressor::Thread ["<<data->id<<"] - coder->codeBlock...\n";
-		coder->codeBlock(text, text_size, &file_headers, &file_data, bytes_headers, bytes_data, full_buffer);
+		coder->codeBlock(text, text_size, &file_headers, &file_data, bytes_headers, bytes_data, full_buffer, block * data->block_size);
 		
 		(*vector_bytes_headers)[block] = bytes_headers;
 		(*vector_bytes_data)[block] = bytes_data;
