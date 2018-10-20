@@ -46,6 +46,7 @@ int main(int argc, char* argv[]){
 	NanoTimer timer;
 	
 	char *reference_text = ReferenceFactory::loadText(serialized_reference);
+	unsigned int type_flags = ReferenceFactory::loadFlags(serialized_reference);
 	
 	cout<<"Testing text[0]: " << string(reference_text, 20) << "\n";
 	cout<<"Testing text[100]: " << string(reference_text + 100, 20) << "\n";
@@ -53,7 +54,7 @@ int main(int argc, char* argv[]){
 	cout<<"Testing text[10000]: " << string(reference_text + 10000, 20) << "\n";
 	
 	//Usando el Compressor
-	CompressorSingleBuffer compressor(compressed_file, NULL, new DecoderBlocksRelz(reference_text));
+	CompressorSingleBuffer compressor(compressed_file, NULL, new DecoderBlocksRelz(reference_text, type_flags));
 	
 	timer.reset();
 	compressor.decompress(output_text, buffer_size);
