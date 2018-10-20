@@ -44,7 +44,7 @@ public:
 	
 	//Como el anterior, pero escribe en un archivo dado
 	//Retorna el numero de bytes escritos
-	unsigned int encodeBlockMaxBits(unsigned int *arr_pos, unsigned int n_factores, unsigned char max_bits, fstream *escritor);
+	unsigned int encodeBlockMaxBits(unsigned int *arr_pos, unsigned int n_factores, fstream *escritor);
 	
 	//Como el anterior, pero escribe en un archivo dado
 	//Retorna el numero de bytes escritos

@@ -34,12 +34,21 @@ void PositionsCoderBlocks::prepareBuffer(unsigned int new_size){
 	}
 }
 
-unsigned int PositionsCoderBlocks::encodeBlockMaxBits(unsigned int *arr_pos, unsigned int n_factores, unsigned char max_bits, fstream *escritor){
+unsigned int PositionsCoderBlocks::encodeBlockMaxBits(unsigned int *arr_pos, unsigned int n_factores, fstream *escritor){
 	if(escritor == NULL || (! escritor->good()) ){
 		return 0;
 	}
 	prepareBuffer(n_factores + 1);
 	memset(buff, 0, (n_factores + 1) * sizeof(int));
+	
+	unsigned int max_value = 0;
+	for(unsigned int i = 0; i < n_factores; ++i){
+		if( arr_pos[i] > max_value ){
+			max_value = arr_pos[i];
+		}
+	}
+	unsigned char max_bits = utils.n_bits(max_value);
+	
 	unsigned int pos_buff = 0;
 	utils.bitput(buff, pos_buff, 8, max_bits);
 	pos_buff += 8;
