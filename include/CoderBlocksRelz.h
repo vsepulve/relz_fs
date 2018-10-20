@@ -31,11 +31,12 @@ protected:
 	LengthsCoderBlocks inner_len_coder;
 	
 	const ReferenceIndex *referencia;
+	unsigned int type_flags;
 	
 public: 
 	
 	//Notar que todo CoderBlocksRelz usable DEBE construirse con una referencia valida
-	CoderBlocksRelz(const ReferenceIndex *referencia = NULL);
+	CoderBlocksRelz(const ReferenceIndex *referencia = NULL, unsigned int _type_flags = 0);
 	virtual ~CoderBlocksRelz();
 	
 //	virtual void codeBlock(const char *text, unsigned int text_size, fstream *file_headers, fstream *file_data, unsigned int &bytes_headers, unsigned int &bytes_data, const ReferenceIndex *referencia, char *full_buffer);

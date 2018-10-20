@@ -1,10 +1,11 @@
 #include "CoderBlocksRelz.h"
 
-CoderBlocksRelz::CoderBlocksRelz(const ReferenceIndex *_referencia){
+CoderBlocksRelz::CoderBlocksRelz(const ReferenceIndex *_referencia, unsigned int _type_flags){
 	referencia = _referencia;
 	if(referencia == NULL){
 		cerr<<"CoderBlocksRelz - Advertencia, referencia NULL\n";
 	}
+	type_flags = _type_flags;
 }
 
 CoderBlocksRelz::~CoderBlocksRelz(){
@@ -37,7 +38,19 @@ void CoderBlocksRelz::codeBlock(const char *text, unsigned int text_size, fstrea
 	
 	unsigned int min_pos = 0;
 	unsigned int max_pos = 0;
-	unsigned int range = 1024*1024*512;
+	unsigned int range = 1024*1024;
+	if( type_flags == 1 ){
+		range *= 128;
+	}
+	else if( type_flags == 2 ){
+		range *= 256;
+	}
+	else if( type_flags == 3 ){
+		range *= 512;
+	}
+	else if( type_flags == 4 ){
+		range *= 1024;
+	}
 	unsigned int max_range = 0xffffffff - range;
 	
 //	cout<<"CoderBlocksRelz::codeBlock - Text: \""<<string(text, (text_size>10)?10:text_size)<<((text_size>10)?"...":"")<<"\"\n";
@@ -46,12 +59,14 @@ void CoderBlocksRelz::codeBlock(const char *text, unsigned int text_size, fstrea
 //		cout<<"CoderBlocksRelz::codeBlock - referencia->find...\n";
 		
 		min_pos = 0;
-		if( text_pos > range ){
-			min_pos = text_pos - range;
-		}
 		max_pos = 0xffffffff;
-		if( text_pos < max_range ){
-			max_pos = text_pos + range;
+		if(type_flags != 0){
+			if( text_pos > range ){
+				min_pos = text_pos - range;
+			}
+			if( text_pos < max_range ){
+				max_pos = text_pos + range;
+			}
 		}
 		
 		referencia->find(text + compressed_text, text_size, pos_prefijo, largo_prefijo, true, min_pos, max_pos);
@@ -74,9 +89,15 @@ void CoderBlocksRelz::codeBlock(const char *text, unsigned int text_size, fstrea
 //	cout<<"CoderBlocksRelz::codeBlock - Escribiendo datos\n";
 	
 	//Escribir datos
-//	unsigned int bytes_pos = inner_pos_coder.encodeBlockMaxBits(buff_pos, n_factores, inner_utils.n_bits(max_pos), file_data);
-	unsigned int bytes_pos = inner_pos_coder.encodeBlockMaxDeltaBits(buff_pos, n_factores, file_data);
-	unsigned int bytes_len = inner_len_coder.encodeBlockGolomb(buff_len, n_factores, file_data);
+	unsigned int bytes_pos = 0;
+	unsigned int bytes_len = 0;
+	if( type_flags == 0){
+		bytes_pos = inner_pos_coder.encodeBlockMaxBits(buff_pos, n_factores, file_data);
+	}
+	else{
+		bytes_pos = inner_pos_coder.encodeBlockMaxDeltaBits(buff_pos, n_factores, file_data);
+	}
+	bytes_len = inner_len_coder.encodeBlockGolomb(buff_len, n_factores, file_data);
 	bytes_data = bytes_pos + bytes_len;
 	
 //	cout<<"CoderBlocksRelz::codeBlock - Escribiendo header\n";

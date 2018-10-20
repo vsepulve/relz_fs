@@ -34,6 +34,8 @@ protected:
 	unsigned int cur_block;
 	unsigned int cur_block_factores;
 	
+	unsigned int type_flags;
+	
 	//Borra headers, coders y resetea cur_block
 	//Conserva los buffers
 	void deleteData();
@@ -46,8 +48,8 @@ protected:
 	
 public: 
 	//Notar que todo DecoderBlocksRelz usable DEBE construirse con un texto de referencia valido
-	DecoderBlocksRelz(const char *_texto_ref = NULL);
-	DecoderBlocksRelz(const char *_master_file, const char *_texto_ref);
+	DecoderBlocksRelz(const char *_texto_ref = NULL, unsigned int _type_flags = 0);
+	DecoderBlocksRelz(const char *_master_file, const char *_texto_ref, unsigned int _type_flags = 0);
 	virtual ~DecoderBlocksRelz();
 	
 	virtual void load(const char *_master_file);

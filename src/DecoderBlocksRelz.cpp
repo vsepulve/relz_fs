@@ -1,6 +1,6 @@
 #include "DecoderBlocksRelz.h"
 
-DecoderBlocksRelz::DecoderBlocksRelz(const char *_texto_ref){
+DecoderBlocksRelz::DecoderBlocksRelz(const char *_texto_ref, unsigned int _type_flags){
 	buff_size = 0;
 	buff_pos = NULL;
 	buff_len = NULL;
@@ -14,9 +14,10 @@ DecoderBlocksRelz::DecoderBlocksRelz(const char *_texto_ref){
 	if(texto_ref == NULL){
 		cerr<<"DecoderBlocksRelz - Advertencia, texto_ref NULL\n";
 	}
+	type_flags = _type_flags;
 }
 
-DecoderBlocksRelz::DecoderBlocksRelz(const char *_master_file, const char *_texto_ref){
+DecoderBlocksRelz::DecoderBlocksRelz(const char *_master_file, const char *_texto_ref, unsigned int _type_flags){
 	buff_size = 0;
 	buff_pos = NULL;
 	buff_len = NULL;
@@ -30,6 +31,7 @@ DecoderBlocksRelz::DecoderBlocksRelz(const char *_master_file, const char *_text
 	if(texto_ref == NULL){
 		cerr<<"DecoderBlocksRelz - Advertencia, texto_ref NULL\n";
 	}
+	type_flags = _type_flags;
 	
 	load(_master_file);
 }
