@@ -31,6 +31,8 @@ public:
 	// It will reserve the necesary memory
 	static char *loadText(const char *ref_file);
 	
+	static unsigned int loadFlags(const char *ref_file);
+	
 };
 
 #endif //_REFERENCE_FACTORY_H

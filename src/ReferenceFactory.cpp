@@ -45,7 +45,7 @@ char *ReferenceFactory::loadText(const char *ref_file){
 	
 	fstream reader(ref_file, fstream::binary | fstream::in);
 	if( ! reader.good() ){
-		cerr<<"ReferenceFactory::loadText - Error al abrir archivo.\n";
+		cerr<<"ReferenceFactory::loadText - Error opening file.\n";
 		return NULL;
 	}
 	
@@ -63,3 +63,31 @@ char *ReferenceFactory::loadText(const char *ref_file){
 	
 	return text;
 }
+
+unsigned int ReferenceFactory::loadFlags(const char *ref_file){
+	unsigned char type = 0;
+	unsigned int type_flags = 0;
+	unsigned int text_size = 0;
+	unsigned int arr_size = 0;
+	
+	fstream reader(ref_file, fstream::binary | fstream::in);
+	if( ! reader.good() ){
+		cerr<<"ReferenceFactory::loadFlags - Error opening file.\n";
+		return 0;
+	}
+	
+	reader.read((char*)&type, 1);
+	reader.read((char*)(&type_flags), sizeof(int));
+	reader.read((char*)(&text_size), sizeof(int));
+	reader.read((char*)(&arr_size), sizeof(int));
+	
+	reader.close();
+	
+	return type_flags;
+	
+}
+
+
+
+
+
