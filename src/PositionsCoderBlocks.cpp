@@ -91,13 +91,17 @@ unsigned int PositionsCoderBlocks::encodeBlockMaxDeltaBits(unsigned int *arr_pos
 	}
 	unsigned char max_bits = utils.n_bits(max_value - min_value);
 	
+	cout << "PositionsCoderBlocks::encodeBlockMaxDeltaBits - Adding max_bits: " << (unsigned int)max_bits << " (" << max_value << " - " << min_value << ") in 8 bits\n";
+	
 	unsigned int pos_buff = 0;
 	utils.bitput(buff, pos_buff, 8, max_bits);
 	pos_buff += 8;
 	
+	cout << "PositionsCoderBlocks::encodeBlockMaxDeltaBits - Adding min_value: " << min_value << " in 32 bits\n";
 	utils.bitput(buff, pos_buff, 32, min_value);
 	pos_buff += 32;
 	
+	cout << "PositionsCoderBlocks::encodeBlockMaxDeltaBits - Adding " << n_factores << " deltas\n";
 	for(unsigned int i = 0; i < n_factores; ++i){
 		utils.bitput(buff, pos_buff, max_bits, (arr_pos[i] - min_value));
 		pos_buff += max_bits;
@@ -152,13 +156,13 @@ void PositionsCoderBlocks::open(const char *_nombre_archivo, unsigned int _byte_
 //Comienza leyendo max_bits y luego carga  n_factores posiciones en arr_pos
 //Asume que arr_pos tiene al menos (n_factores + 1) ints de espacio
 void PositionsCoderBlocks::decodeBlockMaxBits(unsigned int byte_start, unsigned int n_bytes, unsigned int n_factores, unsigned int *arr_pos){
-//	cout<<"PositionsCoderBlocks::decodeBlockMaxBits - Inicio (inicio: "<<byte_start<<", bytes: "<<n_bytes<<", n_factores: "<<n_factores<<")\n";
+//	cout << "PositionsCoderBlocks::decodeBlockMaxBits - Start (byte_start: " << byte_start << ", bytes: " << n_bytes << ", n_factores: "<< n_factores <<")\n";
 	unsigned int max_ints = 1 + (n_bytes >> 2);
 	prepareBuffer(max_ints);
 	memset(buff, 0, n_bytes + sizeof(int));
 	fstream archivo(nombre_archivo, fstream::binary | fstream::in);
 	if( ! archivo.good() ){
-		cerr<<"PositionsCoderBlocks::decodeBlockMaxBits - Error al abrir \""<<nombre_archivo<<"\"\n";
+		cerr << "PositionsCoderBlocks::decodeBlockMaxBits - Error opening \"" << nombre_archivo << "\"\n";
 		return;
 	}
 	archivo.seekg(byte_start + byte_ini, archivo.beg);
@@ -168,12 +172,12 @@ void PositionsCoderBlocks::decodeBlockMaxBits(unsigned int byte_start, unsigned 
 	unsigned char max_bits = 0;
 	max_bits = utils.bitget(buff, pos_buff, 8);
 	pos_buff += 8;
-//	cout<<"PositionsCoderBlocks::decodeBlockMaxBits - max_bits: "<<(unsigned int)max_bits<<"\n";
+//	cout << "PositionsCoderBlocks::decodeBlockMaxBits - max_bits: " << (unsigned int)max_bits << "\n";
 	for(unsigned int i = 0; i < n_factores; ++i){
 		arr_pos[i] = utils.bitget(buff, pos_buff, max_bits);
 		pos_buff += max_bits;
 	}
-//	cout<<"PositionsCoderBlocks::decodeBlockMaxBits - Fin\n";
+//	cout << "PositionsCoderBlocks::decodeBlockMaxBits - End\n";
 }
 
 //Metodo de Lectura
@@ -181,32 +185,38 @@ void PositionsCoderBlocks::decodeBlockMaxBits(unsigned int byte_start, unsigned 
 //Comienza leyendo max_bits, min_value y luego carga  n_factores posiciones en arr_pos
 //Asume que arr_pos tiene al menos (n_factores + 1) ints de espacio
 void PositionsCoderBlocks::decodeBlockMaxDeltaBits(unsigned int byte_start, unsigned int n_bytes, unsigned int n_factores, unsigned int *arr_pos){
-//	cout<<"PositionsCoderBlocks::decodeBlockMaxDeltaBits - Inicio (inicio: "<<byte_start<<", bytes: "<<n_bytes<<", n_factores: "<<n_factores<<")\n";
+	cout << "PositionsCoderBlocks::decodeBlockMaxDeltaBits - Start (byte_start: " << byte_start << ", bytes: " << n_bytes << ", n_factores: " << n_factores << ")\n";
 	unsigned int max_ints = 1 + (n_bytes >> 2);
 	prepareBuffer(max_ints);
 	memset(buff, 0, n_bytes + sizeof(int));
 	fstream archivo(nombre_archivo, fstream::binary | fstream::in);
 	if( ! archivo.good() ){
-		cerr<<"PositionsCoderBlocks::decodeBlockMaxDeltaBits - Error al abrir \""<<nombre_archivo<<"\"\n";
+		cerr << "PositionsCoderBlocks::decodeBlockMaxDeltaBits - Error opening \"" << nombre_archivo << "\"\n";
 		return;
 	}
 	archivo.seekg(byte_start + byte_ini, archivo.beg);
 	archivo.read((char*)buff, n_bytes);
 	archivo.close();
 	unsigned int pos_buff = 0;
+	
 	unsigned char max_bits = 0;
 	max_bits = utils.bitget(buff, pos_buff, 8);
 	pos_buff += 8;
+	
+	cout << "PositionsCoderBlocks::encodeBlockMaxDeltaBits - max_bits: " << (unsigned int)max_bits << "\n";
+	
 	unsigned int min_value = 0;
 	min_value = utils.bitget(buff, pos_buff, 32);
 	pos_buff += 32;
 	
-//	cout<<"PositionsCoderBlocks::decodeBlockMaxDeltaBits - max_bits: "<<(unsigned int)max_bits<<"\n";
+	cout << "PositionsCoderBlocks::encodeBlockMaxDeltaBits - min_value: " << min_value << "\n";
+	
+	cout << "PositionsCoderBlocks::decodeBlockMaxDeltaBits - Loading " << n_factores << " deltas\n";
 	for(unsigned int i = 0; i < n_factores; ++i){
 		arr_pos[i] = min_value + utils.bitget(buff, pos_buff, max_bits);
 		pos_buff += max_bits;
 	}
-//	cout<<"PositionsCoderBlocks::decodeBlockMaxDeltaBits - Fin\n";
+	cout << "PositionsCoderBlocks::decodeBlockMaxDeltaBits - End\n";
 }
 
 //Metodo de Lectura
