@@ -40,16 +40,20 @@ void CoderBlocksRelz::codeBlock(const char *text, unsigned int text_size, fstrea
 	unsigned int max_pos = 0;
 	unsigned int range = 1024*1024;
 	if( type_flags == 1 ){
-		range *= 128;
+//		range *= 128;
+		range *= 64;
 	}
 	else if( type_flags == 2 ){
-		range *= 256;
+//		range *= 256;
+		range *= 128;
 	}
 	else if( type_flags == 3 ){
-		range *= 512;
+//		range *= 512;
+		range *= 256;
 	}
 	else if( type_flags == 4 ){
-		range *= 1024;
+//		range *= 1024;
+		range *= 512;
 	}
 	unsigned int max_range = 0xffffffff - range;
 	

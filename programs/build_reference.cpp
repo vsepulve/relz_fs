@@ -74,24 +74,24 @@ int main(int argc, char* argv[]){
 	if( force_ranges && file_size > 256*1024*1024 ){
 		unsigned int range = 1024*1024;
 		if( file_size < 512*1024*1024 ){
-			range *= 128;
+//			range *= 128;
+			range *= 64;
 			type_flags = 1;
-			ns_len = 128;
 		}
 		else if( file_size < 1024*1024*1024 ){
-			range *= 256;
+//			range *= 256;
+			range *= 128;
 			type_flags = 2;
-			ns_len = 256;
 		}
 		else if( file_size < 2ull*1024*1024*1024 ){
-			range *= 512;
+//			range *= 512;
+			range *= 256;
 			type_flags = 3;
-			ns_len = 512;
 		}
 		else{
-			range *= 1024;
+//			range *= 1024;
+			range *= 512;
 			type_flags = 4;
-			ns_len = 1024;
 		}
 		cout << "Positional Range of " << range << " bytes, type_flags: " << type_flags << "\n";
 		
