@@ -59,8 +59,8 @@ int main(int argc, char* argv[]){
 	//Usando el Compressor
 	CompressorSingleBuffer compressor(
 		output, 
-		new CoderBlocksRelz(reference), 
-		new DecoderBlocksRelz(reference->getText()), 
+		new CoderBlocksRelz(reference, reference->getFlags()), 
+		new DecoderBlocksRelz(reference->getText(), reference->getFlags()), 
 		new TextFilterFull()
 		);
 		
