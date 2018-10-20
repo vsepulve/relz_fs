@@ -38,7 +38,8 @@ In cases where there is no appropriate sequence to be used as a reference (for e
 An example could be:
 ```
 ./bin/prepare_reference_text ../data/reads_cut.fa ../data/reads_ref.txt 300000
-./bin/compress ../data/reads_ref.txt ../data/reads_cut.fa ../data/reads_cut.relz 100000 4 ../data/reads_ref.bin 1 1
+./bin/build_reference ../data/reads_ref.txt ../data/reads_ref.bin 4
+./bin/compress ../data/reads_ref.bin ../data/reads_cut.fa ../data/reads_cut.relz 100000 4 1
 ```
 That would prepare the text data/reads\_ref.txt as a reference, and compress the data data/reads\_cut.txt to data/reads\_cut.relz, building the binary reference in data/reads\_ref.bin.
 
@@ -47,7 +48,7 @@ Building (indexing) the Reference
 The first step to use the system is the indexing of the reference text to generate binary references used for the rest of the processes. The program bin/build\_reference performs the indexing, and its arguments are the reference text file, the output to write the binary and indexed reference, and the number of threads used for construction.
 An example could be:
 ```
-./bin/build_reference ../data/tair10_cut.fa ../data/thaliana_cut.bin 4
+./bin/build_reference ../data/tair10_cut.fa ../data/tair10_cut.bin 4
 ```
 
 Compressing
@@ -56,11 +57,7 @@ The bin/compress program is responsible for both the compressing test sequences 
 The parameters of the program include the reference text, the input sequence, the output compressed file, the blocksize, the number of threads to be used both in the index construction and the compression, the output to write the indexed reference, a flag indicating whether the reference should be built, and a flag indicating whether metadata should be included in the output compressed file.
 An example could be:
 ```
-./bin/compress ../data/tair10_cut.fa ../data/thaliana_cut.fa ../data/thaliana_cut.relz 100000 4 ../data/tair10_cut.bin 1 1
-```
-On the other hand, if the reference is already built, we can skip that step with a command like:
-```
-./bin/compress -- ../data/thaliana_cut.fa ../data/thaliana_cut.relz 100000 4 ../data/tair10_cut.bin 0 1
+./bin/compress ../data/tair10_cut.bin ../data/thaliana_cut.fa ../data/thaliana_cut.relz 100000 4 1
 ```
 
 Decompression
