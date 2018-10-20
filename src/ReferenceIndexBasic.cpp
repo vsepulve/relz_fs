@@ -243,9 +243,9 @@ void ReferenceIndexBasic::find(const char *text, unsigned int size, unsigned int
 	length = 0;
 	
 //	cout<<"ReferenceIndexBasic::find - inicio (largo "<<size<<", text: \""<<string(text, size)<<"\")\n";
-	if( verify_range ){
-		cout << "ReferenceIndexBasic::find - Range[" << min_pos << ", " << max_pos << "]\n";
-	}
+//	if( verify_range ){
+//		cout << "ReferenceIndexBasic::find - Range[" << min_pos << ", " << max_pos << "]\n";
+//	}
 	
 	//Notar que es trivial preparar limites ajustados para, por ejemplo, las primeras 2 letras de la query
 	//Eso seria equivalente a evitar las 2 primeras iteraciones del for (las mas largas, obviamente)

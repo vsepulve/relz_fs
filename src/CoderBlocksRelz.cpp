@@ -53,12 +53,11 @@ void CoderBlocksRelz::codeBlock(const char *text, unsigned int text_size, fstrea
 	}
 	unsigned int max_range = 0xffffffff - range;
 	
-	cout<<"CoderBlocksRelz::codeBlock - Starting codeBlock with type_flags: " << type_flags << " (range: " << range << ")\n";
+//	cout<<"CoderBlocksRelz::codeBlock - Starting codeBlock with type_flags: " << type_flags << " (range: " << range << ")\n";
 	
 //	cout<<"CoderBlocksRelz::codeBlock - Text: \""<<string(text, (text_size>10)?10:text_size)<<((text_size>10)?"...":"")<<"\"\n";
 	
 	while(text_size > 0){
-//		cout<<"CoderBlocksRelz::codeBlock - referencia->find...\n";
 		
 		if( type_flags == 0 ){
 			referencia->find(text + compressed_text, text_size, pos_prefijo, largo_prefijo);
@@ -104,7 +103,7 @@ void CoderBlocksRelz::codeBlock(const char *text, unsigned int text_size, fstrea
 	bytes_len = inner_len_coder.encodeBlockGolomb(buff_len, n_factores, file_data);
 	bytes_data = bytes_pos + bytes_len;
 	
-	cout<<"CoderBlocksRelz::codeBlock - Writing header (bytes_pos: " << bytes_pos << ", bytes_len: " << bytes_len << ")\n";
+//	cout<<"CoderBlocksRelz::codeBlock - Writing header (bytes_pos: " << bytes_pos << ", bytes_len: " << bytes_len << ")\n";
 	
 	// Escribir header
 	BlockHeadersRelz::HeaderRelz header(n_factores, bytes_pos, bytes_len);
