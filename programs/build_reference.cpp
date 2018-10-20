@@ -102,7 +102,11 @@ int main(int argc, char* argv[]){
 		
 		cout << "Adding " << n_adds << " voc extensions (" << file_size << " / " << range << ")\n";
 		char *text_original = new char[file_size + 1];
-		unsigned int real_text_size = filter->readReferenceFull(reference_text, text_original);
+		
+		// The first version only loads ACGT
+		unsigned int real_text_size = filter->readReference(reference_text, text_original);
+		// unsigned int real_text_size = filter->readReferenceFull(reference_text, text_original);
+		
 		text = new char[real_text_size + 1 + n_adds * (ns_len + alphabet.size())];
 		
 		unsigned int read_pos = 0;
@@ -143,8 +147,8 @@ int main(int argc, char* argv[]){
 		}
 		
 		// The first version only loads ACGT
-		// text_size += filter->readReference(reference_text, text + text_size);
-		text_size += filter->readReferenceFull(reference_text, text + text_size);
+		text_size += filter->readReference(reference_text, text + text_size);
+		// text_size += filter->readReferenceFull(reference_text, text + text_size);
 	}
 	
 	cout << "Building Reference with " << text_size << " chars\n";
