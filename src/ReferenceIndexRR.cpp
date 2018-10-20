@@ -226,10 +226,15 @@ void ReferenceIndexRR::find(const char *text, unsigned int size, unsigned int &p
 
 //Metodos de save para carga sin construccion
 void ReferenceIndexRR::save(const char *ref_file){
-	cout << "ReferenceIndexRR::save - guardando en \""<<ref_file<<"\"\n";
 	fstream escritor(ref_file, fstream::trunc | fstream::binary | fstream::out);
+	if( ! escritor.good() ){
+		cerr<<"ReferenceIndexRR::save - Error opening file\n";
+		return;
+	}
 	// Tipo de referencia (para un futuro builder y verificacion en el load)
 	escritor.write((char*)&type, 1);
+	// Variable to store special characteristics
+	escritor.write((char*)&type_flags, sizeof(int));
 	// Largo del texto
 	escritor.write((char*)(&largo), sizeof(int));
 	// Largo del SA
@@ -270,6 +275,7 @@ void ReferenceIndexRR::load(const char *ref_file){
 		return;
 	}
 	
+	lector.read((char*)(&type_flags), sizeof(int));
 	lector.read((char*)(&largo), sizeof(int));
 	lector.read((char*)(&largo_arr), sizeof(int));
 	cout << "ReferenceIndexRR::load - cargando "<<largo<<" chars y "<<largo_arr<<" ints desde \""<<ref_file<<"\"\n";

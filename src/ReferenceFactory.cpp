@@ -39,6 +39,7 @@ ReferenceIndex *ReferenceFactory::loadInstance(const char *ref_file){
 char *ReferenceFactory::loadText(const char *ref_file){
 	char *text = NULL;
 	unsigned char type = 0;
+	unsigned int type_flags = 0;
 	unsigned int text_size = 0;
 	unsigned int arr_size = 0;
 	
@@ -49,6 +50,7 @@ char *ReferenceFactory::loadText(const char *ref_file){
 	}
 	
 	reader.read((char*)&type, 1);
+	reader.read((char*)(&type_flags), sizeof(int));
 	reader.read((char*)(&text_size), sizeof(int));
 	reader.read((char*)(&arr_size), sizeof(int));
 	cout<<"ReferenceFactory::loadText - Loading reference text (" << text_size << " chars) from \"" << ref_file << "\" (type: " << (unsigned int)type << ")\n";

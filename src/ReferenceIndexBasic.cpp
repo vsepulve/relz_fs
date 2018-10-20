@@ -509,14 +509,16 @@ void ReferenceIndexBasic::find(const char *text, unsigned int size, unsigned int
 void ReferenceIndexBasic::save(const char *ref_file){
 	fstream escritor(ref_file, fstream::trunc | fstream::binary | fstream::out);
 	if( ! escritor.good() ){
-		cerr<<"ReferenceIndexBasic::save - Error al abrir archivo\n";
+		cerr<<"ReferenceIndexBasic::save - Error opening file\n";
 		return;
 	}
 	// Tipo de referencia (para un futuro builder y verificacion en el load)
 	escritor.write((char*)&type, 1);
+	// Variable to store special characteristics
+	escritor.write((char*)&type_flags, sizeof(int));
 	// Largo del texto
 	escritor.write((char*)&largo, sizeof(int));
-	// LArgo del arreglo (en este caso es igual)
+	// Largo del arreglo (en este caso es igual)
 	escritor.write((char*)&largo, sizeof(int));
 	// Texto
 	escritor.write((char*)ref, largo);
@@ -550,6 +552,7 @@ void ReferenceIndexBasic::load(const char *ref_file){
 		return;
 	}
 	
+	lector.read((char*)&type_flags, sizeof(int));
 	lector.read((char*)&largo, sizeof(int));
 	unsigned int arr_size = 0;
 	lector.read((char*)&arr_size, sizeof(int));
@@ -575,6 +578,7 @@ char *ReferenceIndexBasic::loadText(const char *ref_file){
 	char *text = NULL;
 	unsigned int text_size = 0;
 	unsigned int arr_size = 0;
+	unsigned int type_flags = 0;
 	
 	fstream reader(ref_file, fstream::binary | fstream::in);
 	if( ! reader.good() ){
@@ -588,6 +592,7 @@ char *ReferenceIndexBasic::loadText(const char *ref_file){
 		cerr << "ReferenceIndexBasic::loadText - Error, unexpected Reference Type (" << (unsigned int)read_type << " vs " << (unsigned int)type << ")\n";
 		return NULL;
 	}
+	reader.read((char*)(&type_flags), sizeof(int));
 	reader.read((char*)(&text_size), sizeof(int));
 	reader.read((char*)(&arr_size), sizeof(int));
 	cout<<"ReferenceIndexBasic::load - Loading reference (" << text_size << " chars) from \"" << ref_file << "\"\n";
