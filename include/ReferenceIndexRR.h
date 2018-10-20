@@ -68,6 +68,10 @@ public:
 		return (const char*)ref;
 	}
 	
+	virtual unsigned int getFlags(){
+		return type_flags;
+	}
+	
 };
 
 

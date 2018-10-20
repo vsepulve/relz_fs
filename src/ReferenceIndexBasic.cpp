@@ -49,11 +49,11 @@ ReferenceIndexBasic::ReferenceIndexBasic(){
 	type_flags = 0;
 }
 	
-ReferenceIndexBasic::ReferenceIndexBasic(const char *_referencia, unsigned int n_threads){
+ReferenceIndexBasic::ReferenceIndexBasic(const char *_referencia, unsigned int n_threads, unsigned int _type_flags){
 	
-	cout<<"ReferenceIndexBasic - inicio\n";
+	cout << "ReferenceIndexBasic - Start (_type_flags: " << _type_flags << ")\n";
 	
-	type_flags = 0;
+	type_flags = _type_flags;
 	largo = strlen(_referencia);
 	arr = new unsigned int[largo];
 	
@@ -67,12 +67,12 @@ ReferenceIndexBasic::ReferenceIndexBasic(const char *_referencia, unsigned int n
 		arr[i] = i;
 //		cout<<"arr["<<i<<"]: "<<arr[i]<<" (\""<<&(ref[ arr[i] ])<<"\", largo "<<largo-arr[i]<<", char[0]: "<<(unsigned int)(ref[ arr[i]])<<")\n";
 	}
-	cout<<"ReferenceIndexBasic - arr de largo "<<largo<<"\n";
+	cout << "ReferenceIndexBasic - Arr of len "<<largo<<"\n";
 	
 	//V4: 3 nivel de bucket (125) y sort
 	//uso un par de atajos para acelerar el codigo
 	
-	cout<<"ReferenceIndexBasic - preparando datos\n";
+	cout << "ReferenceIndexBasic - Preparing data\n";
 	
 	unsigned int ***index = new unsigned int**[256];
 	for(unsigned int i = 0; i < 256; ++i){
@@ -83,7 +83,7 @@ ReferenceIndexBasic::ReferenceIndexBasic(const char *_referencia, unsigned int n
 		}
 	}
 	
-	cout<<"ReferenceIndexBasic - preparando vocabulario\n";
+	cout<<"ReferenceIndexBasic - Preparing voc\n";
 	
 	//En lugar de fijar el voc aca, uso todo el voc de la referencia
 	//Notar que esto SIEMPRE omitira el char '\0' pues se uso strlen
@@ -102,7 +102,7 @@ ReferenceIndexBasic::ReferenceIndexBasic(const char *_referencia, unsigned int n
 		}
 	}
 	
-	cout<<"ReferenceIndexBasic - preparando buckets\n";
+	cout<<"ReferenceIndexBasic - Preparing buckets\n";
 	
 	unsigned int n_buckets = vocabulary.size() * vocabulary.size() * vocabulary.size();
 	unsigned int contador = 0;
@@ -115,7 +115,7 @@ ReferenceIndexBasic::ReferenceIndexBasic(const char *_referencia, unsigned int n
 		}
 	}
 	
-	cout<<"ReferenceIndexBasic - contando ("<<n_buckets<<" buckets)\n";
+	cout<<"ReferenceIndexBasic - Counting ("<<n_buckets<<" buckets)\n";
 	unsigned int *n = new unsigned int[n_buckets];
 	memset(n, 0, n_buckets * sizeof(int));
 	
@@ -148,7 +148,7 @@ ReferenceIndexBasic::ReferenceIndexBasic(const char *_referencia, unsigned int n
 		}
 	}
 	
-	cout<<"ReferenceIndexBasic - llenando buckets\n";
+	cout<<"ReferenceIndexBasic - Reading buckets\n";
 	unsigned int *pos = new unsigned int[n_buckets];
 	memset(pos, 0, n_buckets * sizeof(int));
 	
@@ -159,7 +159,7 @@ ReferenceIndexBasic::ReferenceIndexBasic(const char *_referencia, unsigned int n
 		bucket[ index[ref[i]][ref[i+1]][ref[i+2]] ][ pos[ index[ref[i]][ref[i+1]][ref[i+2]] ]++ ] = i;
 	}
 	
-	cout<<"ReferenceIndexBasic - Ordenando buckets\n";
+	cout<<"ReferenceIndexBasic - Sorting buckets\n";
 	SAComparatorN3 comp(ref, (unsigned int)largo);
 
 	//Version Secuencial
@@ -222,7 +222,7 @@ ReferenceIndexBasic::ReferenceIndexBasic(const char *_referencia, unsigned int n
 //		cout<<"arr["<<i<<"]: "<<arr[i]<<" (\""<<&(ref[ arr[i] ])<<"\", largo "<<largo-arr[i]<<", char[0]: "<<(unsigned int)(ref[ arr[i]])<<")\n";
 //	}
 	
-	cout<<"ReferenceIndexBasic - fin\n";
+	cout << "ReferenceIndexBasic - End\n";
 }
 
 ReferenceIndexBasic::~ReferenceIndexBasic(){

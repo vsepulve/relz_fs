@@ -47,6 +47,10 @@ public:
 	// Esta version busca el texto completo y almacena todas las ocurrencias en "res", ordenadas crecientemente
 	virtual void search(const char *text, unsigned int size, vector<unsigned int> &res) const;
 	
+	virtual unsigned int getFlags(){
+		return 0;
+	}
+	
 };
 
 #endif //_REFERENCE_INDEX_H

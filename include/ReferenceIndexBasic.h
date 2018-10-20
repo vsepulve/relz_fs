@@ -50,7 +50,7 @@ public:
 	
 	ReferenceIndexBasic();
 	
-	ReferenceIndexBasic(const char *_referencia, unsigned int n_threads = 4);
+	ReferenceIndexBasic(const char *_referencia, unsigned int n_threads = 4, unsigned int _type_flags = 0);
 	
 	virtual ~ReferenceIndexBasic();
 	
@@ -89,6 +89,9 @@ public:
 	// Esta version busca el texto completo y almacena todas las ocurrencias en "res", ordenadas crecientemente
 	virtual void search(const char *text, unsigned int size, vector<unsigned int> &res) const;
 	
+	virtual unsigned int getFlags(){
+		return type_flags;
+	}
 	
 };
 
