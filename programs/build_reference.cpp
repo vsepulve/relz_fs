@@ -63,14 +63,24 @@ int main(int argc, char* argv[]){
 	reader.seekg (0, reader.beg);
 	reader.close();
 	
-	text = new char[text_len + 1];
+	// Adding N's and the full alphabet
+	unsigned int ns_len = 1024;
+	vector<char> alphabet;
+	filter->getAlphabet( &alphabet );
+		
+//	text = new char[text_len + 1];
+	text = new char[text_len + ns_len + alphabet.size() + 1];
+	
+	for(unsigned int i = 0; i < ns_len; ++i){
+		text[text_size++] = 'N';
+	}
+	for(unsigned int i = 0; i < alphabet.size(); ++i){
+		text[text_size++] = alphabet[i];
+	}
 	
 	// The first version only loads ACGT
 //	text_size += filter->readReference(reference_text, text + text_size);
 	text_size += filter->readReferenceFull(reference_text, text + text_size);
-	
-	// Additional text could be added (N's, the full alphabet, etc)
-	// ...
 	
 	cout << "Building Reference with " << text_size << " chars\n";
 	timer.reset();
